@@ -8,8 +8,7 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button(props: Props) {
   const { className, type, disabled, uiSize, ...rest } = props;
 
-  const sizeClass =
-    uiSize === "sm" ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm";
+  const sizeClass = uiSize === "sm" ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm";
 
   return (
     <button

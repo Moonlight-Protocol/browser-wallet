@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Stellar Custom Wallet",
+  "version": "0.1.0",
+  "description": "A Stellar wallet with custom capabilities built with Deno and React.",
+  "permissions": ["storage"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "stellar-custom-wallet@example.com"
+    }
+  }
+}

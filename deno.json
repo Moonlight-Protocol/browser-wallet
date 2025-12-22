@@ -1,0 +1,42 @@
+{
+  "tasks": {
+    "dev": "DEV=1 deno run -A --watch src/build.ts",
+    "build": "DEV=1 deno run -A src/build.ts",
+    "build-prod": "DEV=0 MINIFY=1 deno run -A src/build.ts"
+  },
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@": "./src/",
+    "@/": "./src/",
+    "@colibri/core": "jsr:@colibri/core@^0.13.1",
+    "bip39": "npm:bip39@^3.1.0",
+    "react": "npm:react@^18.2.0",
+    "react/jsx-runtime": "npm:react@^18.2.0/jsx-runtime",
+    "react/jsx-dev-runtime": "npm:react@^18.2.0/jsx-dev-runtime",
+    "react-dom": "npm:react-dom@^18.2.0",
+    "react-dom/client": "npm:react-dom@^18.2.0/client",
+    "@ngneat/elf": "npm:@ngneat/elf@^2.5.1",
+    "@ngneat/elf-persist-state": "npm:@ngneat/elf-persist-state@^1.2.1",
+    "webextension-polyfill": "npm:webextension-polyfill@^0.10.0",
+    "@types/react": "npm:@types/react@^18.2.0",
+    "@types/react-dom": "npm:@types/react-dom@^18.2.0",
+    "stellar-sdk": "npm:stellar-sdk@^12.1.0",
+    "esbuild": "npm:esbuild@0.20.2",
+    "esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.0",
+    "@std/fs": "jsr:@std/fs@^0.224.0",
+    "tailwindcss": "npm:tailwindcss@3.4.1",
+    "autoprefixer": "npm:autoprefixer@10.4.17",
+    "postcss": "npm:postcss@8.4.35",
+    "clsx": "npm:clsx@^2.1.1",
+    "tailwind-merge": "npm:tailwind-merge@^3.3.1",
+    "chrome-types": "npm:chrome-types@^0.1.242",
+    "buffer": "npm:buffer@^6.0.3",
+    "process": "npm:process@^0.11.10"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "deno.ns"],
+    "types": ["@types/react", "@types/react-dom", "chrome-types"]
+  }
+}

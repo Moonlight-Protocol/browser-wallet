@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --popup-bg: #242429;
+  --popup-text-primary: #ffffff;
+  --popup-text-muted: #d4d4d8;
+  --popup-text-error: #ef4444;
+}
+
+html,
+body,
+#root {
+  width: 360px;
+  height: 600px;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}

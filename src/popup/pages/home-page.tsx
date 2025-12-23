@@ -340,7 +340,7 @@ export function HomePage() {
 
         const hasSelected = Boolean(
           res.selectedChannelId &&
-            res.channels.some((c) => c.id === res.selectedChannelId),
+            res.channels.some((c) => c.id === res.selectedChannelId)
         );
         setPrivateView(hasSelected ? "selected" : "list");
       } catch (err) {
@@ -374,7 +374,8 @@ export function HomePage() {
 
     const key = `${network}:${accountId}:${channelId}`;
     const alreadyHaveStats = Boolean(privateStats?.stats);
-    const alreadyLoadingThis = privateStats?.loading && lastPrivateStatsKeyRef.current === key;
+    const alreadyLoadingThis =
+      privateStats?.loading && lastPrivateStatsKeyRef.current === key;
 
     // If we already loaded stats for this selection, don't re-run.
     if (alreadyHaveStats && lastPrivateStatsKeyRef.current === key) return;
@@ -394,7 +395,11 @@ export function HomePage() {
         if (cancelled) return;
 
         if (ensured.ok) {
-          setPrivateStats({ loading: false, error: undefined, stats: ensured.stats });
+          setPrivateStats({
+            loading: false,
+            error: undefined,
+            stats: ensured.stats,
+          });
         } else {
           setPrivateStats({
             loading: false,

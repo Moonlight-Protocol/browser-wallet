@@ -12,7 +12,12 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
   const ringClass = size === "sm" ? "h-4 w-4 border-2" : "h-6 w-6 border-2";
 
   return (
-    <div className={cn("flex flex-col items-center justify-center", props.className)}>
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center",
+        props.className
+      )}
+    >
       <div
         aria-label="Loading"
         role="status"
@@ -23,7 +28,9 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
         )}
       />
       {props.message ? (
-        <div className="mt-2 text-xs text-muted text-center">{props.message}</div>
+        <div className="mt-2 text-xs text-muted text-center">
+          {props.message}
+        </div>
       ) : null}
     </div>
   );

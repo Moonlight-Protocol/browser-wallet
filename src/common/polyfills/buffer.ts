@@ -10,11 +10,7 @@
 
 export class Buffer extends Uint8Array {
   static from(
-    input:
-      | ArrayBuffer
-      | ArrayBufferView
-      | ArrayLike<number>
-      | string,
+    input: ArrayBuffer | ArrayBufferView | ArrayLike<number> | string,
     encoding?: "utf8" | "utf-8" | "base64"
   ): Buffer {
     if (typeof input === "string") {

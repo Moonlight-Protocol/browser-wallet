@@ -43,7 +43,10 @@ function toStats(tracking: PrivateChannelTracking): PrivateChannelStats {
   };
 }
 
-function ensureUtxoSlots(utxos: PrivateChannelTracking["utxos"], target: number) {
+function ensureUtxoSlots(
+  utxos: PrivateChannelTracking["utxos"],
+  target: number
+) {
   if (utxos.length >= target) return utxos;
   const next = [...utxos];
   for (let i = next.length; i < target; i++) {
@@ -215,4 +218,3 @@ export class PrivateUtxosStore extends PersistedStore<PrivateUtxosState> {
     return toStats(tracking);
   }
 }
-

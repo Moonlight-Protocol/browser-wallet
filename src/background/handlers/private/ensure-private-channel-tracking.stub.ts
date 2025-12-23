@@ -105,8 +105,9 @@ async function tryLoadPrivateTrackingBundle(): Promise<
 > {
   if (getLoadedModule()) return { ok: true };
 
-  const importScriptsFn = (globalThis as unknown as { importScripts?: (...urls: string[]) => void })
-    .importScripts;
+  const importScriptsFn = (
+    globalThis as unknown as { importScripts?: (...urls: string[]) => void }
+  ).importScripts;
 
   if (typeof importScriptsFn !== "function") {
     return {
@@ -153,7 +154,12 @@ async function tryLoadPrivateTrackingBundle(): Promise<
     importScriptsFn(url);
     devLog("importScripts returned", { url, exports: !!getLoadedModule() });
 
-    return getLoadedModule() ? { ok: true } : { ok: false, error: "Private tracking bundle loaded but did not register exports." };
+    return getLoadedModule()
+      ? { ok: true }
+      : {
+          ok: false,
+          error: "Private tracking bundle loaded but did not register exports.",
+        };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
 
@@ -162,14 +168,20 @@ async function tryLoadPrivateTrackingBundle(): Promise<
       const parts: string[] = [];
       if (lastWorkerError) {
         parts.push(
-          `errorEvent(message=${String(lastWorkerError.message)}, filename=${String(lastWorkerError.filename)}, lineno=${String(lastWorkerError.lineno)}, colno=${String(lastWorkerError.colno)})`,
+          `errorEvent(message=${String(
+            lastWorkerError.message
+          )}, filename=${String(lastWorkerError.filename)}, lineno=${String(
+            lastWorkerError.lineno
+          )}, colno=${String(lastWorkerError.colno)})`
         );
         if (lastWorkerError.error !== undefined) {
           parts.push(`error=${String(lastWorkerError.error)}`);
         }
       }
       if (lastUnhandledRejection) {
-        parts.push(`unhandledRejection(reason=${String(lastUnhandledRejection.reason)})`);
+        parts.push(
+          `unhandledRejection(reason=${String(lastUnhandledRejection.reason)})`
+        );
       }
       return parts.length ? ` (${parts.join("; ")})` : "";
     })();
@@ -199,7 +211,10 @@ export const handleEnsurePrivateChannelTracking = async (
     return {
       type: MessageType.EnsurePrivateChannelTracking,
       ok: false,
-      error: { code: "UNKNOWN", message: "Private tracking module is not available." },
+      error: {
+        code: "UNKNOWN",
+        message: "Private tracking module is not available.",
+      },
     };
   }
 

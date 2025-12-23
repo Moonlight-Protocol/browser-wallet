@@ -34,7 +34,9 @@ export type PrivateAddChannelTemplateProps = {
   onSubmit: () => void | Promise<void>;
 };
 
-export function PrivateAddChannelTemplate(props: PrivateAddChannelTemplateProps) {
+export function PrivateAddChannelTemplate(
+  props: PrivateAddChannelTemplateProps
+) {
   return (
     <SubpageShell title="Add channel" onBack={props.onBack}>
       {props.error ? (
@@ -52,7 +54,7 @@ export function PrivateAddChannelTemplate(props: PrivateAddChannelTemplateProps)
           className={cn(
             "mt-2 w-full rounded-md border border-muted bg-background text-primary",
             "px-3 py-2",
-            "disabled:opacity-50",
+            "disabled:opacity-50"
           )}
         >
           <option value="mainnet">Mainnet</option>
@@ -112,7 +114,9 @@ export function PrivateAddChannelTemplate(props: PrivateAddChannelTemplateProps)
             value={props.assetIssuer}
             disabled={props.busy || props.isNativeXlm}
             onChange={(e) => props.setAssetIssuer(e.target.value)}
-            placeholder={props.isNativeXlm ? "Issuer (disabled)" : "Issuer (optional)"}
+            placeholder={
+              props.isNativeXlm ? "Issuer (disabled)" : "Issuer (optional)"
+            }
           />
         </div>
         {props.isNativeXlm ? (

@@ -18,7 +18,11 @@ export async function callBackground<T extends MessageType>(
 ): Promise<ResponseFor<T>> {
   const timeoutMs = options?.timeoutMs ?? 15_000;
   const startedAt = Date.now();
-  if (DEV) console.log("[popup] callBackground:start", { type: message.type, timeoutMs });
+  if (DEV)
+    console.log("[popup] callBackground:start", {
+      type: message.type,
+      timeoutMs,
+    });
 
   let timer: number | undefined;
   try {
@@ -36,13 +40,21 @@ export async function callBackground<T extends MessageType>(
       }),
     ])) as ResponseFor<T>;
 
-    if (DEV) console.log("[popup] callBackground:ok", { type: message.type, ms: Date.now() - startedAt });
+    if (DEV)
+      console.log("[popup] callBackground:ok", {
+        type: message.type,
+        ms: Date.now() - startedAt,
+      });
 
     return res;
   } catch (err) {
     if (DEV) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.log("[popup] callBackground:fail", { type: message.type, message: msg, ms: Date.now() - startedAt });
+      console.log("[popup] callBackground:fail", {
+        type: message.type,
+        message: msg,
+        ms: Date.now() - startedAt,
+      });
     }
     throw err;
   } finally {

@@ -4,7 +4,7 @@ import type { SetSelectedPrivateChannelPayload } from "@/background/handlers/pri
 import type { SetSelectedPrivateChannelResponse } from "@/background/handlers/private/set-selected-private-channel.types.ts";
 
 export async function setSelectedPrivateChannel(
-  payload: SetSelectedPrivateChannelPayload,
+  payload: SetSelectedPrivateChannelPayload
 ) {
   const res = (await callBackground({
     type: MessageType.SetSelectedPrivateChannel,

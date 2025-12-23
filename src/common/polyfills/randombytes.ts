@@ -4,7 +4,7 @@
 
 export default function randomBytes(
   size: number,
-  cb?: (err: unknown, buf: Uint8Array) => void,
+  cb?: (err: unknown, buf: Uint8Array) => void
 ): Uint8Array {
   const out = new Uint8Array(size);
   crypto.getRandomValues(out);

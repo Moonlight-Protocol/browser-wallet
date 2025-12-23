@@ -143,7 +143,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
     props.privateView === "selected" &&
     props.privateChannels?.selectedChannelId
       ? props.privateChannels.channels.find(
-          (c) => c.id === props.privateChannels?.selectedChannelId,
+          (c) => c.id === props.privateChannels?.selectedChannelId
         )
       : undefined;
 
@@ -163,7 +163,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                   }}
                   className={cn(
                     "h-9 w-9 inline-flex items-center justify-center rounded-md",
-                    "text-primary",
+                    "text-primary"
                   )}
                 >
                   <HamburgerIcon className="h-5 w-5" />
@@ -179,13 +179,14 @@ export function HomeTemplate(props: HomeTemplateProps) {
                     (() => {
                       props.setAccountPickerOpen(false);
                       props.setPrivateView?.(
-                        props.privateView === "list" ? "selected" : "list",
+                        props.privateView === "list" ? "selected" : "list"
                       );
-                    })()}
+                    })()
+                  }
                   className={cn(
                     "inline-flex items-center justify-center gap-1",
                     "max-w-[240px]",
-                    "text-primary",
+                    "text-primary"
                   )}
                 >
                   <LockIcon className="h-4 w-4 text-muted" />
@@ -207,7 +208,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                     className={cn(
                       "h-9 w-9 inline-flex items-center justify-center rounded-md",
                       "text-primary",
-                      props.viewModeToggleDisabled ? "opacity-50" : undefined,
+                      props.viewModeToggleDisabled ? "opacity-50" : undefined
                     )}
                   >
                     <LockIcon className="h-5 w-5" />
@@ -220,7 +221,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                       "absolute right-0 top-full mt-1",
                       "w-[220px]",
                       "px-2 py-2 rounded-md border border-primary bg-background",
-                      "text-xs text-primary",
+                      "text-xs text-primary"
                     )}
                   >
                     <div className="text-primary">Private mode: (WIP)</div>
@@ -318,18 +319,23 @@ export function HomeTemplate(props: HomeTemplateProps) {
                       {props.privateStats?.loading ? (
                         <LoadingSpinner uiSize="sm" className="py-2" />
                       ) : props.privateStats?.error ? (
-                        <p className="text-sm text-error">{props.privateStats.error}</p>
+                        <p className="text-sm text-error">
+                          {props.privateStats.error}
+                        </p>
                       ) : props.privateStats?.stats ? (
                         <>
                           <p className="text-sm text-muted">
-                            Private balance: {props.privateStats.stats.totalBalance}
+                            Private balance:{" "}
+                            {props.privateStats.stats.totalBalance}
                           </p>
                           <p className="mt-1 text-sm text-muted">
-                            Derived UTXOs: {props.privateStats.stats.derivedCount}/
+                            Derived UTXOs:{" "}
+                            {props.privateStats.stats.derivedCount}/
                             {props.privateStats.stats.targetCount}
                           </p>
                           <p className="mt-1 text-sm text-muted">
-                            Non-zero UTXOs: {props.privateStats.stats.nonZeroCount}
+                            Non-zero UTXOs:{" "}
+                            {props.privateStats.stats.nonZeroCount}
                           </p>
                         </>
                       ) : (
@@ -355,7 +361,9 @@ export function HomeTemplate(props: HomeTemplateProps) {
               {props.activation.checking || props.activation.funding ? (
                 <LoadingSpinner
                   uiSize="md"
-                  message={props.activation.funding ? "Initializing…" : undefined}
+                  message={
+                    props.activation.funding ? "Initializing…" : undefined
+                  }
                   className="py-6"
                 />
               ) : props.activation.status === "not_created" ? (
@@ -378,12 +386,15 @@ export function HomeTemplate(props: HomeTemplateProps) {
                     Couldn&apos;t verify whether this account is initialized.
                   </p>
                   <p className="mt-1 text-sm text-muted">
-                    Public balances may be unavailable until this check succeeds.
+                    Public balances may be unavailable until this check
+                    succeeds.
                   </p>
                 </>
               )}
               {props.activation.error ? (
-                <p className="mt-1 text-sm text-error">{props.activation.error}</p>
+                <p className="mt-1 text-sm text-error">
+                  {props.activation.error}
+                </p>
               ) : null}
 
               {props.activation.status === "not_created" &&
@@ -394,7 +405,9 @@ export function HomeTemplate(props: HomeTemplateProps) {
                     uiSize="md"
                     className="w-full max-w-xs"
                     onClick={() => props.onFundWithFriendbot?.()}
-                    disabled={props.activation.checking || props.activation.funding}
+                    disabled={
+                      props.activation.checking || props.activation.funding
+                    }
                   >
                     {props.activation.funding
                       ? "Initializing…"

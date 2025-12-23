@@ -26,7 +26,7 @@ export function Dropdown(props: Props) {
       <div
         className={cn(
           "absolute left-0 top-12 z-50 w-full rounded-md border border-primary bg-background p-2",
-          props.panelClassName,
+          props.panelClassName
         )}
       >
         {props.children}

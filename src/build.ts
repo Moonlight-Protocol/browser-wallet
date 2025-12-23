@@ -18,8 +18,7 @@ async function build() {
   const MINIFY = envFlag("MINIFY", false);
 
   const repoRoot = new URL("..", import.meta.url).pathname;
-  const stellarSdkRoot =
-    `${repoRoot}node_modules/.deno/@stellar+stellar-sdk@14.4.2/node_modules/@stellar/stellar-sdk/`;
+  const stellarSdkRoot = `${repoRoot}node_modules/.deno/@stellar+stellar-sdk@14.4.2/node_modules/@stellar/stellar-sdk/`;
   const stellarSdkMinimalEntry = `${stellarSdkRoot}lib/minimal/index.js`;
   const stellarSdkRpcEntry = `${stellarSdkRoot}lib/rpc/index.js`;
   const stellarSdkContractEntry = `${stellarSdkRoot}lib/contract/index.js`;
@@ -121,7 +120,11 @@ async function build() {
   // because this environment blocks dynamic `import()` via CSP and module service workers
   // do not support `importScripts()`. Classic SW + IIFE bundle keeps startup reliable.
   await esbuild.build({
-    plugins: [nodeCryptoShimPlugin, cspSafeDepsPlugin, ...denoPlugins({ configPath })],
+    plugins: [
+      nodeCryptoShimPlugin,
+      cspSafeDepsPlugin,
+      ...denoPlugins({ configPath }),
+    ],
     entryPoints: ["./src/background/handler.ts"],
     bundle: true,
     outfile: `${buildDir}/background.js`,
@@ -139,7 +142,11 @@ async function build() {
   // Build Private Tracking bundle (loaded lazily by the background SW).
   // NOTE: output is classic (IIFE) so it can be loaded via importScripts().
   await esbuild.build({
-    plugins: [nodeCryptoShimPlugin, cspSafeDepsPlugin, ...denoPlugins({ configPath })],
+    plugins: [
+      nodeCryptoShimPlugin,
+      cspSafeDepsPlugin,
+      ...denoPlugins({ configPath }),
+    ],
     entryPoints: ["./src/background/private-tracking-entry.ts"],
     bundle: true,
     outfile: `${buildDir}/private-tracking.js`,
@@ -165,7 +172,11 @@ async function build() {
 
   // Build Popup Script
   await esbuild.build({
-    plugins: [nodeCryptoShimPlugin, cspSafeDepsPlugin, ...denoPlugins({ configPath })],
+    plugins: [
+      nodeCryptoShimPlugin,
+      cspSafeDepsPlugin,
+      ...denoPlugins({ configPath }),
+    ],
     entryPoints: ["./src/popup/main.tsx"],
     bundle: true,
     outfile: `${buildDir}/popup.js`,

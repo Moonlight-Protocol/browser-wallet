@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 // CSP-safe replacement for the `function-bind` package.
 // The original package falls back to an implementation that uses the Function

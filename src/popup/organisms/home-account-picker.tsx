@@ -75,7 +75,9 @@ export function HomeAccountPicker(props: HomeAccountPickerProps) {
                       value={props.editingName}
                       setValue={props.setEditingName}
                       busy={props.actionBusy}
-                      onConfirm={() => props.confirmRename(props.keyGroups.main!)}
+                      onConfirm={() =>
+                        props.confirmRename(props.keyGroups.main!)
+                      }
                       onCancel={props.cancelRename}
                     />
                   </div>
@@ -277,7 +279,9 @@ export function HomeAccountPicker(props: HomeAccountPickerProps) {
                       <div className="flex items-center gap-2">
                         <ImportedWalletIcon className="h-4 w-4" />
                         <div className="min-w-0">
-                          <div className="min-w-0 text-xs truncate">{label}</div>
+                          <div className="min-w-0 text-xs truncate">
+                            {label}
+                          </div>
                           <div className="text-[9px] leading-tight truncate text-muted opacity-80">
                             {shortenAddress(account.publicKey)}
                           </div>

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 // CSP-safe replacement for the `get-intrinsic` package.
 // The upstream package uses the Function constructor for feature detection,
@@ -10,17 +10,20 @@
  * @param {boolean=} allowMissing
  */
 module.exports = function GetIntrinsic(name, allowMissing) {
-  if (typeof name !== 'string' || name.length === 0) {
-    throw new TypeError('GetIntrinsic: name must be a non-empty string');
+  if (typeof name !== "string" || name.length === 0) {
+    throw new TypeError("GetIntrinsic: name must be a non-empty string");
   }
 
   var intrinsicName = name;
-  if (intrinsicName[0] === '%' && intrinsicName[intrinsicName.length - 1] === '%') {
+  if (
+    intrinsicName[0] === "%" &&
+    intrinsicName[intrinsicName.length - 1] === "%"
+  ) {
     intrinsicName = intrinsicName.slice(1, -1);
   }
 
   // Common callers sometimes pass e.g. "String.prototype.indexOf" without %.
-  var parts = intrinsicName.split('.');
+  var parts = intrinsicName.split(".");
 
   /** @type {any} */
   var value = globalThis;
@@ -36,7 +39,7 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 
   if (value === void 0) {
     if (allowMissing) return void 0;
-    throw new TypeError('GetIntrinsic: intrinsic not found: ' + name);
+    throw new TypeError("GetIntrinsic: intrinsic not found: " + name);
   }
 
   return value;

@@ -8,7 +8,8 @@ export function PrivateAddChannelPage() {
   const { state, actions } = usePopup();
   const status = state.status;
 
-  const defaultNetwork = (status?.lastSelectedNetwork ?? "mainnet") as ChainNetwork;
+  const defaultNetwork = (status?.lastSelectedNetwork ??
+    "mainnet") as ChainNetwork;
 
   const [network, setNetwork] = useState<ChainNetwork>(defaultNetwork);
   const [name, setName] = useState("");
@@ -33,7 +34,7 @@ export function PrivateAddChannelPage() {
       name.trim() &&
         contractId.trim() &&
         quorumContractId.trim() &&
-        assetCode.trim(),
+        assetCode.trim()
     );
   }, [quorumContractId, assetCode, contractId, name]);
 

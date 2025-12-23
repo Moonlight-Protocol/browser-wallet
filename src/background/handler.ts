@@ -55,7 +55,8 @@ const handlers: HandlerMap = {
   [MessageType.GetPrivateChannels]: handleGetPrivateChannels,
   [MessageType.AddPrivateChannel]: handleAddPrivateChannel,
   [MessageType.SetSelectedPrivateChannel]: handleSetSelectedPrivateChannel,
-  [MessageType.EnsurePrivateChannelTracking]: handleEnsurePrivateChannelTracking,
+  [MessageType.EnsurePrivateChannelTracking]:
+    handleEnsurePrivateChannelTracking,
 };
 
 browser.runtime.onMessage.addListener(

@@ -204,7 +204,13 @@ export function PopupProvider(props: { children: React.ReactNode }) {
   const value = useMemo<PopupContextValue>(
     () => ({
       state,
-      actions: { refreshStatus, goHome, goImport, goSettings, goPrivateAddChannel },
+      actions: {
+        refreshStatus,
+        goHome,
+        goImport,
+        goSettings,
+        goPrivateAddChannel,
+      },
     }),
     [state]
   );

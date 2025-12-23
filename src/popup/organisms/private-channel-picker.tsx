@@ -13,9 +13,14 @@ export type PrivateChannelPickerProps = {
 export function PrivateChannelPicker(props: PrivateChannelPickerProps) {
   const selectedFirst = (() => {
     if (!props.selectedChannelId) return props.channels;
-    const selected = props.channels.find((c) => c.id === props.selectedChannelId);
+    const selected = props.channels.find(
+      (c) => c.id === props.selectedChannelId
+    );
     if (!selected) return props.channels;
-    return [selected, ...props.channels.filter((c) => c.id !== props.selectedChannelId)];
+    return [
+      selected,
+      ...props.channels.filter((c) => c.id !== props.selectedChannelId),
+    ];
   })();
 
   return (
@@ -30,7 +35,7 @@ export function PrivateChannelPicker(props: PrivateChannelPickerProps) {
             onClick={() => props.onSelectChannel(c.id)}
             className={cn(
               "text-left rounded-md border border-primary px-3 py-2 text-sm",
-              selected ? "text-primary" : "text-muted",
+              selected ? "text-primary" : "text-muted"
             )}
           >
             <div className="flex items-center justify-between gap-3">
@@ -43,7 +48,11 @@ export function PrivateChannelPicker(props: PrivateChannelPickerProps) {
 
       <div className="mt-2 border-t border-muted pt-2 px-2">
         <div className="flex gap-2">
-          <Button uiSize="sm" className="flex-1" onClick={() => props.onAddChannel()}>
+          <Button
+            uiSize="sm"
+            className="flex-1"
+            onClick={() => props.onAddChannel()}
+          >
             Add channel
           </Button>
         </div>

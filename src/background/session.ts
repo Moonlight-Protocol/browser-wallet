@@ -2,6 +2,9 @@ import browser from "webextension-polyfill";
 import type { EncryptionAdapter } from "@/persistence/types.ts";
 import { VaultStore } from "@/persistence/stores/vault.ts";
 import { MetaStore } from "@/persistence/stores/meta.ts";
+import { ChainStore } from "@/persistence/stores/chain.ts";
+import { PrivateChannelsStore } from "@/persistence/stores/private-channels.ts";
+import { PrivateUtxosStore } from "@/persistence/stores/private-utxos.ts";
 import { base64ToBytes } from "@/common/utils/base64-to-bytes.ts";
 import { bytesToBase64 } from "@/common/utils/bytes-to-base64.ts";
 
@@ -14,6 +17,53 @@ let unlockedUntil = 0;
 // Single instance for background lifetime.
 export const vault = new VaultStore();
 export const meta = new MetaStore();
+export const chain = new ChainStore();
+export const privateChannels = new PrivateChannelsStore();
+export const privateUtxos = new PrivateUtxosStore();
+
+let hydrated = false;
+let hydrating: Promise<void> | undefined;
+
+const HYDRATE_TIMEOUT_MS = 5_000;
+
+export function ensureSessionHydrated(): Promise<void> {
+  if (hydrated) return Promise.resolve();
+  if (hydrating) return hydrating;
+
+  const startedAt = Date.now();
+
+  hydrating = (async () => {
+    try {
+      await Promise.race([
+        Promise.all([
+          meta.hydrateFromStorage(),
+          chain.hydrateFromStorage(),
+          privateChannels.hydrateFromStorage(),
+          privateUtxos.hydrateFromStorage(),
+        ]),
+        new Promise<void>((_, reject) => {
+          setTimeout(() => {
+            reject(new Error("Session hydration timed out"));
+          }, HYDRATE_TIMEOUT_MS);
+        }),
+      ]);
+
+      hydrated = true;
+    } catch (err) {
+      hydrated = false;
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("Failed to hydrate session", {
+        message,
+        ms: Date.now() - startedAt,
+      });
+      throw err;
+    } finally {
+      hydrating = undefined;
+    }
+  })();
+
+  return hydrating;
+}
 
 function clearLockTimer() {
   if (lockTimer !== undefined) {

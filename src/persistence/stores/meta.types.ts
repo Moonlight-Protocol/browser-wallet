@@ -1,6 +1,7 @@
 export type MetaState = {
   version: 1;
   passwordSet: boolean;
+  viewMode?: "public" | "private";
   lastSelectedNetwork: "mainnet" | "testnet" | "futurenet" | "custom";
   customNetworkName?: string;
   lastSelectedAccount?: {

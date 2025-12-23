@@ -1,5 +1,5 @@
 import { MessageType } from "@/background/messages.ts";
-import type { ImportSecretResponse } from "@/background/handlers/import-secret.types.ts";
+import type { ImportSecretResponse } from "@/background/handlers/accounts/import-secret.types.ts";
 import { ApiError, callBackground } from "@/popup/api/client.ts";
 
 export async function importSecret(params: { secret: string }): Promise<void> {

@@ -1,5 +1,5 @@
 import { MessageType } from "@/background/messages.ts";
-import type { RenameAccountResponse } from "@/background/handlers/rename-account.types.ts";
+import type { RenameAccountResponse } from "@/background/handlers/accounts/rename-account.types.ts";
 import { ApiError, callBackground } from "@/popup/api/client.ts";
 
 export async function renameAccount(params: {

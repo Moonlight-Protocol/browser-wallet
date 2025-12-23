@@ -1,5 +1,5 @@
 import { MessageType } from "@/background/messages.ts";
-import type { LockResponse } from "@/background/handlers/lock.types.ts";
+import type { LockResponse } from "@/background/handlers/session/lock.types.ts";
 import { ApiError, callBackground } from "@/popup/api/client.ts";
 
 export async function lock(): Promise<void> {

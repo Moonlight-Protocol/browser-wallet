@@ -1,5 +1,5 @@
 import { MessageType } from "@/background/messages.ts";
-import type { UnlockResponse } from "@/background/handlers/unlock.types.ts";
+import type { UnlockResponse } from "@/background/handlers/session/unlock.types.ts";
 import { ApiError, callBackground } from "@/popup/api/client.ts";
 
 export async function unlock(params: {

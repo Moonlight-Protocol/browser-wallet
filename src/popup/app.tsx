@@ -6,12 +6,14 @@ import { UnlockWalletPage } from "@/popup/pages/unlock-wallet-page.tsx";
 import { HomePage } from "@/popup/pages/home-page.tsx";
 import { AddWalletPage } from "@/popup/pages/add-wallet-page.tsx";
 import { ImportPage } from "@/popup/pages/import-page.tsx";
+import { SettingsPage } from "@/popup/pages/settings-page.tsx";
+import { PrivateAddChannelPage } from "@/popup/pages/private-add-channel-page.tsx";
 
 function AppRouter() {
   const { state } = usePopup();
 
   if (state.loading) return <LoadingPage />;
-  if (state.error) return <LoadingPage />;
+  if (state.error) return <LoadingPage error={state.error} />;
 
   if (!state.status?.passwordSet) {
     return <SetupWalletPage />;
@@ -22,14 +24,26 @@ function AppRouter() {
     return <UnlockWalletPage />;
   }
 
+  if (state.accountsLoading) {
+    return <LoadingPage />;
+  }
+
   const accounts = state.accounts ?? [];
 
-  if (unlocked && accounts.length === 0) {
+  if (unlocked && state.accounts && accounts.length === 0) {
     return <AddWalletPage />;
+  }
+
+  if (state.route === "settings") {
+    return <SettingsPage />;
   }
 
   if (state.route === "import") {
     return <ImportPage />;
+  }
+
+  if (state.route === "private-add-channel") {
+    return <PrivateAddChannelPage />;
   }
 
   return <HomePage />;

@@ -1,51 +1,87 @@
 import type {
   GetAccountsRequest,
   GetAccountsResponse,
-} from "@/background/handlers/get-accounts.types.ts";
+} from "@/background/handlers/accounts/get-accounts.types.ts";
 import type {
   UnlockRequest,
   UnlockResponse,
-} from "@/background/handlers/unlock.types.ts";
+} from "@/background/handlers/session/unlock.types.ts";
 import type {
   LockRequest,
   LockResponse,
-} from "@/background/handlers/lock.types.ts";
+} from "@/background/handlers/session/lock.types.ts";
 import type {
   GetStatusRequest,
   GetStatusResponse,
-} from "@/background/handlers/get-status.types.ts";
+} from "@/background/handlers/session/get-status.types.ts";
 import type {
   CreateWalletRequest,
   CreateWalletResponse,
-} from "@/background/handlers/create-wallet.types.ts";
+} from "@/background/handlers/wallet/create-wallet.types.ts";
 import type {
   ImportWalletRequest,
   ImportWalletResponse,
-} from "@/background/handlers/import-wallet.types.ts";
+} from "@/background/handlers/wallet/import-wallet.types.ts";
 import type {
   TouchRequest,
   TouchResponse,
-} from "@/background/handlers/touch.types.ts";
+} from "@/background/handlers/session/touch.types.ts";
 import type {
   SetNetworkRequest,
   SetNetworkResponse,
-} from "@/background/handlers/set-network.types.ts";
+} from "@/background/handlers/session/set-network.types.ts";
 import type {
   SetSelectedAccountRequest,
   SetSelectedAccountResponse,
-} from "@/background/handlers/set-selected-account.types.ts";
+} from "@/background/handlers/accounts/set-selected-account.types.ts";
+import type {
+  SetViewModeRequest,
+  SetViewModeResponse,
+} from "@/background/handlers/session/set-view-mode.types.ts";
 import type {
   DeriveAccountRequest,
   DeriveAccountResponse,
-} from "@/background/handlers/derive-account.types.ts";
+} from "@/background/handlers/accounts/derive-account.types.ts";
 import type {
   ImportSecretRequest,
   ImportSecretResponse,
-} from "@/background/handlers/import-secret.types.ts";
+} from "@/background/handlers/accounts/import-secret.types.ts";
 import type {
   RenameAccountRequest,
   RenameAccountResponse,
-} from "@/background/handlers/rename-account.types.ts";
+} from "@/background/handlers/accounts/rename-account.types.ts";
+import type {
+  GetChainStateRequest,
+  GetChainStateResponse,
+} from "@/background/handlers/chain/get-chain-state.types.ts";
+import type {
+  SyncChainStateRequest,
+  SyncChainStateResponse,
+} from "@/background/handlers/chain/sync-chain-state.types.ts";
+import type {
+  GetAccountActivationStatusRequest,
+  GetAccountActivationStatusResponse,
+} from "@/background/handlers/chain/get-account-activation-status.types.ts";
+import type {
+  FundWithFriendbotRequest,
+  FundWithFriendbotResponse,
+} from "@/background/handlers/chain/fund-with-friendbot.types.ts";
+import type {
+  GetPrivateChannelsRequest,
+  GetPrivateChannelsResponse,
+} from "@/background/handlers/private/get-private-channels.types.ts";
+import type {
+  AddPrivateChannelRequest,
+  AddPrivateChannelResponse,
+} from "@/background/handlers/private/add-private-channel.types.ts";
+import type {
+  SetSelectedPrivateChannelRequest,
+  SetSelectedPrivateChannelResponse,
+} from "@/background/handlers/private/set-selected-private-channel.types.ts";
+import type {
+  EnsurePrivateChannelTrackingRequest,
+  EnsurePrivateChannelTrackingResponse,
+} from "@/background/handlers/private/ensure-private-channel-tracking.types.ts";
 
 // Helper types and mapped types for messages and responses
 // ==============================================================================
@@ -74,6 +110,10 @@ export type HandlerMap = {
 export enum MessageType {
   GetAccounts = "GET_ACCOUNTS",
   GetStatus = "GET_STATUS",
+  GetChainState = "GET_CHAIN_STATE",
+  SyncChainState = "SYNC_CHAIN_STATE",
+  GetAccountActivationStatus = "GET_ACCOUNT_ACTIVATION_STATUS",
+  FundWithFriendbot = "FUND_WITH_FRIENDBOT",
   Unlock = "UNLOCK",
   Lock = "LOCK",
   CreateWallet = "CREATE_WALLET",
@@ -83,12 +123,21 @@ export enum MessageType {
   RenameAccount = "RENAME_ACCOUNT",
   Touch = "TOUCH",
   SetNetwork = "SET_NETWORK",
+  SetViewMode = "SET_VIEW_MODE",
   SetSelectedAccount = "SET_SELECTED_ACCOUNT",
+  GetPrivateChannels = "GET_PRIVATE_CHANNELS",
+  AddPrivateChannel = "ADD_PRIVATE_CHANNEL",
+  SetSelectedPrivateChannel = "SET_SELECTED_PRIVATE_CHANNEL",
+  EnsurePrivateChannelTracking = "ENSURE_PRIVATE_CHANNEL_TRACKING",
 }
 
 export type MessagePayloadMap = {
   [MessageType.GetAccounts]: GetAccountsRequest;
   [MessageType.GetStatus]: GetStatusRequest;
+  [MessageType.GetChainState]: GetChainStateRequest;
+  [MessageType.SyncChainState]: SyncChainStateRequest;
+  [MessageType.GetAccountActivationStatus]: GetAccountActivationStatusRequest;
+  [MessageType.FundWithFriendbot]: FundWithFriendbotRequest;
   [MessageType.Unlock]: UnlockRequest;
   [MessageType.Lock]: LockRequest;
   [MessageType.CreateWallet]: CreateWalletRequest;
@@ -98,12 +147,21 @@ export type MessagePayloadMap = {
   [MessageType.RenameAccount]: RenameAccountRequest;
   [MessageType.Touch]: TouchRequest;
   [MessageType.SetNetwork]: SetNetworkRequest;
+  [MessageType.SetViewMode]: SetViewModeRequest;
   [MessageType.SetSelectedAccount]: SetSelectedAccountRequest;
+  [MessageType.GetPrivateChannels]: GetPrivateChannelsRequest;
+  [MessageType.AddPrivateChannel]: AddPrivateChannelRequest;
+  [MessageType.SetSelectedPrivateChannel]: SetSelectedPrivateChannelRequest;
+  [MessageType.EnsurePrivateChannelTracking]: EnsurePrivateChannelTrackingRequest;
 };
 
 export type ResponsePayloadMap = {
   [MessageType.GetAccounts]: GetAccountsResponse;
   [MessageType.GetStatus]: GetStatusResponse;
+  [MessageType.GetChainState]: GetChainStateResponse;
+  [MessageType.SyncChainState]: SyncChainStateResponse;
+  [MessageType.GetAccountActivationStatus]: GetAccountActivationStatusResponse;
+  [MessageType.FundWithFriendbot]: FundWithFriendbotResponse;
   [MessageType.Unlock]: UnlockResponse;
   [MessageType.Lock]: LockResponse;
   [MessageType.CreateWallet]: CreateWalletResponse;
@@ -113,5 +171,10 @@ export type ResponsePayloadMap = {
   [MessageType.RenameAccount]: RenameAccountResponse;
   [MessageType.Touch]: TouchResponse;
   [MessageType.SetNetwork]: SetNetworkResponse;
+  [MessageType.SetViewMode]: SetViewModeResponse;
   [MessageType.SetSelectedAccount]: SetSelectedAccountResponse;
+  [MessageType.GetPrivateChannels]: GetPrivateChannelsResponse;
+  [MessageType.AddPrivateChannel]: AddPrivateChannelResponse;
+  [MessageType.SetSelectedPrivateChannel]: SetSelectedPrivateChannelResponse;
+  [MessageType.EnsurePrivateChannelTracking]: EnsurePrivateChannelTrackingResponse;
 };

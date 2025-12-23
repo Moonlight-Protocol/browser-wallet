@@ -64,6 +64,7 @@ export const handleDeriveAccount = async (
       ...prev,
       wallets: prev.wallets.map((w) => {
         if (w.id !== mnemonicWallet.id) return w;
+        if (w.type !== "mnemonic") return w;
         return {
           ...w,
           accounts: [...w.accounts, newAccount],

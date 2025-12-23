@@ -1,5 +1,5 @@
 import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
-import type { SafeAccount } from "@/background/handlers/get-accounts.types.ts";
+import type { SafeAccount } from "@/background/handlers/accounts/get-accounts.types.ts";
 import { vault } from "@/background/session.ts";
 import type {
   DerivedAccount,
@@ -33,9 +33,9 @@ function toSafeAccounts(wallet: VaultWallet): SafeAccount[] {
   }));
 }
 
-export const handleGetAccounts = async (
+export const handleGetAccounts = (
   _message: MessageFor<MessageType.GetAccounts>
-): Promise<ResponseFor<MessageType.GetAccounts>> => {
+): ResponseFor<MessageType.GetAccounts> => {
   if (vault.isLocked()) {
     return { type: MessageType.GetAccounts, error: { code: "LOCKED" } };
   }

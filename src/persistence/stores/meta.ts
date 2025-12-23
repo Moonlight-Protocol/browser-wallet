@@ -4,6 +4,7 @@ import type { MetaState } from "@/persistence/stores/meta.types.ts";
 const DEFAULT_META_STATE: MetaState = {
   version: 1,
   passwordSet: false,
+  viewMode: "public",
   lastSelectedNetwork: "mainnet",
 };
 
@@ -17,6 +18,10 @@ export class MetaStore extends PersistedStore<MetaState> {
 
   setPasswordSet(passwordSet: boolean) {
     this.store.update((state) => ({ ...state, passwordSet }));
+  }
+
+  setViewMode(viewMode: MetaState["viewMode"]) {
+    this.store.update((state) => ({ ...state, viewMode }));
   }
 
   setLastSelectedNetwork(

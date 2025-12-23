@@ -1,10 +1,5 @@
-import { Shell } from "@/popup/templates/shell.tsx";
+import { LoadingTemplate } from "@/popup/templates/loading-template.tsx";
 
-export function LoadingPage() {
-  return (
-    <Shell>
-      <h1 className="text-2xl font-bold text-slate-800">Stellar Wallet</h1>
-      <p className="mt-4 text-slate-600">Loading…</p>
-    </Shell>
-  );
+export function LoadingPage(props: { error?: string }) {
+  return <LoadingTemplate error={props.error} />;
 }

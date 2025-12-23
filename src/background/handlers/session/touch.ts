@@ -1,9 +1,9 @@
 import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { extendVaultSession } from "@/background/session.ts";
 
-export const handleTouch = async (
+export const handleTouch = (
   message: MessageFor<MessageType.Touch>
-): Promise<ResponseFor<MessageType.Touch>> => {
+): ResponseFor<MessageType.Touch> => {
   const ok = extendVaultSession({ ttlMs: message.ttlMs });
   if (!ok) {
     return {

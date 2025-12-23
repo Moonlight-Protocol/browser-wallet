@@ -3,6 +3,7 @@ import { Title } from "@/popup/atoms/title.tsx";
 import { Text } from "@/popup/atoms/text.tsx";
 import { PasswordInput } from "@/popup/molecules/password-input.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
+import { MasterWalletIcon } from "@/popup/icons/master-wallet-icon.tsx";
 
 type Props = {
   password: string;
@@ -17,30 +18,53 @@ type Props = {
 export function UnlockWalletTemplate(props: Props) {
   return (
     <Shell>
-      <Title>Unlock</Title>
-      <Text>Enter your password to unlock this wallet.</Text>
+      <div className="min-h-full flex flex-col items-center">
+        <div className="w-full pt-6 flex flex-col items-center">
+          <div className="text-center">
+            <Title>Moonlight Wallet</Title>
+          </div>
 
-      <PasswordInput
-        label="Password"
-        value={props.password}
-        autoComplete="current-password"
-        onChange={props.onChangePassword}
-        error={props.passwordError}
-      />
+          <Text className="mt-2 text-center">
+            Enter your password to unlock.
+          </Text>
+        </div>
 
-      {props.submitError ? (
-        <Text tone="error" size="sm">
-          {props.submitError}
-        </Text>
-      ) : null}
+        <form
+          className="flex-1 w-full flex flex-col items-center justify-center"
+          onSubmit={(e) => {
+            e.preventDefault();
+            props.onSubmit();
+          }}
+        >
+          <div className="w-full max-w-sm">
+            <PasswordInput
+              label="Password"
+              value={props.password}
+              autoComplete="current-password"
+              onChange={props.onChangePassword}
+              error={props.passwordError}
+            />
 
-      <Button
-        type="button"
-        disabled={!props.canSubmit}
-        onClick={props.onSubmit}
-      >
-        Unlock
-      </Button>
+            {props.submitError ? (
+              <Text tone="error" size="sm" className="mt-3">
+                {props.submitError}
+              </Text>
+            ) : null}
+
+            <Button
+              type="submit"
+              disabled={!props.canSubmit}
+              className="mt-4 w-full"
+            >
+              Unlock
+            </Button>
+          </div>
+        </form>
+
+        <div className="w-full flex items-center justify-center pb-2">
+          <MasterWalletIcon className="h-16 w-16 text-muted" />
+        </div>
+      </div>
     </Shell>
   );
 }

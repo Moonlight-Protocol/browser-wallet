@@ -1,5 +1,5 @@
 import { MessageType } from "@/background/messages.ts";
-import type { DeriveAccountResponse } from "@/background/handlers/derive-account.types.ts";
+import type { DeriveAccountResponse } from "@/background/handlers/accounts/derive-account.types.ts";
 import { ApiError, callBackground } from "@/popup/api/client.ts";
 
 export async function deriveAccount(): Promise<void> {

@@ -1,5 +1,5 @@
 import { Buffer as BufferPolyfill } from "buffer";
-import processPolyfill from "process";
+import processPolyfill from "@/common/polyfills/process.ts";
 
 // Some npm packages (e.g. bip39) expect Node globals even when bundled for the browser.
 const g = globalThis as unknown as Record<string, unknown>;

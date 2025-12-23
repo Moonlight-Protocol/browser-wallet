@@ -1,7 +1,7 @@
 import "@/common/polyfills/node-globals.ts";
 
 import { mnemonicToSeed, generateMnemonic, validateMnemonic } from "bip39";
-import { Keypair } from "stellar-sdk";
+import { Keypair } from "@stellar/stellar-base";
 
 const ED25519_CURVE_SEED = new TextEncoder().encode("ed25519 seed");
 const HARDENED_OFFSET = 0x80000000;

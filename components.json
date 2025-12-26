@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "radix-mira",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "src/popup/style.css",
+    "baseColor": "gray",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/popup/atoms",
+    "utils": "@/popup/utils",
+    "ui": "@/popup/atoms",
+    "lib": "@/popup/utils",
+    "hooks": "@/popup/hooks"
+  },
+  "iconLibrary": "tabler"
+}

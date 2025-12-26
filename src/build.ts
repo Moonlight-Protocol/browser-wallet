@@ -1,7 +1,7 @@
 import * as esbuild from "esbuild";
 import { denoPlugins } from "esbuild-deno-loader";
 import { copy, exists } from "@std/fs";
-import tailwindcss from "tailwindcss";
+import tailwindcss from "@tailwindcss/postcss";
 import autoprefixer from "autoprefixer";
 import postcss from "postcss";
 
@@ -109,7 +109,10 @@ async function build() {
   const cssInput = await Deno.readTextFile("src/popup/style.css");
   const result = await postcss([tailwindcss(), autoprefixer()]).process(
     cssInput,
-    { from: "src/popup/style.css", to: `${buildDir}/style.css` }
+    {
+      from: "src/popup/style.css",
+      to: `${buildDir}/style.css`,
+    }
   );
   await Deno.writeTextFile(`${buildDir}/style.css`, result.css);
 

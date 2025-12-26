@@ -1,35 +1,30 @@
-import React from "react";
+import * as React from "react";
 import { cn } from "@/popup/utils/cn.ts";
+import { Spinner } from "@/popup/atoms/spinner.tsx";
 
-export type LoadingSpinnerProps = {
+export interface LoadingSpinnerProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   message?: string;
   uiSize?: "sm" | "md";
-  className?: string;
-};
+}
 
-export function LoadingSpinner(props: LoadingSpinnerProps) {
-  const size = props.uiSize ?? "md";
-  const ringClass = size === "sm" ? "h-4 w-4 border-2" : "h-6 w-6 border-2";
+export function LoadingSpinner({
+  className,
+  message,
+  uiSize = "md",
+  ...props
+}: LoadingSpinnerProps) {
+  const sizeClass = uiSize === "sm" ? "h-4 w-4" : "h-6 w-6";
 
   return (
     <div
-      className={cn(
-        "flex flex-col items-center justify-center",
-        props.className
-      )}
+      className={cn("flex flex-col items-center justify-center", className)}
+      {...props}
     >
-      <div
-        aria-label="Loading"
-        role="status"
-        className={cn(
-          "rounded-full animate-spin",
-          ringClass,
-          "border-muted border-t-primary"
-        )}
-      />
-      {props.message ? (
-        <div className="mt-2 text-xs text-muted text-center">
-          {props.message}
+      <Spinner className={cn("text-primary", sizeClass)} />
+      {message ? (
+        <div className="mt-2 text-xs text-muted-foreground text-center">
+          {message}
         </div>
       ) : null}
     </div>

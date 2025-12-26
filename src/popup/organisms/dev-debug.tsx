@@ -46,20 +46,21 @@ export function DevDebug() {
 
   return (
     <div className={cn("pt-2", open ? "border-t border-muted" : "")}>
-      <button
+      <Button
+        variant="link"
+        size="sm"
         type="button"
         aria-label="Debug"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "text-[10px] lowercase",
-          "text-muted",
-          "opacity-60 hover:opacity-100",
-          "w-full text-center"
+          "w-full text-center lowercase",
+          "text-white hover:text-white",
+          "px-0 h-auto"
         )}
       >
         debug
-      </button>
+      </Button>
 
       {open ? (
         <div className="pt-2">

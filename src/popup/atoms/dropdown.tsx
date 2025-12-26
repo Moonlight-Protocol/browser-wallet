@@ -1,5 +1,9 @@
-import React from "react";
+import * as React from "react";
 import { cn } from "@/popup/utils/cn.ts";
+
+// NOTE: This is a custom implementation to match the existing atomic interface
+// while using shadcn-like styling. For full shadcn power, we should eventually
+// migrate to using Radix UI's Popover or DropdownMenu primitives directly.
 
 type Props = {
   open: boolean;
@@ -19,13 +23,13 @@ export function Dropdown(props: Props) {
           type="button"
           aria-label="Close dropdown"
           onClick={props.onClose}
-          className="absolute inset-0"
+          className="absolute inset-0 bg-background/80 backdrop-blur-sm"
         />
       </div>
 
       <div
         className={cn(
-          "absolute left-0 top-12 z-50 w-full rounded-md border border-primary bg-background p-2",
+          "absolute left-0 top-12 z-50 w-full rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95",
           props.panelClassName
         )}
       >

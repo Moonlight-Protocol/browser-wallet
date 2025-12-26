@@ -12,6 +12,7 @@ export { LockIcon } from "@/popup/icons/lock-icon.tsx";
 export { SyncIcon } from "@/popup/icons/sync-icon.tsx";
 export { MasterWalletIcon } from "@/popup/icons/master-wallet-icon.tsx";
 export { ImportedWalletIcon } from "@/popup/icons/imported-wallet-icon.tsx";
+export { LogoIcon } from "@/popup/icons/logo-icon.tsx";
 
 export type WithIcon = {
   icon?: ReactNode;

@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { Input } from "@/popup/atoms/input.tsx";
 import { Text } from "@/popup/atoms/text.tsx";
-import { cn } from "@/popup/utils/cn.ts";
+import { IconEye, IconEyeClosed } from "@tabler/icons-react";
 
 type Props = {
-  label: string;
+  label?: string;
+  placeholder?: string;
   value: string;
   onChange: (value: string) => void;
   autoComplete?: string;
@@ -20,19 +21,26 @@ export function PasswordInput(props: Props) {
   );
 
   return (
-    <div>
-      <label htmlFor={inputId} className="block text-sm text-muted">
-        {props.label}
-      </label>
+    <div className="space-y-2">
+      {props.label && (
+        <label
+          htmlFor={inputId}
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          {props.label}
+        </label>
+      )}
 
-      <div className="mt-2 flex items-stretch gap-0">
+      <div className="relative">
         <Input
           id={inputId}
           type={visible ? "text" : "password"}
           value={props.value}
+          placeholder={props.placeholder}
           autoComplete={props.autoComplete}
           aria-invalid={props.error ? true : undefined}
-          uiSize="sm"
+          size="sm"
+          className="pr-10"
           onChange={(e) => props.onChange(e.currentTarget.value)}
         />
 
@@ -40,46 +48,12 @@ export function PasswordInput(props: Props) {
           type="button"
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? "Hide password" : "Show password"}
-          className={cn(
-            "inline-flex items-center justify-center rounded-md border border-muted",
-            "bg-background px-2",
-            "text-muted",
-            "focus:outline-none focus:ring-2 focus:ring-primary"
-          )}
+          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground hover:text-foreground"
         >
           {visible ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-              aria-hidden="true"
-            >
-              <path d="M2 2l20 20" />
-              <path d="M10.5 10.5a2 2 0 0 0 2.83 2.83" />
-              <path d="M6.11 6.11C3.73 7.74 2 10.5 2 12c0 0 3.5 7 10 7 1.45 0 2.79-.27 4-.73" />
-              <path d="M9.88 4.24A9.77 9.77 0 0 1 12 4c6.5 0 10 8 10 8a17.6 17.6 0 0 1-3.11 4.31" />
-              <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" />
-            </svg>
+            <IconEyeClosed className="h-4 w-4" />
           ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-              aria-hidden="true"
-            >
-              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
+            <IconEye className="h-4 w-4" />
           )}
         </button>
       </div>

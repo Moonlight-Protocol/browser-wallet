@@ -20,6 +20,12 @@ import {
 export const handleEnsurePrivateChannelTracking = async (
   message: MessageFor<MessageType.EnsurePrivateChannelTracking>
 ): Promise<ResponseFor<MessageType.EnsurePrivateChannelTracking>> => {
+  console.info("[private][ensure-tracking] request", {
+    network: message.network,
+    accountId: message.accountId,
+    channelId: message.channelId,
+    targetUtxos: message.targetUtxos,
+  });
   try {
     const channels = privateChannels.getChannels(message.network);
     const channel = channels.find((c) => c.id === message.channelId);
@@ -49,32 +55,16 @@ export const handleEnsurePrivateChannelTracking = async (
       channelId: message.channelId,
     });
 
-    // If we already derived the target set, just return cached stats.
-    if (existingTracking && existingTracking.nextIndex >= targetCount) {
-      const cached = privateUtxos.getStats({
+    if (vault.isLocked()) {
+      console.warn("[private][ensure-tracking] blocked: vault locked", {
         network: message.network,
         accountId: message.accountId,
         channelId: message.channelId,
       });
-
-      return {
-        type: MessageType.EnsurePrivateChannelTracking,
-        ok: true,
-        stats: cached ?? {
-          targetCount,
-          derivedCount: 0,
-          nonZeroCount: 0,
-          totalBalance: "0",
-          updatedAt: Date.now(),
-        },
-      };
-    }
-
-    if (vault.isLocked()) {
       return {
         type: MessageType.EnsurePrivateChannelTracking,
         ok: false,
-        error: { code: "LOCKED", message: "Wallet is locked" },
+        error: { code: "UNKNOWN", message: "Wallet is locked" },
       };
     }
 
@@ -148,14 +138,15 @@ export const handleEnsurePrivateChannelTracking = async (
 
     // Do this in chunks so MV3 service worker + popup messaging stays responsive.
     const chunkSize = 50;
-    const startIndex = Math.max(0, existingTracking?.nextIndex ?? 0);
-    const remaining = Math.max(0, targetCount - startIndex);
-    const count = Math.min(chunkSize, remaining);
-    const nextIndex = startIndex + count;
-
-    if (count > 0) {
+    for (
+      let startIndex = 0;
+      startIndex < targetCount;
+      startIndex += chunkSize
+    ) {
+      const count = Math.min(chunkSize, targetCount - startIndex);
       await utxoAccount.deriveBatch({ startIndex, count });
     }
+
     await utxoAccount.batchLoad();
 
     const all = utxoAccount.getAllUTXOs() as unknown as Array<
@@ -173,7 +164,7 @@ export const handleEnsurePrivateChannelTracking = async (
       channelId: message.channelId,
       targetCount,
       utxos: snapshotUtxos,
-      nextIndex,
+      nextIndex: targetCount,
     });
 
     await privateUtxos.flush();
@@ -182,6 +173,15 @@ export const handleEnsurePrivateChannelTracking = async (
       network: message.network,
       accountId: message.accountId,
       channelId: message.channelId,
+    });
+
+    console.info("[private][ensure-tracking] success", {
+      network: message.network,
+      accountId: message.accountId,
+      channelId: message.channelId,
+      utxoCount: stats?.utxos?.length,
+      totalBalance: stats?.totalBalance,
+      derivedCount: stats?.derivedCount,
     });
 
     return {
@@ -197,6 +197,12 @@ export const handleEnsurePrivateChannelTracking = async (
     };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
+    console.warn("[private][ensure-tracking] failure", {
+      network: message.network,
+      accountId: message.accountId,
+      channelId: message.channelId,
+      error: msg,
+    });
     return {
       type: MessageType.EnsurePrivateChannelTracking,
       ok: false,

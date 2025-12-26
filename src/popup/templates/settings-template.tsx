@@ -1,6 +1,9 @@
 import { useMemo } from "react";
 import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Text } from "@/popup/atoms/text.tsx";
+import { RadioGroup, RadioGroupItem } from "@/popup/atoms/radio-group.tsx";
+import { Label } from "@/popup/atoms/label.tsx";
+import { Card, CardContent } from "@/popup/atoms/card.tsx";
 import { cn } from "@/popup/utils/cn.ts";
 import { networkLabel } from "@/popup/utils/common.ts";
 
@@ -25,64 +28,53 @@ export type SettingsTemplateProps = {
 };
 
 export function SettingsTemplate(props: SettingsTemplateProps) {
-  const selectedNetworkLabel = useMemo(
-    () =>
-      networkLabel({
-        network: props.selectedNetwork,
-        customNetworkName: props.customNetworkName,
-      }),
-    [props.customNetworkName, props.selectedNetwork]
-  );
-
   return (
     <SubpageShell title="Settings" onBack={props.onBack}>
-      <Text size="sm">Network: {selectedNetworkLabel}</Text>
-
-      {props.error ? (
-        <Text tone="error" size="sm">
-          {props.error}
-        </Text>
-      ) : null}
-
-      <div className="mt-3">
-        <div className="text-xs text-muted">Network</div>
-        <div className="mt-2 flex flex-col gap-2">
-          {props.networkItems.map((item) => {
-            if (item.key === "custom") {
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  disabled
-                  className={cn(
-                    "text-left rounded-md border border-primary px-3 py-2 text-sm",
-                    "text-muted opacity-50"
-                  )}
-                >
-                  {item.label}
-                </button>
-              );
-            }
-
-            return (
-              <button
-                key={item.key}
-                type="button"
+      <div className="space-y-6">
+        <section>
+          <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+            Network Configuration
+          </h3>
+          <Card>
+            <CardContent className="pt-6">
+              <RadioGroup
+                value={props.selectedNetwork}
+                onValueChange={(v) =>
+                  props.onSelectNetwork(v as Exclude<Network, "custom">)
+                }
                 disabled={props.busy}
-                onClick={() => props.onSelectNetwork(item.key)}
-                className={cn(
-                  "text-left rounded-md border border-primary px-3 py-2 text-sm",
-                  props.selectedNetwork === item.key
-                    ? "text-primary"
-                    : "text-muted",
-                  "disabled:opacity-50"
-                )}
               >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
+                {props.networkItems.map((item) => (
+                  <div
+                    key={item.key}
+                    className="flex items-center space-x-3 space-y-0"
+                  >
+                    <RadioGroupItem
+                      value={item.key}
+                      id={item.key}
+                      disabled={item.disabled}
+                    />
+                    <Label
+                      htmlFor={item.key}
+                      className={cn(
+                        "cursor-pointer font-normal",
+                        item.disabled && "cursor-not-allowed opacity-50"
+                      )}
+                    >
+                      {item.label}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </CardContent>
+          </Card>
+        </section>
+
+        {props.error ? (
+          <Text tone="error" size="sm" className="mt-2">
+            {props.error}
+          </Text>
+        ) : null}
       </div>
     </SubpageShell>
   );

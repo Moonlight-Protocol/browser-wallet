@@ -1,12 +1,25 @@
 import { cn } from "@/popup/utils/cn.ts";
 import { toDecimals } from "@colibri/core";
+import { ChevronDownIcon } from "@/popup/icons/index.tsx";
 import {
-  ChevronDownIcon,
-  HamburgerIcon,
-  GlobeIcon,
-  LockIcon,
-  SyncIcon,
-} from "@/popup/icons/index.tsx";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/popup/atoms/tooltip.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/popup/atoms/dropdown-menu.tsx";
+import { SidebarTrigger } from "@/popup/atoms/sidebar.tsx";
+import {
+  IconWorld,
+  IconShieldLock,
+  IconPlugConnected,
+  IconPlugConnectedX,
+} from "@tabler/icons-react";
+import type { ReactNode } from "react";
 
 export type HomeHeaderProps = {
   selectedNetworkLabel: string;
@@ -15,16 +28,18 @@ export type HomeHeaderProps = {
   viewModeToggleDisabled?: boolean;
 
   accountPickerOpen: boolean;
-  onToggleAccountPicker: () => void;
-
-  onOpenMenu: () => void;
+  onToggleAccountPicker: (open: boolean) => void;
+  accountPicker: ReactNode;
 
   headerKeyName?: string;
   headerAddressShort: string;
 
-  showBalance: boolean;
-  balanceXlm?: string;
-  syncing: boolean;
+  // Private mode connection status
+  channelName?: string;
+  isConnected?: boolean;
+  onToggleChannelPicker?: (open: boolean) => void;
+  channelPickerOpen?: boolean;
+  channelPicker?: ReactNode;
 };
 
 export function HomeHeader(props: HomeHeaderProps) {
@@ -32,109 +47,130 @@ export function HomeHeader(props: HomeHeaderProps) {
 
   return (
     <>
-      <header className="h-12 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            aria-label="Menu"
-            onClick={props.onOpenMenu}
-            className={cn(
-              "h-9 w-9 inline-flex items-center justify-center rounded-md",
-              "text-primary"
-            )}
-          >
-            <HamburgerIcon className="h-5 w-5" />
-          </button>
-        </div>
+      <header
+        className={cn(
+          "flex flex-col justify-center relative z-50 px-3 border-b border-border/50 transition-all duration-300 ease-in-out bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+          props.viewMode === "private" ? "h-24 py-2 gap-1" : "h-14"
+        )}
+      >
+        <div className="flex items-center justify-between w-full">
+          <div className="w-[40px] flex items-center justify-start">
+            <SidebarTrigger />
+          </div>
 
-        <div className="flex-1 text-center">
-          <button
-            type="button"
-            aria-label="Select account"
-            aria-expanded={props.accountPickerOpen}
-            onClick={props.onToggleAccountPicker}
-            className={cn(
-              "inline-flex items-center justify-center gap-1",
-              "max-w-[240px]",
-              "text-primary"
-            )}
-          >
-            {props.headerKeyName ? (
-              <div className="flex flex-col items-center leading-tight">
-                <div className="text-sm font-medium text-primary truncate max-w-[220px]">
-                  {props.headerKeyName}
-                </div>
-                <div className="text-[10px] text-muted truncate max-w-[220px]">
-                  {props.headerAddressShort}
-                </div>
-              </div>
-            ) : (
-              <h1 className="text-sm font-medium text-primary truncate">
-                {props.headerAddressShort}
-              </h1>
-            )}
-
-            <ChevronDownIcon className="h-4 w-4 text-muted" />
-          </button>
-        </div>
-
-        <div className="w-[76px] flex items-center justify-end">
-          <div className="relative group">
-            <button
-              type="button"
-              aria-label={`${modeLabel} mode`}
-              aria-pressed={props.viewMode === "private"}
-              disabled={props.viewModeToggleDisabled}
-              onClick={() => props.onToggleViewMode()}
-              className={cn(
-                "h-9 w-9 inline-flex items-center justify-center rounded-md",
-                "text-primary",
-                props.viewModeToggleDisabled ? "opacity-50" : undefined
-              )}
+          <div className="flex-1 flex justify-center min-w-0">
+            <DropdownMenu
+              open={props.accountPickerOpen}
+              onOpenChange={props.onToggleAccountPicker}
             >
-              {props.viewMode === "private" ? (
-                <LockIcon className="h-5 w-5" />
-              ) : (
-                <GlobeIcon className="h-5 w-5" />
-              )}
-            </button>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Select account"
+                  className="inline-flex flex-col items-center justify-center gap-0 group outline-none min-w-0"
+                >
+                  <div className="flex items-center gap-1 min-w-0">
+                    <span className="text-sm font-bold text-primary truncate max-w-[120px]">
+                      {props.headerKeyName || props.headerAddressShort}
+                    </span>
+                    <ChevronDownIcon className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                  </div>
+                  {props.headerKeyName && (
+                    <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[120px]">
+                      {props.headerAddressShort}
+                    </span>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-70 max-h-100 overflow-y-auto">
+                {props.accountPicker}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-            <div
-              className={cn(
-                "opacity-0 group-hover:opacity-100",
-                "pointer-events-none",
-                "absolute right-0 top-full mt-1",
-                "w-[220px]",
-                "px-2 py-2 rounded-md border border-primary bg-background",
-                "text-xs text-primary"
-              )}
-            >
-              <div className="text-primary">
-                {props.viewMode === "public"
-                  ? "Public mode: on-chain balances"
-                  : "Private mode: (WIP)"}
-              </div>
-              <div className="mt-1 text-muted">
-                Network: {props.selectedNetworkLabel}
-              </div>
-              <div className="mt-1 text-muted">Click to switch.</div>
-            </div>
+          <div className="w-[40px] flex items-center justify-end gap-1">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    disabled={props.viewModeToggleDisabled}
+                    onClick={() => props.onToggleViewMode()}
+                    className={cn(
+                      "h-9 w-9 inline-flex items-center justify-center rounded-md transition-colors shrink-0",
+                      "hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+                    )}
+                  >
+                    {props.viewMode === "private" ? (
+                      <IconShieldLock className="h-5 w-5" />
+                    ) : (
+                      <IconWorld className="h-5 w-5" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="end">
+                  <div className="text-xs">
+                    <div className="font-medium">
+                      {props.viewMode === "public"
+                        ? "Public mode: on-chain balances"
+                        : "Private mode: confidential balances"}
+                    </div>
+                    <div className="mt-1 text-muted-foreground">
+                      Network: {props.selectedNetworkLabel}
+                    </div>
+                    <div className="mt-1 text-muted-foreground">
+                      Click to switch.
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
+
+        {props.viewMode === "private" && (
+          <div className="flex items-center justify-end w-full animate-in fade-in slide-in-from-top-1 duration-200">
+            <DropdownMenu
+              open={props.channelPickerOpen}
+              onOpenChange={props.onToggleChannelPicker}
+            >
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-md hover:bg-accent transition-colors text-left border border-transparent hover:border-border min-w-0"
+                >
+                  <div className="flex flex-col items-end leading-tight min-w-0">
+                    <span className="text-xs font-bold text-primary truncate max-w-[120px]">
+                      {props.channelName || "No Channel"}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-[9px] font-medium whitespace-nowrap",
+                        props.isConnected
+                          ? "text-green-500"
+                          : "text-destructive"
+                      )}
+                    >
+                      {props.isConnected ? "Connected" : "Not connected"}
+                    </span>
+                  </div>
+                  {props.isConnected ? (
+                    <IconPlugConnected className="h-4 w-4 text-green-500 shrink-0" />
+                  ) : (
+                    <IconPlugConnectedX className="h-4 w-4 text-destructive shrink-0" />
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-70 max-h-100 overflow-y-auto"
+                align="end"
+              >
+                {props.channelPicker}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </header>
-
-      {props.showBalance ? (
-        <div className="mt-1 flex items-center justify-center gap-2 text-[11px] text-muted">
-          <div className="truncate">
-            Balance:{" "}
-            {props.balanceXlm ? toDecimals(BigInt(props.balanceXlm), 7) : "—"}{" "}
-            XLM
-          </div>
-          {props.syncing ? (
-            <SyncIcon className="h-3.5 w-3.5 text-muted" />
-          ) : null}
-        </div>
-      ) : null}
     </>
   );
 }

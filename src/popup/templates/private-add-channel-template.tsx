@@ -1,7 +1,9 @@
 import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Input } from "@/popup/atoms/input.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
-import { Text } from "@/popup/atoms/text.tsx";
+import { Label } from "@/popup/atoms/label.tsx";
+import { Card, CardContent, CardFooter } from "@/popup/atoms/card.tsx";
+import { Tabs, TabsList, TabsTrigger } from "@/popup/atoms/tabs.tsx";
 import { cn } from "@/popup/utils/cn.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 
@@ -14,9 +16,6 @@ export type PrivateAddChannelTemplateProps = {
 
   contractId: string;
   setContractId: (v: string) => void;
-
-  quorumContractId: string;
-  setQuorumContractId: (v: string) => void;
 
   assetCode: string;
   setAssetCode: (v: string) => void;
@@ -38,100 +37,94 @@ export function PrivateAddChannelTemplate(
   props: PrivateAddChannelTemplateProps
 ) {
   return (
-    <SubpageShell title="Add channel" onBack={props.onBack}>
-      {props.error ? (
-        <Text tone="error" size="sm">
-          {props.error}
-        </Text>
-      ) : null}
-
-      <div className="mt-2">
-        <div className="text-xs text-muted">Network</div>
-        <select
-          value={props.network}
-          disabled={props.busy}
-          onChange={(e) => props.setNetwork(e.target.value as ChainNetwork)}
-          className={cn(
-            "mt-2 w-full rounded-md border border-muted bg-background text-primary",
-            "px-3 py-2",
-            "disabled:opacity-50"
-          )}
-        >
-          <option value="mainnet">Mainnet</option>
-          <option value="testnet">Testnet</option>
-          <option value="futurenet">Futurenet</option>
-          <option value="custom">Custom</option>
-        </select>
-      </div>
-
-      <div className="mt-3">
-        <div className="text-xs text-muted">Name</div>
-        <Input
-          className="mt-2"
-          value={props.name}
-          disabled={props.busy}
-          onChange={(e) => props.setName(e.target.value)}
-          placeholder="Channel name"
-        />
-      </div>
-
-      <div className="mt-3">
-        <div className="text-xs text-muted">Contract ID</div>
-        <Input
-          className="mt-2"
-          value={props.contractId}
-          disabled={props.busy}
-          onChange={(e) => props.setContractId(e.target.value)}
-          placeholder="C… (Stellar contract id)"
-        />
-        <div className="mt-1 text-xs text-muted">Contracts start with “C”.</div>
-      </div>
-
-      <div className="mt-3">
-        <div className="text-xs text-muted">Quorum contract ID</div>
-        <Input
-          className="mt-2"
-          value={props.quorumContractId}
-          disabled={props.busy}
-          onChange={(e) => props.setQuorumContractId(e.target.value)}
-          placeholder="C… (quorum contract id)"
-        />
-        <div className="mt-1 text-xs text-muted">Contracts start with “C”.</div>
-      </div>
-
-      <div className="mt-3">
-        <div className="text-xs text-muted">Asset</div>
-        <div className="mt-2 flex gap-2">
-          <Input
-            className="flex-1"
-            value={props.assetCode}
-            disabled={props.busy}
-            onChange={(e) => props.setAssetCode(e.target.value)}
-            placeholder="Code (e.g. XLM)"
-          />
-          <Input
-            className="flex-[2]"
-            value={props.assetIssuer}
-            disabled={props.busy || props.isNativeXlm}
-            onChange={(e) => props.setAssetIssuer(e.target.value)}
-            placeholder={
-              props.isNativeXlm ? "Issuer (disabled)" : "Issuer (optional)"
-            }
-          />
-        </div>
-        {props.isNativeXlm ? (
-          <div className="mt-1 text-xs text-muted">Native XLM</div>
+    <SubpageShell title="Add Channel" onBack={props.onBack}>
+      <div className="space-y-4">
+        {props.error ? (
+          <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+            {props.error}
+          </div>
         ) : null}
-      </div>
 
-      <div className="mt-4">
-        <Button
-          className="w-full"
-          disabled={props.busy || !props.canSubmit}
-          onClick={() => props.onSubmit()}
-        >
-          {props.busy ? "Adding…" : "Add channel"}
-        </Button>
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="space-y-2">
+              <Label>Network</Label>
+              <Tabs
+                value={props.network}
+                onValueChange={(v) => props.setNetwork(v as ChainNetwork)}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="mainnet">Main</TabsTrigger>
+                  <TabsTrigger value="testnet">Test</TabsTrigger>
+                  <TabsTrigger value="futurenet">Future</TabsTrigger>
+                  <TabsTrigger value="custom">Custom</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="name">Channel Name</Label>
+              <Input
+                id="name"
+                value={props.name}
+                disabled={props.busy}
+                onChange={(e) => props.setName(e.target.value)}
+                placeholder="My Private Channel"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contractId">Contract ID</Label>
+              <Input
+                id="contractId"
+                value={props.contractId}
+                disabled={props.busy}
+                onChange={(e) => props.setContractId(e.target.value)}
+                placeholder="C..."
+                className="font-mono text-xs"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                The contract ID of the private channel.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Asset</Label>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Input
+                    value={props.assetCode}
+                    disabled={props.busy}
+                    onChange={(e) => props.setAssetCode(e.target.value)}
+                    placeholder="Code (e.g. XLM)"
+                  />
+                </div>
+                <div className="flex-[2]">
+                  <Input
+                    value={props.assetIssuer}
+                    disabled={props.busy || props.isNativeXlm}
+                    onChange={(e) => props.setAssetIssuer(e.target.value)}
+                    placeholder={
+                      props.isNativeXlm ? "Native" : "Issuer Address"
+                    }
+                    className={cn(props.isNativeXlm && "opacity-50")}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button
+              className="w-full"
+              disabled={props.busy || !props.canSubmit}
+              onClick={() => props.onSubmit()}
+              loading={props.busy}
+            >
+              {props.busy ? "Adding Channel..." : "Add Channel"}
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     </SubpageShell>
   );

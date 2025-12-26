@@ -1,7 +1,14 @@
 import { Shell } from "@/popup/templates/shell.tsx";
-import { Title } from "@/popup/atoms/title.tsx";
-import { Text } from "@/popup/atoms/text.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/popup/atoms/card.tsx";
+import { Label } from "@/popup/atoms/label.tsx";
+import { Textarea } from "@/popup/atoms/textarea.tsx";
 import { cn } from "@/popup/utils/cn.ts";
 
 export type AddWalletMode = "choose" | "import";
@@ -27,70 +34,90 @@ export function AddWalletTemplate(props: Props) {
   if (props.mode === "import") {
     return (
       <Shell>
-        <Title>Import wallet</Title>
-        <Text size="sm">Paste your recovery phrase (mnemonic) below.</Text>
+        <Card className="shadow-sm border-border/70">
+          <CardHeader>
+            <CardTitle className="text-lg">Import wallet</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Paste your recovery phrase (mnemonic) below.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="mnemonic">Recovery phrase</Label>
+              <Textarea
+                id="mnemonic"
+                value={props.mnemonic}
+                onChange={(e) => props.onChangeMnemonic(e.target.value)}
+                rows={3}
+                placeholder="twelve words ..."
+                spellCheck={false}
+                className="font-mono text-sm"
+              />
+              {props.mnemonicError ? (
+                <p className="text-sm text-destructive">
+                  {props.mnemonicError}
+                </p>
+              ) : null}
+            </div>
 
-        <textarea
-          value={props.mnemonic}
-          onChange={(e) => props.onChangeMnemonic(e.target.value)}
-          rows={3}
-          placeholder="twelve words ..."
-          className={cn(
-            "mt-4 w-full rounded-md border border-muted bg-background text-primary",
-            "px-2 py-1 text-sm",
-            "placeholder:text-muted",
-            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0"
-          )}
-        />
-
-        {props.mnemonicError ? (
-          <Text tone="error" size="sm">
-            {props.mnemonicError}
-          </Text>
-        ) : null}
-
-        {props.submitError ? (
-          <Text tone="error" size="sm">
-            {props.submitError}
-          </Text>
-        ) : null}
-
-        <div className="mt-4 flex gap-2">
-          <Button disabled={props.submitting} onClick={props.onClickBack}>
-            Back
-          </Button>
-          <Button
-            disabled={props.submitting || Boolean(props.mnemonicError)}
-            onClick={props.onClickImport}
-          >
-            Import
-          </Button>
-        </div>
+            {props.submitError ? (
+              <p className="text-sm text-destructive">{props.submitError}</p>
+            ) : null}
+          </CardContent>
+          <CardFooter className="flex gap-2">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              disabled={props.submitting}
+              onClick={props.onClickBack}
+            >
+              Back
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={props.submitting || Boolean(props.mnemonicError)}
+              onClick={props.onClickImport}
+            >
+              Import
+            </Button>
+          </CardFooter>
+        </Card>
       </Shell>
     );
   }
 
   return (
     <Shell>
-      <Title>Add a wallet</Title>
-      <Text size="sm">
-        Your password encryption is set. Now add your first wallet.
-      </Text>
-
-      {props.submitError ? (
-        <Text tone="error" size="sm">
-          {props.submitError}
-        </Text>
-      ) : null}
-
-      <div className="mt-4 flex flex-col gap-2">
-        <Button disabled={props.submitting} onClick={props.onClickGenerate}>
-          Generate wallet
-        </Button>
-        <Button disabled={props.submitting} onClick={props.onClickGoToImport}>
-          Import wallet
-        </Button>
-      </div>
+      <Card className="shadow-sm border-border/70">
+        <CardHeader>
+          <CardTitle className="text-lg">Add a wallet</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Your password is set. Create a new wallet or import an existing one.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {props.submitError ? (
+            <p className="text-sm text-destructive">{props.submitError}</p>
+          ) : null}
+        </CardContent>
+        <CardFooter className="flex flex-col gap-2">
+          <Button
+            className="w-full"
+            disabled={props.submitting}
+            onClick={props.onClickGenerate}
+          >
+            Generate wallet
+          </Button>
+          <Button
+            variant="secondary"
+            className="w-full"
+            disabled={props.submitting}
+            onClick={props.onClickGoToImport}
+          >
+            Import wallet
+          </Button>
+        </CardFooter>
+      </Card>
     </Shell>
   );
 }

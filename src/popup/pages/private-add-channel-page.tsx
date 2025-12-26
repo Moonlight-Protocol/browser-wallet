@@ -14,7 +14,6 @@ export function PrivateAddChannelPage() {
   const [network, setNetwork] = useState<ChainNetwork>(defaultNetwork);
   const [name, setName] = useState("");
   const [contractId, setContractId] = useState("");
-  const [quorumContractId, setQuorumContractId] = useState("");
   const [assetCode, setAssetCode] = useState("");
   const [assetIssuer, setAssetIssuer] = useState("");
 
@@ -30,13 +29,8 @@ export function PrivateAddChannelPage() {
   const [error, setError] = useState<string | undefined>(undefined);
 
   const canSubmit = useMemo(() => {
-    return Boolean(
-      name.trim() &&
-        contractId.trim() &&
-        quorumContractId.trim() &&
-        assetCode.trim()
-    );
-  }, [quorumContractId, assetCode, contractId, name]);
+    return Boolean(name.trim() && contractId.trim() && assetCode.trim());
+  }, [assetCode, contractId, name]);
 
   const onSubmit = async () => {
     if (!canSubmit) return;
@@ -48,7 +42,8 @@ export function PrivateAddChannelPage() {
         network,
         name: name.trim(),
         contractId: contractId.trim(),
-        quorumContractId: quorumContractId.trim(),
+        // Quorum ID is now fetched by the background
+        quorumContractId: "",
         asset: {
           code: assetCode.trim(),
           issuer: assetIssuer.trim() ? assetIssuer.trim() : undefined,
@@ -77,8 +72,6 @@ export function PrivateAddChannelPage() {
       setName={setName}
       contractId={contractId}
       setContractId={setContractId}
-      quorumContractId={quorumContractId}
-      setQuorumContractId={setQuorumContractId}
       assetCode={assetCode}
       setAssetCode={setAssetCode}
       assetIssuer={assetIssuer}

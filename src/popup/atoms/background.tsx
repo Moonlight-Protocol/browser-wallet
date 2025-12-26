@@ -6,7 +6,7 @@ type Props = {
 
 export function Background(props: Props) {
   return (
-    <div className="bg-background w-[360px] h-[600px] overflow-hidden">
+    <div className="relative bg-background min-w-[360px] h-[600px] overflow-hidden">
       {props.children}
     </div>
   );

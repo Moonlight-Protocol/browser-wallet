@@ -1,26 +1,44 @@
-import React from "react";
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/popup/utils/cn.ts";
 
-type Props = {
-  children: React.ReactNode;
-  size?: "sm" | "md";
-  tone?: "muted" | "primary" | "error";
-  className?: string;
-};
+const textVariants = cva("mt-4", {
+  variants: {
+    size: {
+      default: "text-base",
+      sm: "text-sm",
+      md: "text-base",
+      lg: "text-lg",
+    },
+    tone: {
+      default: "text-muted-foreground",
+      muted: "text-muted-foreground",
+      primary: "text-primary",
+      error: "text-destructive",
+      normal: "text-foreground",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+    tone: "default",
+  },
+});
 
-export function Text(props: Props) {
-  const sizeClass = props.size === "sm" ? "text-sm" : "text-base";
+export interface TextProps
+  extends React.HTMLAttributes<HTMLParagraphElement>,
+    VariantProps<typeof textVariants> {}
 
-  const toneClass =
-    props.tone === "primary"
-      ? "text-primary"
-      : props.tone === "error"
-      ? "text-error"
-      : "text-muted";
+const Text = React.forwardRef<HTMLParagraphElement, TextProps>(
+  ({ className, size, tone, ...props }, ref) => {
+    return (
+      <p
+        ref={ref}
+        className={cn(textVariants({ size, tone, className }))}
+        {...props}
+      />
+    );
+  }
+);
+Text.displayName = "Text";
 
-  return (
-    <p className={cn("mt-4", sizeClass, toneClass, props.className)}>
-      {props.children}
-    </p>
-  );
-}
+export { Text, textVariants };

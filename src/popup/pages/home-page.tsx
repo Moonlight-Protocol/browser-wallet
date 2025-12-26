@@ -21,8 +21,8 @@ import type { Ed25519PublicKey } from "@colibri/core";
 
 export function HomePage() {
   const { state, actions } = usePopup();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [accountPickerOpen, setAccountPickerOpen] = useState(false);
+  const [channelPickerOpen, setChannelPickerOpen] = useState(false);
   const [rowMenuOpenFor, setRowMenuOpenFor] = useState<string | undefined>(
     undefined
   );
@@ -227,6 +227,9 @@ export function HomePage() {
       }))
       .filter((i) => Boolean(i.publicKey));
 
+    const selectedItem = items.find((i) => i.publicKey === selectedPk);
+    const otherItems = items.filter((i) => i.publicKey !== selectedPk);
+
     const refreshSelected = async () => {
       const res = await readSelectedChain({ network, publicKey: selectedPk });
       if (cancelled) return;
@@ -279,8 +282,15 @@ export function HomePage() {
           }
         }
 
-        // 2) Enqueue a priority sync for selected + normal sync for other stale.
-        await syncChainState({ items, onlyIfStale: true });
+        // 2) Force-sync the selected account (fresh read even if cache says not stale).
+        if (selectedItem) {
+          await syncChainState({ items: [selectedItem], onlyIfStale: false });
+        }
+
+        // 2b) Sync other accounts only if stale to avoid unnecessary work.
+        if (otherItems.length > 0) {
+          await syncChainState({ items: otherItems, onlyIfStale: true });
+        }
 
         // 3) Re-read to reflect queued/syncing flags right away.
         await refreshSelected();
@@ -303,6 +313,7 @@ export function HomePage() {
       setPrivateChannels(undefined);
       setPrivateView("list");
       setPrivateStats(undefined);
+      lastPrivateStatsKeyRef.current = undefined;
       return;
     }
 
@@ -370,15 +381,15 @@ export function HomePage() {
     const network = selectedNetwork as ChainNetwork;
     const channelId = privateChannels?.selectedChannelId;
     const accountId = selectedAccount?.accountId;
-    if (!channelId || !accountId) return;
+    const walletId = selectedAccount?.walletId;
+    if (!channelId || !accountId || !walletId) return;
 
-    const key = `${network}:${accountId}:${channelId}`;
-    const alreadyHaveStats = Boolean(privateStats?.stats);
+    const key = `${network}:${walletId}:${accountId}:${channelId}`;
     const alreadyLoadingThis =
       privateStats?.loading && lastPrivateStatsKeyRef.current === key;
 
-    // If we already loaded stats for this selection, don't re-run.
-    if (alreadyHaveStats && lastPrivateStatsKeyRef.current === key) return;
+    // Allow re-fetching even if we previously loaded stats for this key, so we
+    // always pick up fresh balances when the user reopens or switches back.
     if (alreadyLoadingThis) return;
 
     lastPrivateStatsKeyRef.current = key;
@@ -443,43 +454,13 @@ export function HomePage() {
   const onSelectPrivateChannel = async (channelId: string) => {
     const network = selectedNetwork as ChainNetwork;
     try {
-      setAccountPickerOpen(false);
+      setChannelPickerOpen(false);
 
-      // Ensure we have a tracking record for this (account, channel).
-      const accountId = selectedAccount?.accountId;
-      if (accountId) {
-        setPrivateStats({ loading: true, error: undefined, stats: undefined });
-        try {
-          const ensured = await ensurePrivateChannelTracking({
-            network,
-            accountId,
-            channelId,
-            targetUtxos: 300,
-          });
-
-          if (ensured.ok) {
-            setPrivateStats({
-              loading: false,
-              error: undefined,
-              stats: ensured.stats,
-            });
-          } else {
-            setPrivateStats({
-              loading: false,
-              error:
-                ensured.error.message ?? "Failed to prepare private tracking",
-              stats: undefined,
-            });
-          }
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          setPrivateStats({
-            loading: false,
-            error: message || "Failed to prepare private tracking",
-            stats: undefined,
-          });
-        }
-      }
+      // We update the selected channel in the backend.
+      // The useEffect hook will detect the change in selectedChannelId and trigger the stats sync.
+      // We clear the current stats to indicate a switch is happening.
+      setPrivateStats(undefined);
+      lastPrivateStatsKeyRef.current = undefined;
 
       const res = await setSelectedPrivateChannel({ network, channelId });
       if (!res.ok) return;
@@ -497,7 +478,7 @@ export function HomePage() {
         const message = err instanceof Error ? err.message : String(err);
         setPrivateStats({
           loading: false,
-          error: message || "Failed to select private channel",
+          error: message,
           stats: undefined,
         });
       }
@@ -596,6 +577,12 @@ export function HomePage() {
     });
     await actions.refreshStatus();
     setAccountPickerOpen(false);
+
+    // If in private mode, clear stats so they re-load for the new account
+    if (viewMode === "private") {
+      setPrivateStats(undefined);
+      lastPrivateStatsKeyRef.current = undefined;
+    }
   };
 
   const startRename = (account: SafeAccount) => {
@@ -657,7 +644,6 @@ export function HomePage() {
     try {
       await lock();
       await actions.refreshStatus();
-      setMenuOpen(false);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setActionError(msg);
@@ -683,10 +669,11 @@ export function HomePage() {
       onSelectPrivateChannel={onSelectPrivateChannel}
       activation={activation}
       onFundWithFriendbot={onFundWithFriendbot}
-      menuOpen={menuOpen}
-      setMenuOpen={setMenuOpen}
       accountPickerOpen={accountPickerOpen}
       setAccountPickerOpen={setAccountPickerOpen}
+      channelPickerOpen={channelPickerOpen}
+      setChannelPickerOpen={setChannelPickerOpen}
+      isConnected={false} // Placeholder for now
       rowMenuOpenFor={rowMenuOpenFor}
       setRowMenuOpenFor={setRowMenuOpenFor}
       editingAccountId={editingAccountId}

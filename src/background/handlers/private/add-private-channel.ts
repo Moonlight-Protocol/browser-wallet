@@ -1,5 +1,8 @@
 import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { privateChannels } from "@/background/session.ts";
+import { Contract, type ContractId } from "@colibri/core";
+import { ChannelReadMethods, ChannelSpec } from "@moonlight/moonlight-sdk";
+import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
 
 export const handleAddPrivateChannel = async (
   message: MessageFor<MessageType.AddPrivateChannel>
@@ -15,7 +18,7 @@ export const handleAddPrivateChannel = async (
     }
 
     const contractId = message.contractId.trim();
-    const quorumContractId = message.quorumContractId.trim();
+    let quorumContractId = message.quorumContractId.trim();
     if (!contractId) {
       return {
         type: MessageType.AddPrivateChannel,
@@ -23,6 +26,38 @@ export const handleAddPrivateChannel = async (
         error: { code: "UNKNOWN", message: "Contract ID is required" },
       };
     }
+
+    if (!quorumContractId) {
+      try {
+        const networkConfig = getNetworkConfig(message.network);
+        const channelContract = new Contract({
+          networkConfig,
+          contractConfig: {
+            contractId: contractId as ContractId,
+            spec: ChannelSpec,
+          },
+        });
+
+        const authContractId = await channelContract.read({
+          method: ChannelReadMethods.auth,
+          methodArgs: {},
+        });
+
+        quorumContractId = authContractId as string;
+      } catch (e) {
+        console.error("Failed to fetch quorum contract ID", e);
+        return {
+          type: MessageType.AddPrivateChannel,
+          ok: false,
+          error: {
+            code: "UNKNOWN",
+            message:
+              "Failed to fetch Quorum Contract ID. Please check the Channel Contract ID.",
+          },
+        };
+      }
+    }
+
     if (!quorumContractId) {
       return {
         type: MessageType.AddPrivateChannel,

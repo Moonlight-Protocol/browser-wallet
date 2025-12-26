@@ -8,7 +8,9 @@ export function Shell(props: { children: React.ReactNode }) {
   return (
     <Background>
       <Container>
-        <div className="flex-1 overflow-y-auto">{props.children}</div>
+        <div className="relative flex-1 overflow-y-auto z-10">
+          {props.children}
+        </div>
         {DEV ? <DevDebug /> : null}
       </Container>
     </Background>

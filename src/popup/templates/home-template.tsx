@@ -1,18 +1,39 @@
 import { Shell } from "@/popup/templates/shell.tsx";
 import { networkLabel, shortenAddress } from "@/popup/utils/common.ts";
 import { HomeHeader } from "@/popup/organisms/home-header.tsx";
-import { HomeMenuDrawer } from "@/popup/organisms/home-menu-drawer.tsx";
 import { HomeAccountPicker } from "@/popup/organisms/home-account-picker.tsx";
 import { PrivateChannelPicker } from "@/popup/organisms/private-channel-picker.tsx";
-import { Dropdown } from "@/popup/atoms/dropdown.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
+import { Spinner } from "@/popup/atoms/spinner.tsx";
 import { LoadingSpinner } from "@/popup/atoms/loading-spinner.tsx";
-import { cn } from "@/popup/utils/cn.ts";
 import {
-  ChevronDownIcon,
-  HamburgerIcon,
-  LockIcon,
-} from "@/popup/icons/index.tsx";
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/popup/atoms/card.tsx";
+import {
+  IconCashPlus,
+  IconDownload,
+  IconSettings,
+  IconLock,
+  IconWallet,
+  IconShieldLock,
+} from "@tabler/icons-react";
+import { cn } from "@/popup/utils/cn.ts";
+import { toDecimals } from "@colibri/core";
+import { ChevronDownIcon } from "@/popup/icons/index.tsx";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from "@/popup/atoms/sidebar.tsx";
 import type { SafeAccount } from "@/background/handlers/accounts/get-accounts.types.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
@@ -72,11 +93,12 @@ export type HomeTemplateProps = {
   };
   onFundWithFriendbot?: () => void | Promise<void>;
 
-  menuOpen: boolean;
-  setMenuOpen: (v: boolean) => void;
-
   accountPickerOpen: boolean;
   setAccountPickerOpen: (v: boolean | ((v: boolean) => boolean)) => void;
+
+  channelPickerOpen?: boolean;
+  setChannelPickerOpen?: (v: boolean | ((v: boolean) => boolean)) => void;
+  isConnected?: boolean;
 
   rowMenuOpenFor: string | undefined;
   setRowMenuOpenFor: (
@@ -139,322 +161,330 @@ export function HomeTemplate(props: HomeTemplateProps) {
   })();
 
   const selectedPrivateChannel =
-    props.viewMode === "private" &&
-    props.privateView === "selected" &&
-    props.privateChannels?.selectedChannelId
+    props.viewMode === "private" && props.privateChannels?.selectedChannelId
       ? props.privateChannels.channels.find(
           (c) => c.id === props.privateChannels?.selectedChannelId
         )
       : undefined;
 
   return (
-    <Shell>
-      <div className="relative">
-        {props.viewMode === "private" && selectedPrivateChannel ? (
-          <>
-            <header className="h-12 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  aria-label="Menu"
-                  onClick={() => {
-                    props.setAccountPickerOpen(false);
-                    props.setMenuOpen(true);
-                  }}
-                  className={cn(
-                    "h-9 w-9 inline-flex items-center justify-center rounded-md",
-                    "text-primary"
-                  )}
-                >
-                  <HamburgerIcon className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 text-center">
-                <button
-                  type="button"
-                  aria-label="Select channel"
-                  aria-expanded={props.privateView === "list"}
-                  onClick={() =>
-                    (() => {
-                      props.setAccountPickerOpen(false);
-                      props.setPrivateView?.(
-                        props.privateView === "list" ? "selected" : "list"
-                      );
-                    })()
-                  }
-                  className={cn(
-                    "inline-flex items-center justify-center gap-1",
-                    "max-w-[240px]",
-                    "text-primary"
-                  )}
-                >
-                  <LockIcon className="h-4 w-4 text-muted" />
-                  <div className="text-sm font-medium text-primary truncate max-w-[200px]">
-                    {selectedPrivateChannel.name}
-                  </div>
-                  <ChevronDownIcon className="h-4 w-4 text-muted" />
-                </button>
-              </div>
-
-              <div className="w-[76px] flex items-center justify-end">
-                <div className="relative group">
-                  <button
-                    type="button"
-                    aria-label="Private mode"
-                    aria-pressed
-                    disabled={props.viewModeToggleDisabled}
-                    onClick={() => props.onToggleViewMode()}
-                    className={cn(
-                      "h-9 w-9 inline-flex items-center justify-center rounded-md",
-                      "text-primary",
-                      props.viewModeToggleDisabled ? "opacity-50" : undefined
-                    )}
+    <SidebarProvider defaultOpen={false}>
+      <Sidebar collapsible="offcanvas" variant="floating">
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={props.goImport} tooltip="Import">
+                    <IconDownload />
+                    <span>Import</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={props.goSettings}
+                    tooltip="Settings"
                   >
-                    <LockIcon className="h-5 w-5" />
-                  </button>
-
-                  <div
-                    className={cn(
-                      "opacity-0 group-hover:opacity-100",
-                      "pointer-events-none",
-                      "absolute right-0 top-full mt-1",
-                      "w-[220px]",
-                      "px-2 py-2 rounded-md border border-primary bg-background",
-                      "text-xs text-primary"
-                    )}
+                    <IconSettings />
+                    <span>Settings</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={props.onLockFromMenu}
+                    tooltip="Lock wallet"
+                    className="text-destructive hover:text-destructive"
                   >
-                    <div className="text-primary">Private mode: (WIP)</div>
-                    <div className="mt-1 text-muted">
-                      Network: {selectedNetworkLabel}
-                    </div>
-                    <div className="mt-1 text-muted">Click to switch.</div>
-                  </div>
-                </div>
-              </div>
-            </header>
-          </>
-        ) : (
+                    <IconLock />
+                    <span>Lock wallet</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+      <Shell>
+        <div className="relative">
           <HomeHeader
             selectedNetworkLabel={selectedNetworkLabel}
             viewMode={props.viewMode}
             onToggleViewMode={props.onToggleViewMode}
             viewModeToggleDisabled={props.viewModeToggleDisabled}
-            accountPickerOpen={props.accountPickerOpen}
-            onToggleAccountPicker={() => props.setAccountPickerOpen((v) => !v)}
-            onOpenMenu={() => {
-              props.setAccountPickerOpen(false);
-              props.setMenuOpen(true);
-            }}
             headerKeyName={header.keyName}
             headerAddressShort={header.addressShort}
-            showBalance={Boolean(props.selectedAccount) && isInitialized}
-            balanceXlm={props.selectedChain?.balanceXlm}
-            syncing={Boolean(props.selectedChain?.syncing)}
+            accountPicker={
+              <HomeAccountPicker
+                actionError={props.actionError}
+                keyGroups={props.keyGroups}
+                selectedAccount={props.selectedAccount}
+                rowMenuOpenFor={props.rowMenuOpenFor}
+                setRowMenuOpenFor={props.setRowMenuOpenFor}
+                editingAccountId={props.editingAccountId}
+                editingName={props.editingName}
+                setEditingName={props.setEditingName}
+                actionBusy={props.actionBusy}
+                canDeriveNew={props.canDeriveNew}
+                onSelectAccount={props.onSelectAccount}
+                startRename={props.startRename}
+                cancelRename={props.cancelRename}
+                confirmRename={props.confirmRename}
+                onCreateNew={props.onCreateNew}
+                goImport={props.goImport}
+                onClose={() => props.setAccountPickerOpen(false)}
+              />
+            }
+            accountPickerOpen={props.accountPickerOpen}
+            onToggleAccountPicker={(open) => props.setAccountPickerOpen(open)}
+            channelName={selectedPrivateChannel?.name}
+            isConnected={props.isConnected}
+            channelPickerOpen={props.channelPickerOpen}
+            onToggleChannelPicker={(open) => props.setChannelPickerOpen?.(open)}
+            channelPicker={
+              <PrivateChannelPicker
+                channels={props.privateChannels?.channels ?? []}
+                selectedChannelId={props.privateChannels?.selectedChannelId}
+                onSelectChannel={(id) => {
+                  props.onSelectPrivateChannel?.(id);
+                  props.setChannelPickerOpen?.(false);
+                }}
+                onAddChannel={() => {
+                  props.onAddPrivateChannel?.();
+                  props.setChannelPickerOpen?.(false);
+                }}
+              />
+            }
           />
-        )}
 
-        {props.viewMode === "private" ? (
-          <div className="mt-4 rounded-md border border-muted p-3">
-            {props.privateChannels?.loading ? (
-              <LoadingSpinner uiSize="md" className="py-6" />
-            ) : props.privateChannels?.error ? (
-              <>
-                <p className="text-sm text-muted">Failed to load channels.</p>
-                <p className="mt-1 text-sm text-error">
-                  {props.privateChannels.error}
-                </p>
-                <div className="mt-3 flex justify-center">
-                  <Button
-                    uiSize="md"
-                    className="w-full max-w-xs"
-                    onClick={() => props.onAddPrivateChannel?.()}
-                    disabled={!props.onAddPrivateChannel}
-                  >
-                    Add channel
-                  </Button>
+          {props.viewMode === "public" && isInitialized && (
+            <Card className="mt-4">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <IconWallet className="h-5 w-5" />
+                  Wallet Balance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold">
+                    {props.selectedChain?.balanceXlm
+                      ? toDecimals(BigInt(props.selectedChain.balanceXlm), 7)
+                      : "0.00"}
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    XLM
+                  </span>
+                  {props.selectedChain?.syncing && (
+                    <Spinner className="ml-2 size-4" />
+                  )}
                 </div>
-              </>
-            ) : (props.privateChannels?.channels?.length ?? 0) === 0 ? (
-              <>
-                <p className="text-sm text-muted">
-                  No channels yet for this network.
-                </p>
-                <p className="mt-1 text-sm text-muted">
-                  Add a channel to start using private mode.
-                </p>
-                <div className="mt-3 flex justify-center">
-                  <Button
-                    uiSize="md"
-                    className="w-full max-w-xs"
-                    onClick={() => props.onAddPrivateChannel?.()}
-                    disabled={!props.onAddPrivateChannel}
-                  >
-                    Add channel
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <Dropdown
-                  open={props.privateView === "list"}
-                  onClose={() => props.setPrivateView?.("selected")}
-                >
-                  <PrivateChannelPicker
-                    channels={props.privateChannels?.channels ?? []}
-                    selectedChannelId={props.privateChannels?.selectedChannelId}
-                    onSelectChannel={(id) => props.onSelectPrivateChannel?.(id)}
-                    onAddChannel={() => props.onAddPrivateChannel?.()}
-                  />
-                </Dropdown>
+              </CardContent>
+            </Card>
+          )}
 
-                {props.privateView === "selected" && selectedPrivateChannel ? (
-                  <>
-                    <p className="text-sm text-muted">Private channel</p>
-                    <p className="mt-1 text-sm text-muted">
-                      Asset: {selectedPrivateChannel.asset.code}
+          {props.viewMode === "private" ? (
+            <div className="mt-4 space-y-4">
+              {props.privateChannels?.loading ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <LoadingSpinner uiSize="md" />
+                  </CardContent>
+                </Card>
+              ) : props.privateChannels?.error ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm text-destructive">
+                      Failed to load channels
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      {props.privateChannels.error}
                     </p>
-
-                    <div className="mt-3 rounded-md border border-muted p-3">
-                      {props.privateStats?.loading ? (
-                        <LoadingSpinner uiSize="sm" className="py-2" />
-                      ) : props.privateStats?.error ? (
-                        <p className="text-sm text-error">
-                          {props.privateStats.error}
-                        </p>
-                      ) : props.privateStats?.stats ? (
-                        <>
-                          <p className="text-sm text-muted">
-                            Private balance:{" "}
-                            {props.privateStats.stats.totalBalance}
-                          </p>
-                          <p className="mt-1 text-sm text-muted">
-                            Derived UTXOs:{" "}
-                            {props.privateStats.stats.derivedCount}/
-                            {props.privateStats.stats.targetCount}
-                          </p>
-                          <p className="mt-1 text-sm text-muted">
-                            Non-zero UTXOs:{" "}
-                            {props.privateStats.stats.nonZeroCount}
-                          </p>
-                        </>
-                      ) : (
-                        <LoadingSpinner uiSize="sm" className="py-2" />
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted">Select a channel.</p>
-                )}
-              </>
-            )}
-          </div>
-        ) : null}
-
-        {props.viewMode === "public" &&
-        props.selectedAccount &&
-        props.activation &&
-        !isInitialized &&
-        props.activation.status !== "created" ? (
-          <div className="mt-4 rounded-md border border-muted p-3">
-            <div className="min-w-0">
-              {props.activation.checking || props.activation.funding ? (
-                <LoadingSpinner
-                  uiSize="md"
-                  message={
-                    props.activation.funding ? "Initializing…" : undefined
-                  }
-                  className="py-6"
-                />
-              ) : props.activation.status === "not_created" ? (
-                <>
-                  <p className="text-sm text-muted">
-                    This account isn&apos;t initialized yet.
-                  </p>
-                  <p className="mt-1 text-sm text-muted">
-                    It needs funds to exist on-chain and hold public balances.
-                  </p>
-                  {props.activation.canUseFriendbot ? (
-                    <p className="mt-1 text-sm text-muted">
-                      You can create it with Friendbot.
+                  </CardContent>
+                  <CardFooter>
+                    <Button
+                      uiSize="sm"
+                      className="w-full"
+                      onClick={() => props.onAddPrivateChannel?.()}
+                      disabled={!props.onAddPrivateChannel}
+                    >
+                      Add channel
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ) : (props.privateChannels?.channels?.length ?? 0) === 0 ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">No channels yet</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Add a channel to start using private mode.
                     </p>
-                  ) : null}
-                </>
+                  </CardContent>
+                  <CardFooter>
+                    <Button
+                      uiSize="sm"
+                      className="w-full"
+                      onClick={() => props.onAddPrivateChannel?.()}
+                      disabled={!props.onAddPrivateChannel}
+                    >
+                      Add channel
+                    </Button>
+                  </CardFooter>
+                </Card>
               ) : (
                 <>
-                  <p className="text-sm text-muted">
-                    Couldn&apos;t verify whether this account is initialized.
-                  </p>
-                  <p className="mt-1 text-sm text-muted">
-                    Public balances may be unavailable until this check
-                    succeeds.
-                  </p>
+                  {selectedPrivateChannel ? (
+                    <Card className="border-primary/20 bg-primary/5">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="flex items-center justify-between text-base">
+                          <div className="flex items-center gap-2">
+                            <IconShieldLock className="h-5 w-5 text-primary" />
+                            Private Channel
+                          </div>
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                            {selectedPrivateChannel.asset.code}
+                          </span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {props.privateStats?.loading ? (
+                          <LoadingSpinner uiSize="sm" className="py-2" />
+                        ) : props.privateStats?.error ? (
+                          <p className="text-sm text-destructive">
+                            {props.privateStats.error}
+                          </p>
+                        ) : props.privateStats?.stats ? (
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-baseline">
+                              <span className="text-sm text-muted-foreground font-medium">
+                                Confidential Balance
+                              </span>
+                              <span className="text-2xl font-black text-primary">
+                                {toDecimals(
+                                  BigInt(
+                                    props.privateStats.stats.totalBalance || "0"
+                                  ),
+                                  7
+                                )}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 pt-3 border-t border-primary/10">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                                  Derived UTXOs
+                                </p>
+                                <p className="text-sm font-bold">
+                                  {props.privateStats.stats.derivedCount} /{" "}
+                                  {props.privateStats.stats.targetCount}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                                  Non-zero UTXOs
+                                </p>
+                                <p className="text-sm font-bold">
+                                  {props.privateStats.stats.nonZeroCount}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <LoadingSpinner uiSize="sm" className="py-2" />
+                        )}
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card>
+                      <CardContent className="pt-6 text-center">
+                        <p className="text-sm text-muted-foreground">
+                          Select a channel from the header to view details.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </>
               )}
-              {props.activation.error ? (
-                <p className="mt-1 text-sm text-error">
-                  {props.activation.error}
-                </p>
-              ) : null}
+            </div>
+          ) : null}
 
+          {props.viewMode === "public" &&
+          props.selectedAccount &&
+          props.activation &&
+          !isInitialized &&
+          props.activation.status !== "created" ? (
+            <Card className="mt-4">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <IconCashPlus className="h-5 w-5" />
+                  Initialize Account
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-2">
+                {props.activation.checking || props.activation.funding ? (
+                  <LoadingSpinner
+                    uiSize="md"
+                    message={
+                      props.activation.funding ? "Initializing…" : undefined
+                    }
+                    className="py-6"
+                  />
+                ) : props.activation.status === "not_created" ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      This account isn&apos;t initialized yet.
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      It needs funds to exist on-chain and hold public balances.
+                    </p>
+                    {props.activation.canUseFriendbot ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        You can create it with Friendbot.
+                      </p>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Couldn&apos;t verify whether this account is initialized.
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Public balances may be unavailable until this check
+                      succeeds.
+                    </p>
+                  </>
+                )}
+                {props.activation.error ? (
+                  <p className="mt-1 text-sm text-error">
+                    {props.activation.error}
+                  </p>
+                ) : null}
+              </CardContent>
               {props.activation.status === "not_created" &&
               props.activation.canUseFriendbot &&
               props.onFundWithFriendbot ? (
-                <div className="mt-3 flex justify-center">
+                <CardFooter>
                   <Button
-                    uiSize="md"
-                    className="w-full max-w-xs"
+                    uiSize="lg"
+                    className="w-full"
                     onClick={() => props.onFundWithFriendbot?.()}
-                    disabled={
-                      props.activation.checking || props.activation.funding
-                    }
+                    loading={props.activation.funding}
+                    disabled={props.activation.checking}
                   >
                     {props.activation.funding
                       ? "Initializing…"
                       : "Initialize with 10,000 XLM"}
                   </Button>
-                </div>
+                </CardFooter>
               ) : null}
-            </div>
-          </div>
-        ) : null}
+            </Card>
+          ) : null}
 
-        <HomeMenuDrawer
-          open={props.menuOpen}
-          selectedNetworkLabel={selectedNetworkLabel}
-          actionBusy={props.actionBusy}
-          actionError={props.actionError}
-          onClose={() => props.setMenuOpen(false)}
-          goImport={props.goImport}
-          goSettings={props.goSettings}
-          onLockFromMenu={props.onLockFromMenu}
-        />
-
-        <Dropdown
-          open={props.accountPickerOpen}
-          onClose={() => props.setAccountPickerOpen(false)}
-        >
-          <HomeAccountPicker
-            actionError={props.actionError}
-            keyGroups={props.keyGroups}
-            selectedAccount={props.selectedAccount}
-            rowMenuOpenFor={props.rowMenuOpenFor}
-            setRowMenuOpenFor={props.setRowMenuOpenFor}
-            editingAccountId={props.editingAccountId}
-            editingName={props.editingName}
-            setEditingName={props.setEditingName}
-            actionBusy={props.actionBusy}
-            canDeriveNew={props.canDeriveNew}
-            onSelectAccount={props.onSelectAccount}
-            startRename={props.startRename}
-            cancelRename={props.cancelRename}
-            confirmRename={props.confirmRename}
-            onCreateNew={props.onCreateNew}
-            goImport={props.goImport}
-            onClose={() => props.setAccountPickerOpen(false)}
-          />
-        </Dropdown>
-      </div>
-    </Shell>
+          {/* HomeMenuDrawer removed as it is replaced by NavigationMenu in HomeHeader */}
+        </div>
+      </Shell>
+    </SidebarProvider>
   );
 }

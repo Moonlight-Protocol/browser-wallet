@@ -7,10 +7,12 @@ const client = new Sep10Client({
 });
 
 // Mock fetch to see what it requests
-globalThis.fetch = async (input, init) => {
+globalThis.fetch = (input, init) => {
   console.log("Fetch called with:", input, init);
   // Return a mock structure
-  return new Response(JSON.stringify({ transaction: "AAAA..." }));
+  return Promise.resolve(
+    new Response(JSON.stringify({ transaction: "AAAA..." }))
+  );
 };
 
 try {

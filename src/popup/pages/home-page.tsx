@@ -16,11 +16,8 @@ import { ensurePrivateChannelTracking } from "@/popup/api/ensure-private-channel
 import { getPrivateStats } from "@/popup/api/get-private-stats.ts";
 import { addPrivacyProvider } from "@/popup/api/add-privacy-provider.ts";
 import { removePrivacyProvider } from "@/popup/api/remove-privacy-provider.ts";
-import { setSelectedPrivacyProvider } from "@/popup/api/set-selected-privacy-provider.ts";
-import { getPrivacyProviderAuthChallenge } from "@/popup/api/get-privacy-provider-auth-challenge.ts";
 import { connectPrivacyProvider } from "@/popup/api/connect-privacy-provider.ts";
 import { disconnectPrivacyProvider } from "@/popup/api/disconnect-privacy-provider.ts";
-import { requestSigning } from "@/popup/api/request-signing.ts";
 import type { SafeAccount } from "@/background/handlers/accounts/get-accounts.types.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
@@ -156,7 +153,7 @@ export function HomePage() {
   const refreshPrivateChannels = async () => {
     if (viewMode !== "private") return;
     const network = selectedNetwork as ChainNetwork;
-    
+
     // Mark as refreshing (keeps existing data visible)
     setPrivateChannels((prev) => ({
       initializing: false,
@@ -166,7 +163,7 @@ export function HomePage() {
       selectedChannelId: prev?.selectedChannelId,
       error: prev?.error,
     }));
-    
+
     try {
       const res = await getPrivateChannels({ network });
       if (!res.ok) {
@@ -478,13 +475,13 @@ export function HomePage() {
     const cachedChannels = lastKnownChannelsRef.current;
     const cachedSelectedId = lastKnownSelectedChannelIdRef.current;
     const hasCachedData = cachedChannels.length > 0;
-    
-    console.log('[POPUP] setPrivateChannels initial:', {
+
+    console.log("[POPUP] setPrivateChannels initial:", {
       cachedChannelsCount: cachedChannels.length,
       cachedSelectedId,
       hasCachedData,
     });
-    
+
     setPrivateChannels({
       initializing: !hasCachedData,
       loading: false,
@@ -501,9 +498,9 @@ export function HomePage() {
 
     (async () => {
       try {
-        console.log('[POPUP] fetching getPrivateChannels...');
+        console.log("[POPUP] fetching getPrivateChannels...");
         const res = await getPrivateChannels({ network });
-        console.log('[POPUP] getPrivateChannels response:', {
+        console.log("[POPUP] getPrivateChannels response:", {
           ok: res.ok,
           channelsCount: res.ok ? res.channels.length : 0,
           selectedChannelId: res.ok ? res.selectedChannelId : null,
@@ -525,7 +522,7 @@ export function HomePage() {
         // Update the cache ref with new data
         lastKnownChannelsRef.current = res.channels;
         lastKnownSelectedChannelIdRef.current = res.selectedChannelId;
-        
+
         setPrivateChannels({
           initializing: false,
           loading: false,
@@ -585,14 +582,18 @@ export function HomePage() {
     (async () => {
       // First, immediately get cached stats from background store (persisted)
       try {
-        const cachedStats = await getPrivateStats({ network, accountId, channelId });
+        const cachedStats = await getPrivateStats({
+          network,
+          accountId,
+          channelId,
+        });
         if (cancelled) return;
-        
+
         // Show cached stats immediately, with loading=true to indicate refresh in progress
-        setPrivateStats({ 
-          loading: true, 
-          error: undefined, 
-          stats: cachedStats 
+        setPrivateStats({
+          loading: true,
+          error: undefined,
+          stats: cachedStats,
         });
       } catch {
         // No cached stats available, start with loading state
@@ -660,17 +661,29 @@ export function HomePage() {
     const network = selectedNetwork as ChainNetwork;
     const accountId = selectedAccount?.accountId;
     const walletId = selectedAccount?.walletId;
-    
+
     try {
       // Set loading state and immediately get cached stats from background
       lastPrivateStatsKeyRef.current = undefined;
-      
+
       if (accountId && walletId) {
         try {
-          const cachedStats = await getPrivateStats({ network, accountId, channelId });
-          setPrivateStats({ loading: true, error: undefined, stats: cachedStats });
+          const cachedStats = await getPrivateStats({
+            network,
+            accountId,
+            channelId,
+          });
+          setPrivateStats({
+            loading: true,
+            error: undefined,
+            stats: cachedStats,
+          });
         } catch {
-          setPrivateStats({ loading: true, error: undefined, stats: undefined });
+          setPrivateStats({
+            loading: true,
+            error: undefined,
+            stats: undefined,
+          });
         }
       } else {
         setPrivateStats({ loading: true, error: undefined, stats: undefined });
@@ -803,21 +816,29 @@ export function HomePage() {
       const network = selectedNetwork as ChainNetwork;
       const channelId = privateChannels?.selectedChannelId;
       lastPrivateStatsKeyRef.current = undefined;
-      
+
       if (channelId) {
         try {
-          const cachedStats = await getPrivateStats({ 
-            network, 
-            accountId: account.accountId, 
-            channelId 
+          const cachedStats = await getPrivateStats({
+            network,
+            accountId: account.accountId,
+            channelId,
           });
-          setPrivateStats({ loading: true, error: undefined, stats: cachedStats });
+          setPrivateStats({
+            loading: true,
+            error: undefined,
+            stats: cachedStats,
+          });
         } catch {
-          setPrivateStats({ loading: true, error: undefined, stats: undefined });
+          setPrivateStats({
+            loading: true,
+            error: undefined,
+            stats: undefined,
+          });
         }
       }
     }
-    
+
     await setSelectedAccount({
       walletId: account.walletId,
       accountId: account.accountId,

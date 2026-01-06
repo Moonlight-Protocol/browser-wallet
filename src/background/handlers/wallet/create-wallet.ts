@@ -3,7 +3,7 @@ import { Keys } from "@/keys/keys.ts";
 import type { Ed25519PublicKey } from "@colibri/core";
 
 export const handleCreateWallet = async (
-  message: MessageFor<MessageType.CreateWallet>
+  _message: MessageFor<MessageType.CreateWallet>
 ): Promise<ResponseFor<MessageType.CreateWallet>> => {
   const mnemonic = Keys.generateMnemonic();
   const account = await Keys.deriveStellarAccountFromMnemonic(mnemonic, 0);

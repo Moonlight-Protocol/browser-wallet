@@ -21,9 +21,7 @@ import {
   IconWallet,
   IconShieldLock,
 } from "@tabler/icons-react";
-import { cn } from "@/popup/utils/cn.ts";
 import { toDecimals } from "@colibri/core";
-import { ChevronDownIcon } from "@/popup/icons/index.tsx";
 import {
   Sidebar,
   SidebarContent,

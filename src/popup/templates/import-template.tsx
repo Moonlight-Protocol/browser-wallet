@@ -9,7 +9,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/popup/atoms/tabs.tsx";
-import { cn } from "@/popup/utils/cn.ts";
 
 type ImportMode = "mnemonic" | "secret";
 

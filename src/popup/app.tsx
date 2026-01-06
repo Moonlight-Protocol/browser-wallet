@@ -1,4 +1,3 @@
-import React from "react";
 import { PopupProvider, usePopup } from "@/popup/hooks/state.tsx";
 import { LoadingPage } from "@/popup/pages/loading-page.tsx";
 import { SetupWalletPage } from "@/popup/pages/setup-wallet-page.tsx";

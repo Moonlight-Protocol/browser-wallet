@@ -52,7 +52,7 @@ const PopupContext = createContext<PopupContextValue | undefined>(undefined);
 
 export function PopupProvider(props: { children: React.ReactNode }) {
   const [state, setState] = useState<PopupState>(() => {
-    const hash = window.location.hash;
+    const hash = globalThis.location.hash;
     let route: PopupRoute = "home";
     let signingRequestId: string | undefined;
 

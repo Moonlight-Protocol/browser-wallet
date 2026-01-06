@@ -6,12 +6,12 @@ import browser from "webextension-polyfill";
 export const handleRequestSigning: Handler<MessageType.RequestSigning> = async (
   message
 ) => {
-  const { type, xdr, accountId, network } = message.payload;
+  const { requestType, xdr, accountId, network } = message;
 
   // TODO: Validate XDR based on type (e.g. check if it's a valid auth challenge)
 
   const request = signingManager.createRequest({
-    type,
+    type: requestType,
     xdr,
     accountId,
     network,
@@ -35,9 +35,8 @@ export const handleRequestSigning: Handler<MessageType.RequestSigning> = async (
 
   return {
     type: MessageType.RequestSigning,
-    payload: {
-      requestId: request.id,
-      signedXdr,
-    },
+    ok: true as const,
+    requestId: request.id,
+    signedXdr,
   };
 };

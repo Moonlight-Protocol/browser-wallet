@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getSigningRequest } from "@/popup/api/get-signing-request.ts";
 import { approveSigningRequest } from "@/popup/api/approve-signing-request.ts";
@@ -23,11 +23,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/popup/atoms/tooltip.tsx";
-import type { GetSigningRequestResponse } from "@/background/handlers/signing/get-signing-request.types.ts";
 import {
   TransactionBuilder,
   Networks,
   Transaction,
+  Operation,
 } from "@stellar/stellar-sdk";
 import { shortenAddress } from "@/popup/utils/common.ts";
 import { IconCopy, IconCheck } from "@tabler/icons-react";
@@ -48,14 +48,16 @@ const parseTransaction = (xdr: string | undefined): Transaction | null => {
   }
 };
 
+import type { SigningRequest } from "@/background/services/signing-manager.ts";
+
 export function SignRequestPage() {
   const { state, actions } = usePopup();
   const { signingRequestId, inPopupSigningFlow } = state;
   const accounts = state.accounts || [];
 
-  const [requestDetails, setRequestDetails] = useState<
-    GetSigningRequestResponse["payload"] | null
-  >(null);
+  const [requestDetails, setRequestDetails] = useState<SigningRequest | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const [password, setPassword] = useState("");
@@ -73,8 +75,9 @@ export function SignRequestPage() {
     // Look for ManageData(type=web_auth_domain)
     const ops = transaction.operations;
     const authDomainOp = ops.find(
-      (op) => op.type === "manageData" && op.name === "web_auth_domain"
-    ) as any;
+      (op): op is Operation.ManageData =>
+        op.type === "manageData" && op.name === "web_auth_domain"
+    );
 
     const webAuthDomain = authDomainOp?.value
       ? new TextDecoder().decode(authDomainOp.value)
@@ -120,7 +123,11 @@ export function SignRequestPage() {
 
     getSigningRequest(signingRequestId)
       .then((res) => {
-        setRequestDetails(res);
+        if (res.ok) {
+          setRequestDetails(res.request);
+        } else {
+          setError(res.error.message ?? "Failed to get signing request");
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -133,7 +140,12 @@ export function SignRequestPage() {
     if (!signingRequestId) return;
     setSubmitting(true);
     try {
-      await approveSigningRequest(signingRequestId, password);
+      const result = await approveSigningRequest(signingRequestId, password);
+      if (!result.ok) {
+        setError(result.error.message ?? "Failed to approve signing request");
+        setSubmitting(false);
+        return;
+      }
       // If this was initiated from within the popup, navigate back to home
       if (inPopupSigningFlow) {
         // Small delay to allow background async completion (JWT save) to finish
@@ -142,8 +154,9 @@ export function SignRequestPage() {
         actions.refreshStatus();
       }
       // Otherwise, stay in submitting state - background will close the window
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
       setSubmitting(false);
     }
   };
@@ -151,13 +164,18 @@ export function SignRequestPage() {
   const handleReject = async () => {
     if (!signingRequestId) return;
     try {
-      await rejectSigningRequest(signingRequestId);
+      const result = await rejectSigningRequest(signingRequestId);
+      if (!result.ok) {
+        setError(result.error.message ?? "Failed to reject signing request");
+        return;
+      }
       // If this was initiated from within the popup, navigate back to home
       if (inPopupSigningFlow) {
         actions.goHome();
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
     }
   };
 
@@ -188,7 +206,7 @@ export function SignRequestPage() {
         <Container className="p-4 space-y-4">
           <Title>Error</Title>
           <Text className="text-red-500">{error}</Text>
-          <Button onClick={() => window.close()}>Close</Button>
+          <Button onClick={() => globalThis.close()}>Close</Button>
         </Container>
       </MoonlightBackground>
     );
@@ -210,6 +228,7 @@ export function SignRequestPage() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
+                      type="button"
                       onClick={handleCopyXdr}
                       className="h-7 w-7 flex items-center justify-center rounded-md text-primary hover:bg-primary/10 transition-colors"
                     >

@@ -4,12 +4,10 @@ import type { RejectSigningRequestResponse } from "@/background/handlers/signing
 
 export async function rejectSigningRequest(
   requestId: string
-): Promise<RejectSigningRequestResponse["payload"]> {
+): Promise<RejectSigningRequestResponse> {
   const response = await callBackground({
     type: MessageType.RejectSigningRequest,
-    payload: {
-      requestId,
-    },
+    requestId,
   });
-  return response.payload;
+  return response as RejectSigningRequestResponse;
 }

@@ -4,8 +4,8 @@ import { signingManager } from "@/background/session.ts";
 
 export const handleRejectSigningRequest: Handler<
   MessageType.RejectSigningRequest
-> = async (message) => {
-  const { requestId } = message.payload;
+> = (message) => {
+  const { requestId } = message;
   signingManager.rejectRequest(
     requestId,
     new Error("User rejected signing request")
@@ -13,6 +13,6 @@ export const handleRejectSigningRequest: Handler<
 
   return {
     type: MessageType.RejectSigningRequest,
-    payload: undefined,
+    ok: true as const,
   };
 };

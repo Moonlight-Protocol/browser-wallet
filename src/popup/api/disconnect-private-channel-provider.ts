@@ -1,9 +1,5 @@
 import { MessageType } from "@/background/messages.ts";
 import { callBackground } from "@/popup/api/client.ts";
-import type {
-  DisconnectPrivateChannelProviderRequest,
-  DisconnectPrivateChannelProviderResponse,
-} from "@/background/handlers/private/disconnect-private-channel-provider.types.ts";
 
 export const disconnectPrivateChannelProvider = async (params: {
   channelAddress: string;

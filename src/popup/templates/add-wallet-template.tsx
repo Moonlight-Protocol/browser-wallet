@@ -9,7 +9,6 @@ import {
 } from "@/popup/atoms/card.tsx";
 import { Label } from "@/popup/atoms/label.tsx";
 import { Textarea } from "@/popup/atoms/textarea.tsx";
-import { cn } from "@/popup/utils/cn.ts";
 
 export type AddWalletMode = "choose" | "import";
 

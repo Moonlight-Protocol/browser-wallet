@@ -1,11 +1,9 @@
-import { useMemo } from "react";
 import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Text } from "@/popup/atoms/text.tsx";
 import { RadioGroup, RadioGroupItem } from "@/popup/atoms/radio-group.tsx";
 import { Label } from "@/popup/atoms/label.tsx";
 import { Card, CardContent } from "@/popup/atoms/card.tsx";
 import { cn } from "@/popup/utils/cn.ts";
-import { networkLabel } from "@/popup/utils/common.ts";
 
 type Network = "mainnet" | "testnet" | "futurenet" | "custom";
 

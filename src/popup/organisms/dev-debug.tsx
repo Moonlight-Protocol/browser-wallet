@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import browser from "webextension-polyfill";
 import { Button } from "@/popup/atoms/button.tsx";
 import { Text } from "@/popup/atoms/text.tsx";

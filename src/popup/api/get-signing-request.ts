@@ -4,12 +4,10 @@ import type { GetSigningRequestResponse } from "@/background/handlers/signing/ge
 
 export async function getSigningRequest(
   requestId: string
-): Promise<GetSigningRequestResponse["payload"]> {
+): Promise<GetSigningRequestResponse> {
   const response = await callBackground({
     type: MessageType.GetSigningRequest,
-    payload: {
-      requestId,
-    },
+    requestId,
   });
-  return response.payload;
+  return response as GetSigningRequestResponse;
 }

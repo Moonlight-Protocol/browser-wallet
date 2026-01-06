@@ -1,18 +1,16 @@
-import type {
-  BackgroundRequest,
-  BackgroundResponse,
-} from "@/background/types.ts";
+import type { BackgroundError } from "@/background/types.ts";
 
-export interface ApproveSigningRequestRequest extends BackgroundRequest {
-  type: "APPROVE_SIGNING_REQUEST";
-  payload: {
-    requestId: string;
-    password: string;
-  };
-}
+export type ApproveSigningRequestRequest = {
+  requestId: string;
+  password: string;
+};
 
-export interface ApproveSigningRequestResponse extends BackgroundResponse {
-  payload: {
-    signedXdr: string;
-  };
-}
+export type ApproveSigningRequestResponse =
+  | {
+      ok: true;
+      signedXdr: string;
+    }
+  | {
+      ok: false;
+      error: BackgroundError;
+    };

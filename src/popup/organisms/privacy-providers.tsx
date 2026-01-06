@@ -3,19 +3,10 @@ import { cn } from "@/popup/utils/cn.ts";
 import { Button } from "@/popup/atoms/button.tsx";
 import { Input } from "@/popup/atoms/input.tsx";
 import { Label } from "@/popup/atoms/label.tsx";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/popup/atoms/card.tsx";
 import { Spinner } from "@/popup/atoms/spinner.tsx";
 import { PickerItem } from "@/popup/molecules/picker-item.tsx";
-import { IconServer, IconTrash, IconPlus, IconX } from "@tabler/icons-react";
-import type {
-  PrivateChannel,
-  PrivacyProvider,
-} from "@/persistence/stores/private-channels.types.ts";
+import { IconServer, IconTrash, IconPlus } from "@tabler/icons-react";
+import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 
 export type PrivacyProvidersProps = {
   channel: PrivateChannel;

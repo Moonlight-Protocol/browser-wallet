@@ -1,4 +1,3 @@
-import { cn } from "@/popup/utils/cn.ts";
 import { Button } from "@/popup/atoms/button.tsx";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 import { PickerItem } from "@/popup/molecules/picker-item.tsx";

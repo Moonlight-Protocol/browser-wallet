@@ -14,7 +14,7 @@ module.exports = function GetIntrinsic(name, allowMissing) {
     throw new TypeError("GetIntrinsic: name must be a non-empty string");
   }
 
-  var intrinsicName = name;
+  let intrinsicName = name;
   if (
     intrinsicName[0] === "%" &&
     intrinsicName[intrinsicName.length - 1] === "%"
@@ -23,12 +23,12 @@ module.exports = function GetIntrinsic(name, allowMissing) {
   }
 
   // Common callers sometimes pass e.g. "String.prototype.indexOf" without %.
-  var parts = intrinsicName.split(".");
+  const parts = intrinsicName.split(".");
 
   /** @type {any} */
-  var value = globalThis;
-  for (var i = 0; i < parts.length; i++) {
-    var key = parts[i];
+  let value = globalThis;
+  for (let i = 0; i < parts.length; i++) {
+    const key = parts[i];
     if (!key) continue;
     if (value == null) {
       value = void 0;

@@ -2,13 +2,13 @@ import { MessageType } from "@/background/messages.ts";
 import type { Handler } from "@/background/messages.ts";
 import { signingManager, vault, unlockVault } from "@/background/session.ts";
 import { Keys } from "@/keys/keys.ts";
-import { TransactionBuilder, Networks } from "@stellar/stellar-sdk";
+import { TransactionBuilder } from "@stellar/stellar-sdk";
 import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
 
 export const handleApproveSigningRequest: Handler<
   MessageType.ApproveSigningRequest
 > = async (message) => {
-  const { requestId, password } = message.payload;
+  const { requestId, password } = message;
   const request = signingManager.getRequest(requestId);
 
   if (!request) {
@@ -62,8 +62,7 @@ export const handleApproveSigningRequest: Handler<
 
   return {
     type: MessageType.ApproveSigningRequest,
-    payload: {
-      signedXdr,
-    },
+    ok: true as const,
+    signedXdr,
   };
 };

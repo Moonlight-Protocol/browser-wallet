@@ -1,11 +1,9 @@
-import { cn } from "@/popup/utils/cn.ts";
 import { shortenAddress } from "@/popup/utils/common.ts";
 import { Button } from "@/popup/atoms/button.tsx";
 import { AccountRenameInline } from "@/popup/molecules/account-rename-inline.tsx";
 import { PickerItem } from "@/popup/molecules/picker-item.tsx";
 import type { SafeAccount } from "@/background/handlers/accounts/get-accounts.types.ts";
 import {
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/popup/atoms/dropdown-menu.tsx";

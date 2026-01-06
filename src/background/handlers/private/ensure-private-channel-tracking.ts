@@ -49,7 +49,7 @@ export const handleEnsurePrivateChannelTracking = async (
       targetCount,
     });
 
-    const existingTracking = privateUtxos.getTracking({
+    const _existingTracking = privateUtxos.getTracking({
       network: message.network,
       accountId: message.accountId,
       channelId: message.channelId,

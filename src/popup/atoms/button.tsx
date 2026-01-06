@@ -70,7 +70,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         data-variant={variant}
         data-size={finalSize}
         className={cn(
-          buttonVariants({ variant, size: finalSize as any, className })
+          buttonVariants({
+            variant,
+            size: finalSize as ButtonProps["size"],
+            className,
+          })
         )}
         disabled={loading || disabled}
         {...props}

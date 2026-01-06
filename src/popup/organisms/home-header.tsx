@@ -1,5 +1,4 @@
 import { cn } from "@/popup/utils/cn.ts";
-import { toDecimals } from "@colibri/core";
 import { ChevronDownIcon } from "@/popup/icons/index.tsx";
 import {
   Tooltip,
@@ -50,7 +49,7 @@ export type HomeHeaderProps = {
 };
 
 export function HomeHeader(props: HomeHeaderProps) {
-  const modeLabel = props.viewMode === "public" ? "Public" : "Private";
+  const _modeLabel = props.viewMode === "public" ? "Public" : "Private";
 
   return (
     <>

@@ -10,11 +10,11 @@ export const handleGetPrivateChannels = (
       message.network
     );
 
-    console.log('[BG] getPrivateChannels returning:', {
+    console.log("[BG] getPrivateChannels returning:", {
       network: message.network,
       channelsCount: channels.length,
       selectedChannelId,
-      channels: channels.map(c => ({ id: c.id, name: c.name })),
+      channels: channels.map((c) => ({ id: c.id, name: c.name })),
     });
 
     return {

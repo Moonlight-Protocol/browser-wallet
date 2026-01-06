@@ -20,7 +20,7 @@ export class SigningRequestManager {
   private requests: Map<string, SigningRequest> = new Map();
   private pendingResolvers: Map<
     string,
-    { resolve: (value: string) => void; reject: (reason?: any) => void }
+    { resolve: (value: string) => void; reject: (reason?: unknown) => void }
   > = new Map();
 
   createRequest(

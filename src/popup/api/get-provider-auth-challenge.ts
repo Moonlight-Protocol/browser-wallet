@@ -1,9 +1,6 @@
 import { MessageType } from "@/background/messages.ts";
 import { callBackground } from "@/popup/api/client.ts";
-import type {
-  GetProviderAuthChallengeRequest,
-  GetProviderAuthChallengeResponse,
-} from "@/background/handlers/private/get-provider-auth-challenge.types.ts";
+import type { GetProviderAuthChallengeResponse } from "@/background/handlers/private/get-provider-auth-challenge.types.ts";
 
 export const getProviderAuthChallenge = async (params: {
   providerUrl: string;

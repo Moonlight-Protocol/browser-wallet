@@ -19,9 +19,9 @@ async function build() {
 
   const repoRoot = new URL("..", import.meta.url).pathname;
   const stellarSdkRoot = `${repoRoot}node_modules/.deno/@stellar+stellar-sdk@14.4.2/node_modules/@stellar/stellar-sdk/`;
-  const stellarSdkMinimalEntry = `${stellarSdkRoot}lib/minimal/index.js`;
-  const stellarSdkRpcEntry = `${stellarSdkRoot}lib/rpc/index.js`;
-  const stellarSdkContractEntry = `${stellarSdkRoot}lib/contract/index.js`;
+  const _stellarSdkMinimalEntry = `${stellarSdkRoot}lib/minimal/index.js`;
+  const _stellarSdkRpcEntry = `${stellarSdkRoot}lib/rpc/index.js`;
+  const _stellarSdkContractEntry = `${stellarSdkRoot}lib/contract/index.js`;
 
   const nodeCryptoShimPlugin: esbuild.Plugin = {
     name: "node-crypto-shim",

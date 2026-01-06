@@ -120,7 +120,7 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
           ? p.sessions?.[props.accountId]
           : undefined;
         const hasValidSession = session && session.expiresAt > Date.now();
-        const selected = isSelectedProvider && hasValidSession;
+        const selected = !!(isSelectedProvider && hasValidSession);
 
         return (
           <div key={p.id} className="flex items-center gap-2">

@@ -10,6 +10,6 @@ export const disconnectPrivacyProvider = async (params: {
 }): Promise<void> => {
   await callBackground<MessageType.DisconnectPrivacyProvider>({
     type: MessageType.DisconnectPrivacyProvider,
-    payload: params,
+    ...params,
   });
 };

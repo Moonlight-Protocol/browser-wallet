@@ -179,9 +179,8 @@ export const handleEnsurePrivateChannelTracking = async (
       network: message.network,
       accountId: message.accountId,
       channelId: message.channelId,
-      utxoCount: stats?.utxos?.length,
-      totalBalance: stats?.totalBalance,
       derivedCount: stats?.derivedCount,
+      totalBalance: stats?.totalBalance,
     });
 
     return {

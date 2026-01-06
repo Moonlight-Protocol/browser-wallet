@@ -5,13 +5,13 @@ import { PrivacyProviderClient } from "@/background/services/privacy-provider-cl
 export const handleGetPrivacyProviderAuthChallenge: Handler<
   MessageType.GetPrivacyProviderAuthChallenge
 > = async (message) => {
-  const { providerUrl, publicKey } = message.payload;
+  const { providerUrl, publicKey } = message;
 
   const client = new PrivacyProviderClient(providerUrl);
   const response = await client.getAuthChallenge(publicKey);
 
   return {
     type: MessageType.GetPrivacyProviderAuthChallenge,
-    payload: response,
+    ...response,
   };
 };

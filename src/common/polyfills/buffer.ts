@@ -8,8 +8,10 @@
 // - `Buffer.isBuffer()`
 // - behaves like a Uint8Array
 
+// @ts-ignore: Buffer intentionally overloads Uint8Array.from with incompatible signature
 export class Buffer extends Uint8Array {
-  static from(
+  // @ts-ignore: intentionally overriding with different signature for Node.js Buffer compatibility
+  static override from(
     input: ArrayBuffer | ArrayBufferView | ArrayLike<number> | string,
     encoding?: "utf8" | "utf-8" | "base64"
   ): Buffer {

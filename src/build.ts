@@ -107,6 +107,7 @@ async function build() {
 
   // Build Tailwind CSS
   const cssInput = await Deno.readTextFile("src/popup/style.css");
+  // @ts-ignore: postcss version mismatch between tailwindcss and autoprefixer dependencies
   const result = await postcss([tailwindcss(), autoprefixer()]).process(
     cssInput,
     {

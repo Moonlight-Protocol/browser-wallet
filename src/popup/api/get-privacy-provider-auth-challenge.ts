@@ -5,11 +5,11 @@ import type { GetPrivacyProviderAuthChallengeResponse } from "@/background/handl
 export const getPrivacyProviderAuthChallenge = async (params: {
   providerUrl: string;
   publicKey: string;
-}): Promise<GetPrivacyProviderAuthChallengeResponse["payload"]> => {
+}): Promise<GetPrivacyProviderAuthChallengeResponse> => {
   const response =
     await callBackground<MessageType.GetPrivacyProviderAuthChallenge>({
       type: MessageType.GetPrivacyProviderAuthChallenge,
-      payload: params,
+      ...params,
     });
-  return response.payload;
+  return response;
 };

@@ -5,7 +5,7 @@ import { privateChannels } from "@/background/session.ts";
 export const handleDisconnectPrivacyProvider: Handler<
   MessageType.DisconnectPrivacyProvider
 > = (message) => {
-  const { network, channelId, providerId, accountId } = message.payload;
+  const { network, channelId, providerId, accountId } = message;
 
   privateChannels.clearProviderSession(
     network,
@@ -16,6 +16,5 @@ export const handleDisconnectPrivacyProvider: Handler<
 
   return {
     type: MessageType.DisconnectPrivacyProvider,
-    payload: undefined,
   };
 };

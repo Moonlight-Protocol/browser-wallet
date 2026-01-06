@@ -124,7 +124,7 @@ export function SignRequestPage() {
     getSigningRequest(signingRequestId)
       .then((res) => {
         if (res.ok) {
-          setRequestDetails(res.request);
+          setRequestDetails(res.request ?? null);
         } else {
           setError(res.error.message ?? "Failed to get signing request");
         }

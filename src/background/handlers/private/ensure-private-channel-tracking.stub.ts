@@ -1,5 +1,8 @@
 import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 
+// Compile-time dev flag injected by esbuild
+declare const __DEV__: boolean;
+
 type PrivateTrackingModule = {
   handleEnsurePrivateChannelTracking: (
     message: MessageFor<MessageType.EnsurePrivateChannelTracking>

@@ -1,3 +1,6 @@
+// Compile-time dev flag injected by esbuild
+declare const __DEV__: boolean;
+
 try {
   if (typeof __DEV__ !== "undefined" && __DEV__) {
     // eslint-disable-next-line no-console

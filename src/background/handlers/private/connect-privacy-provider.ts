@@ -7,7 +7,7 @@ export const handleConnectPrivacyProvider: Handler<
   MessageType.ConnectPrivacyProvider
 > = async (message) => {
   const { channelId, providerId, providerUrl, accountId, publicKey, network } =
-    message.payload;
+    message;
 
   // 1. Get Authentication Challenge from Provider
   const client = new PrivacyProviderClient(providerUrl);
@@ -55,8 +55,6 @@ export const handleConnectPrivacyProvider: Handler<
   // The popup will navigate to the signing page
   return {
     type: MessageType.ConnectPrivacyProvider,
-    payload: {
-      signingRequestId: request.id,
-    },
+    signingRequestId: request.id,
   };
 };

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "@/common/polyfills/axios.ts";
 
 export type AuthChallengeResponse = {
   status: number;

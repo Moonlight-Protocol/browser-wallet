@@ -13,6 +13,7 @@ export type PickerItemProps = {
   actionContent?: React.ReactNode;
   editing?: boolean;
   editingContent?: React.ReactNode;
+  className?: string;
 };
 
 export function PickerItem({
@@ -26,6 +27,7 @@ export function PickerItem({
   actionContent,
   editing,
   editingContent,
+  className,
 }: PickerItemProps) {
   return (
     <div
@@ -33,7 +35,8 @@ export function PickerItem({
         "flex items-center justify-between gap-2 px-2 py-1.5 rounded-sm hover:bg-accent hover:text-accent-foreground transition-colors",
         isSelected
           ? "bg-accent text-accent-foreground"
-          : "text-muted-foreground"
+          : "text-muted-foreground",
+        className
       )}
     >
       {editing ? (

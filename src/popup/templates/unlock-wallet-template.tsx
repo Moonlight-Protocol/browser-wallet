@@ -21,55 +21,55 @@ type Props = {
 export function UnlockWalletTemplate(props: Props) {
   return (
     <Background>
-      <MoonlightBackground />
-
-      <Container>
-        <div className="relative flex-1 flex flex-col items-center z-10">
-          <div className="w-full pt-64 flex flex-col items-center">
-            <div className="text-center">
-              <Title className="text-4xl font-bold tracking-tight">
-                Moonlight
-              </Title>
-              <Title className="text-4xl font-bold tracking-tight -mt-2">
-                Wallet
-              </Title>
+      <MoonlightBackground>
+        <Container>
+          <div className="relative flex-1 flex flex-col items-center z-10">
+            <div className="w-full pt-64 flex flex-col items-center">
+              <div className="text-center">
+                <Title className="text-4xl font-bold tracking-tight">
+                  Moonlight
+                </Title>
+                <Title className="text-4xl font-bold tracking-tight -mt-2">
+                  Wallet
+                </Title>
+              </div>
             </div>
+
+            <form
+              className="flex-1 w-full flex flex-col items-center mt-8"
+              onSubmit={(e) => {
+                e.preventDefault();
+                props.onSubmit();
+              }}
+            >
+              <div className="w-full max-w-sm p-1">
+                <PasswordInput
+                  placeholder="Enter your password"
+                  value={props.password}
+                  autoComplete="current-password"
+                  onChange={props.onChangePassword}
+                  error={props.passwordError}
+                />
+
+                {props.submitError ? (
+                  <Text tone="error" size="sm" className="mt-3">
+                    {props.submitError}
+                  </Text>
+                ) : null}
+
+                <Button
+                  type="submit"
+                  disabled={!props.canSubmit}
+                  className="mt-4 w-full"
+                >
+                  Unlock
+                </Button>
+              </div>
+            </form>
           </div>
-
-          <form
-            className="flex-1 w-full flex flex-col items-center mt-8"
-            onSubmit={(e) => {
-              e.preventDefault();
-              props.onSubmit();
-            }}
-          >
-            <div className="w-full max-w-sm p-1">
-              <PasswordInput
-                placeholder="Enter your password"
-                value={props.password}
-                autoComplete="current-password"
-                onChange={props.onChangePassword}
-                error={props.passwordError}
-              />
-
-              {props.submitError ? (
-                <Text tone="error" size="sm" className="mt-3">
-                  {props.submitError}
-                </Text>
-              ) : null}
-
-              <Button
-                type="submit"
-                disabled={!props.canSubmit}
-                className="mt-4 w-full"
-              >
-                Unlock
-              </Button>
-            </div>
-          </form>
-        </div>
-        {DEV ? <DevDebug /> : null}
-      </Container>
+          {DEV ? <DevDebug /> : null}
+        </Container>
+      </MoonlightBackground>
     </Background>
   );
 }

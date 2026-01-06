@@ -8,12 +8,17 @@ import { AddWalletPage } from "@/popup/pages/add-wallet-page.tsx";
 import { ImportPage } from "@/popup/pages/import-page.tsx";
 import { SettingsPage } from "@/popup/pages/settings-page.tsx";
 import { PrivateAddChannelPage } from "@/popup/pages/private-add-channel-page.tsx";
+import { SignRequestPage } from "@/popup/pages/sign-request-page.tsx";
 
 function AppRouter() {
   const { state } = usePopup();
 
   if (state.loading) return <LoadingPage />;
   if (state.error) return <LoadingPage error={state.error} />;
+
+  if (state.route === "sign-request") {
+    return <SignRequestPage />;
+  }
 
   if (!state.status?.passwordSet) {
     return <SetupWalletPage />;

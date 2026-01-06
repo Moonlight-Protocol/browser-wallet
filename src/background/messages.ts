@@ -82,6 +82,51 @@ import type {
   EnsurePrivateChannelTrackingRequest,
   EnsurePrivateChannelTrackingResponse,
 } from "@/background/handlers/private/ensure-private-channel-tracking.types.ts";
+import type {
+  GetPrivateStatsRequest,
+  GetPrivateStatsResponse,
+} from "@/background/handlers/private/get-private-stats.types.ts";
+import type {
+  AddPrivacyProviderRequest,
+  AddPrivacyProviderResponse,
+} from "@/background/handlers/private/add-privacy-provider.types.ts";
+import type {
+  RemovePrivacyProviderRequest,
+  RemovePrivacyProviderResponse,
+} from "@/background/handlers/private/remove-privacy-provider.types.ts";
+import type {
+  SetSelectedPrivacyProviderRequest,
+  SetSelectedPrivacyProviderResponse,
+} from "@/background/handlers/private/set-selected-privacy-provider.types.ts";
+import type {
+  ConnectPrivacyProviderRequest,
+  ConnectPrivacyProviderResponse,
+} from "@/background/handlers/private/connect-privacy-provider.types.ts";
+import type {
+  DisconnectPrivacyProviderRequest,
+  DisconnectPrivacyProviderResponse,
+} from "@/background/handlers/private/disconnect-privacy-provider.types.ts";
+
+import type {
+  GetPrivacyProviderAuthChallengeRequest,
+  GetPrivacyProviderAuthChallengeResponse,
+} from "@/background/handlers/private/get-privacy-provider-auth-challenge.types.ts";
+import type {
+  RequestSigningRequest,
+  RequestSigningResponse,
+} from "@/background/handlers/signing/request-signing.types.ts";
+import type {
+  GetSigningRequestRequest,
+  GetSigningRequestResponse,
+} from "@/background/handlers/signing/get-signing-request.types.ts";
+import type {
+  ApproveSigningRequestRequest,
+  ApproveSigningRequestResponse,
+} from "@/background/handlers/signing/approve-signing-request.types.ts";
+import type {
+  RejectSigningRequestRequest,
+  RejectSigningRequestResponse,
+} from "@/background/handlers/signing/reject-signing-request.types.ts";
 
 // Helper types and mapped types for messages and responses
 // ==============================================================================
@@ -129,6 +174,17 @@ export enum MessageType {
   AddPrivateChannel = "ADD_PRIVATE_CHANNEL",
   SetSelectedPrivateChannel = "SET_SELECTED_PRIVATE_CHANNEL",
   EnsurePrivateChannelTracking = "ENSURE_PRIVATE_CHANNEL_TRACKING",
+  GetPrivateStats = "GET_PRIVATE_STATS",
+  AddPrivacyProvider = "ADD_PRIVACY_PROVIDER",
+  RemovePrivacyProvider = "REMOVE_PRIVACY_PROVIDER",
+  SetSelectedPrivacyProvider = "SET_SELECTED_PRIVACY_PROVIDER",
+  ConnectPrivacyProvider = "CONNECT_PRIVACY_PROVIDER",
+  DisconnectPrivacyProvider = "DISCONNECT_PRIVACY_PROVIDER",
+  GetPrivacyProviderAuthChallenge = "GET_PRIVACY_PROVIDER_AUTH_CHALLENGE",
+  RequestSigning = "REQUEST_SIGNING",
+  GetSigningRequest = "GET_SIGNING_REQUEST",
+  ApproveSigningRequest = "APPROVE_SIGNING_REQUEST",
+  RejectSigningRequest = "REJECT_SIGNING_REQUEST",
 }
 
 export type MessagePayloadMap = {
@@ -153,6 +209,17 @@ export type MessagePayloadMap = {
   [MessageType.AddPrivateChannel]: AddPrivateChannelRequest;
   [MessageType.SetSelectedPrivateChannel]: SetSelectedPrivateChannelRequest;
   [MessageType.EnsurePrivateChannelTracking]: EnsurePrivateChannelTrackingRequest;
+  [MessageType.GetPrivateStats]: GetPrivateStatsRequest;
+  [MessageType.AddPrivacyProvider]: AddPrivacyProviderRequest;
+  [MessageType.RemovePrivacyProvider]: RemovePrivacyProviderRequest;
+  [MessageType.SetSelectedPrivacyProvider]: SetSelectedPrivacyProviderRequest;
+  [MessageType.ConnectPrivacyProvider]: ConnectPrivacyProviderRequest;
+  [MessageType.DisconnectPrivacyProvider]: DisconnectPrivacyProviderRequest;
+  [MessageType.GetPrivacyProviderAuthChallenge]: GetPrivacyProviderAuthChallengeRequest;
+  [MessageType.RequestSigning]: RequestSigningRequest;
+  [MessageType.GetSigningRequest]: GetSigningRequestRequest;
+  [MessageType.ApproveSigningRequest]: ApproveSigningRequestRequest;
+  [MessageType.RejectSigningRequest]: RejectSigningRequestRequest;
 };
 
 export type ResponsePayloadMap = {
@@ -177,4 +244,15 @@ export type ResponsePayloadMap = {
   [MessageType.AddPrivateChannel]: AddPrivateChannelResponse;
   [MessageType.SetSelectedPrivateChannel]: SetSelectedPrivateChannelResponse;
   [MessageType.EnsurePrivateChannelTracking]: EnsurePrivateChannelTrackingResponse;
+  [MessageType.GetPrivateStats]: GetPrivateStatsResponse;
+  [MessageType.AddPrivacyProvider]: AddPrivacyProviderResponse;
+  [MessageType.RemovePrivacyProvider]: RemovePrivacyProviderResponse;
+  [MessageType.SetSelectedPrivacyProvider]: SetSelectedPrivacyProviderResponse;
+  [MessageType.ConnectPrivacyProvider]: ConnectPrivacyProviderResponse;
+  [MessageType.DisconnectPrivacyProvider]: DisconnectPrivacyProviderResponse;
+  [MessageType.GetPrivacyProviderAuthChallenge]: GetPrivacyProviderAuthChallengeResponse;
+  [MessageType.RequestSigning]: RequestSigningResponse;
+  [MessageType.GetSigningRequest]: GetSigningRequestResponse;
+  [MessageType.ApproveSigningRequest]: ApproveSigningRequestResponse;
+  [MessageType.RejectSigningRequest]: RejectSigningRequestResponse;
 };

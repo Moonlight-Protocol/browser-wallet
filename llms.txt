@@ -1,0 +1,73 @@
+# Browser Wallet Project Context
+
+## Project Overview
+This is a browser extension wallet built with Deno, React, and Tailwind CSS.
+It uses the Shadcn UI library with a custom "Radix-Mira" theme.
+
+## Tech Stack
+- **Runtime**: Deno
+- **Framework**: React (Vite-like setup with Deno)
+- **Styling**: Tailwind CSS, PostCSS
+- **UI Library**: Shadcn UI (Radix-Mira theme)
+- **Icons**: Tabler Icons (`@tabler/icons-react`)
+- **State Management**: Elf (`@ngneat/elf`)
+- **Build Tool**: Custom Deno build script (`src/build.ts`)
+
+## Project Structure
+- `src/popup/`: UI code for the extension popup.
+  - `atoms/`: Basic UI components (Button, Input, etc.).
+  - `molecules/`: Composite components.
+  - `organisms/`: Complex sections.
+  - `templates/`: Page layouts.
+  - `pages/`: Route handlers.
+  - `style.css`: Global styles and theme variables.
+- `src/background/`: Background script logic (wallet core, session, etc.).
+- `src/common/`: Shared utilities and types.
+- `src/persistence/`: Storage logic.
+- `tailwind.config.js`: Tailwind configuration.
+- `deno.json`: Deno configuration and tasks.
+
+## Development Commands
+- `deno task dev`: Run build in watch mode.
+- `deno task build`: One-off build.
+- `deno task build-prod`: Production build (minified).
+
+## Theme Configuration (Radix-Mira)
+The project uses a custom "Radix-Mira" theme for Shadcn.
+- **CSS Variables**: Defined in `src/popup/style.css`.
+- **Colors**: Uses `oklch` color space.
+- **Transparency**: Inputs and borders use specific alpha values in dark mode.
+- **Tailwind Config**: Colors are mapped to CSS variables (e.g., `var(--primary)`).
+  - Note: Some colors use `oklch(var(--name) / <alpha-value>)` for opacity support.
+  - Note: `border` and `input` variables are used directly (`var(--name)`) as they contain built-in opacity.
+
+## Key Components
+- **Input**: Uses `.bg-mira-input` utility for specific dark mode transparency.
+- **Button**: Standard Shadcn implementation.
+- **InputGroup**: Custom component for grouped inputs.
+
+## Conventions
+- **Communication**: When I ask something, do not change code directly unless explicitly asked. When not explicit, confirm with me first.
+- Use `cn()` utility for class merging.
+- Prefer `src/popup/atoms` for base UI components.
+- Use absolute imports starting with `@/` (mapped to `./src/`).
+
+## Reference Repositories
+- **xBull Wallet**: `https://github.com/Creit-Tech/xBull-Wallet`
+  - Reference for basic wallet capabilities (key storage, signature triggering, etc.).
+  - Focus on the extension implementation.
+  - **Note**: Always check before using as a direct reference.
+- **Moonlight Sandbox**: `https://github.com/fazzatti/moonlight-sandbox`
+  - Reference for Moonlight protocol business rules and integration.
+  - **Note**: This is a demo/sandbox. Do not copy blindly; use for clarification on logic.
+
+## Moonlight Integration (Privacy Protocol)
+The wallet operates in two main modes:
+1.  **Public Mode**:
+    - Standard Stellar blockchain usage.
+    - Uses normal public/private key pairs and addresses.
+2.  **Private Mode (Moonlight)**:
+    - Accounts are represented by **derived UTXOs** (deterministic and sequential).
+    - Interaction happens via **Channels** (smart contracts), which act as privacy pools for specific assets.
+    - UTXOs are unique to each Channel and Network.
+    - **Providers**: External services required to execute private transactions. They collect signed bundles and submit them to the network on behalf of the user.

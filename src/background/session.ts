@@ -5,6 +5,7 @@ import { MetaStore } from "@/persistence/stores/meta.ts";
 import { ChainStore } from "@/persistence/stores/chain.ts";
 import { PrivateChannelsStore } from "@/persistence/stores/private-channels.ts";
 import { PrivateUtxosStore } from "@/persistence/stores/private-utxos.ts";
+import { SigningRequestManager } from "@/background/services/signing-manager.ts";
 import { base64ToBytes } from "@/common/utils/base64-to-bytes.ts";
 import { bytesToBase64 } from "@/common/utils/bytes-to-base64.ts";
 
@@ -20,6 +21,7 @@ export const meta = new MetaStore();
 export const chain = new ChainStore();
 export const privateChannels = new PrivateChannelsStore();
 export const privateUtxos = new PrivateUtxosStore();
+export const signingManager = new SigningRequestManager();
 
 let hydrated = false;
 let hydrating: Promise<void> | undefined;

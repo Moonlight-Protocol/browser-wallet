@@ -12,6 +12,13 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/popup/atoms/dropdown-menu.tsx";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/popup/atoms/sheet.tsx";
 import { SidebarTrigger } from "@/popup/atoms/sidebar.tsx";
 import {
   IconWorld,
@@ -130,11 +137,11 @@ export function HomeHeader(props: HomeHeaderProps) {
 
         {props.viewMode === "private" && (
           <div className="flex items-center justify-end w-full animate-in fade-in slide-in-from-top-1 duration-200">
-            <DropdownMenu
+            <Sheet
               open={props.channelPickerOpen}
               onOpenChange={props.onToggleChannelPicker}
             >
-              <DropdownMenuTrigger asChild>
+              <SheetTrigger asChild>
                 <button
                   type="button"
                   className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-md hover:bg-accent transition-colors text-left border border-transparent hover:border-border min-w-0"
@@ -160,14 +167,16 @@ export function HomeHeader(props: HomeHeaderProps) {
                     <IconPlugConnectedX className="h-4 w-4 text-destructive shrink-0" />
                   )}
                 </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-70 max-h-100 overflow-y-auto"
-                align="end"
-              >
-                {props.channelPicker}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[80vh] flex flex-col">
+                <SheetHeader>
+                  <SheetTitle>Private Channels</SheetTitle>
+                </SheetHeader>
+                <div className="flex-1 overflow-y-auto py-4">
+                  {props.channelPicker}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         )}
       </header>

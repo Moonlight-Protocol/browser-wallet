@@ -13,6 +13,8 @@ export type AddPrivateChannelRequest = {
   asset: PrivateChannelAsset;
 };
 
+export type AddPrivateChannelPayload = AddPrivateChannelRequest;
+
 export type AddPrivateChannelResponse =
   | {
       ok: true;

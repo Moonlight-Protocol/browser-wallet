@@ -2,7 +2,7 @@ import { Shell } from "@/popup/templates/shell.tsx";
 import { networkLabel, shortenAddress } from "@/popup/utils/common.ts";
 import { HomeHeader } from "@/popup/organisms/home-header.tsx";
 import { HomeAccountPicker } from "@/popup/organisms/home-account-picker.tsx";
-import { PrivateChannelPicker } from "@/popup/organisms/private-channel-picker.tsx";
+import { PrivateChannelManager } from "@/popup/organisms/private-channel-manager.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
 import { Spinner } from "@/popup/atoms/spinner.tsx";
 import { LoadingSpinner } from "@/popup/atoms/loading-spinner.tsx";
@@ -69,7 +69,9 @@ export type HomeTemplateProps = {
   viewModeToggleDisabled?: boolean;
 
   privateChannels?: {
+    initializing?: boolean;
     loading: boolean;
+    refreshing?: boolean;
     error?: string;
     channels: PrivateChannel[];
     selectedChannelId?: string;
@@ -83,6 +85,19 @@ export type HomeTemplateProps = {
   setPrivateView?: (v: "list" | "selected") => void;
   onAddPrivateChannel?: () => void | Promise<void>;
   onSelectPrivateChannel?: (channelId: string) => void | Promise<void>;
+  onAddPrivacyProvider?: (
+    channelId: string,
+    name: string,
+    url: string
+  ) => Promise<void>;
+  onRemovePrivacyProvider?: (
+    channelId: string,
+    providerId: string
+  ) => Promise<void>;
+  onSelectPrivacyProvider?: (
+    channelId: string,
+    providerId: string | undefined
+  ) => Promise<void>;
 
   activation?: {
     status: "created" | "not_created" | "unknown";
@@ -241,16 +256,25 @@ export function HomeTemplate(props: HomeTemplateProps) {
             channelPickerOpen={props.channelPickerOpen}
             onToggleChannelPicker={(open) => props.setChannelPickerOpen?.(open)}
             channelPicker={
-              <PrivateChannelPicker
+              <PrivateChannelManager
                 channels={props.privateChannels?.channels ?? []}
                 selectedChannelId={props.privateChannels?.selectedChannelId}
+                accountId={props.selectedAccount?.accountId}
                 onSelectChannel={(id) => {
                   props.onSelectPrivateChannel?.(id);
-                  props.setChannelPickerOpen?.(false);
                 }}
                 onAddChannel={() => {
                   props.onAddPrivateChannel?.();
                   props.setChannelPickerOpen?.(false);
+                }}
+                onAddProvider={async (channelId, name, url) => {
+                  await props.onAddPrivacyProvider?.(channelId, name, url);
+                }}
+                onRemoveProvider={async (channelId, providerId) => {
+                  await props.onRemovePrivacyProvider?.(channelId, providerId);
+                }}
+                onSelectProvider={async (channelId, providerId) => {
+                  await props.onSelectPrivacyProvider?.(channelId, providerId);
                 }}
               />
             }
@@ -284,13 +308,10 @@ export function HomeTemplate(props: HomeTemplateProps) {
 
           {props.viewMode === "private" ? (
             <div className="mt-4 space-y-4">
-              {props.privateChannels?.loading ? (
-                <Card>
-                  <CardContent className="pt-6">
-                    <LoadingSpinner uiSize="md" />
-                  </CardContent>
-                </Card>
-              ) : props.privateChannels?.error ? (
+              {/* Error state (only if no channels to show) */}
+              {props.privateChannels?.error &&
+              (props.privateChannels?.channels?.length ?? 0) === 0 &&
+              !props.privateChannels?.initializing ? (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-sm text-destructive">
@@ -313,7 +334,9 @@ export function HomeTemplate(props: HomeTemplateProps) {
                     </Button>
                   </CardFooter>
                 </Card>
-              ) : (props.privateChannels?.channels?.length ?? 0) === 0 ? (
+              ) : (props.privateChannels?.channels?.length ?? 0) === 0 &&
+                !props.privateChannels?.initializing ? (
+                // Only show "No channels" when we've finished loading and truly have none
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-sm">No channels yet</CardTitle>
@@ -334,7 +357,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                     </Button>
                   </CardFooter>
                 </Card>
-              ) : (
+              ) : (props.privateChannels?.channels?.length ?? 0) > 0 ? (
                 <>
                   {selectedPrivateChannel ? (
                     <Card className="border-primary/20 bg-primary/5">
@@ -343,6 +366,10 @@ export function HomeTemplate(props: HomeTemplateProps) {
                           <div className="flex items-center gap-2">
                             <IconShieldLock className="h-5 w-5 text-primary" />
                             Private Channel
+                            {/* Small spinner in header when loading */}
+                            {props.privateStats?.loading && (
+                              <Spinner className="size-3 text-muted-foreground" />
+                            )}
                           </div>
                           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                             {selectedPrivateChannel.asset.code}
@@ -350,25 +377,27 @@ export function HomeTemplate(props: HomeTemplateProps) {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        {props.privateStats?.loading ? (
-                          <LoadingSpinner uiSize="sm" className="py-2" />
-                        ) : props.privateStats?.error ? (
+                        {props.privateStats?.error &&
+                        !props.privateStats?.stats ? (
                           <p className="text-sm text-destructive">
                             {props.privateStats.error}
                           </p>
-                        ) : props.privateStats?.stats ? (
+                        ) : (
                           <div className="space-y-3">
                             <div className="flex justify-between items-baseline">
                               <span className="text-sm text-muted-foreground font-medium">
                                 Confidential Balance
                               </span>
                               <span className="text-2xl font-black text-primary">
-                                {toDecimals(
-                                  BigInt(
-                                    props.privateStats.stats.totalBalance || "0"
-                                  ),
-                                  7
-                                )}
+                                {props.privateStats?.stats
+                                  ? toDecimals(
+                                      BigInt(
+                                        props.privateStats.stats.totalBalance ||
+                                          "0"
+                                      ),
+                                      7
+                                    )
+                                  : "-"}
                               </span>
                             </div>
                             <div className="grid grid-cols-2 gap-4 pt-3 border-t border-primary/10">
@@ -377,8 +406,9 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                   Derived UTXOs
                                 </p>
                                 <p className="text-sm font-bold">
-                                  {props.privateStats.stats.derivedCount} /{" "}
-                                  {props.privateStats.stats.targetCount}
+                                  {props.privateStats?.stats
+                                    ? `${props.privateStats.stats.derivedCount} / ${props.privateStats.stats.targetCount}`
+                                    : "-"}
                                 </p>
                               </div>
                               <div>
@@ -386,13 +416,13 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                   Non-zero UTXOs
                                 </p>
                                 <p className="text-sm font-bold">
-                                  {props.privateStats.stats.nonZeroCount}
+                                  {props.privateStats?.stats
+                                    ? props.privateStats.stats.nonZeroCount
+                                    : "-"}
                                 </p>
                               </div>
                             </div>
                           </div>
-                        ) : (
-                          <LoadingSpinner uiSize="sm" className="py-2" />
                         )}
                       </CardContent>
                     </Card>
@@ -406,7 +436,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                     </Card>
                   )}
                 </>
-              )}
+              ) : null}
             </div>
           ) : null}
 

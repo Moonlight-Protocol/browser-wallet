@@ -13,6 +13,14 @@ import { setViewMode } from "@/popup/api/set-view-mode.ts";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { setSelectedPrivateChannel } from "@/popup/api/set-selected-private-channel.ts";
 import { ensurePrivateChannelTracking } from "@/popup/api/ensure-private-channel-tracking.ts";
+import { getPrivateStats } from "@/popup/api/get-private-stats.ts";
+import { addPrivacyProvider } from "@/popup/api/add-privacy-provider.ts";
+import { removePrivacyProvider } from "@/popup/api/remove-privacy-provider.ts";
+import { setSelectedPrivacyProvider } from "@/popup/api/set-selected-privacy-provider.ts";
+import { getPrivacyProviderAuthChallenge } from "@/popup/api/get-privacy-provider-auth-challenge.ts";
+import { connectPrivacyProvider } from "@/popup/api/connect-privacy-provider.ts";
+import { disconnectPrivacyProvider } from "@/popup/api/disconnect-privacy-provider.ts";
+import { requestSigning } from "@/popup/api/request-signing.ts";
 import type { SafeAccount } from "@/background/handlers/accounts/get-accounts.types.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
@@ -118,13 +126,19 @@ export function HomePage() {
 
   const [privateChannels, setPrivateChannels] = useState<
     | {
+        initializing?: boolean;
         loading: boolean;
+        refreshing?: boolean;
         error?: string;
         channels: PrivateChannel[];
         selectedChannelId?: string;
       }
     | undefined
   >(undefined);
+
+  // Ref to cache last known channels - persists across effect re-runs
+  const lastKnownChannelsRef = useRef<PrivateChannel[]>([]);
+  const lastKnownSelectedChannelIdRef = useRef<string | undefined>(undefined);
 
   const [privateView, setPrivateView] = useState<"list" | "selected">("list");
 
@@ -138,6 +152,148 @@ export function HomePage() {
   >(undefined);
 
   const lastPrivateStatsKeyRef = useRef<string | undefined>(undefined);
+
+  const refreshPrivateChannels = async () => {
+    if (viewMode !== "private") return;
+    const network = selectedNetwork as ChainNetwork;
+    
+    // Mark as refreshing (keeps existing data visible)
+    setPrivateChannels((prev) => ({
+      initializing: false,
+      loading: false,
+      refreshing: true,
+      channels: prev?.channels ?? [],
+      selectedChannelId: prev?.selectedChannelId,
+      error: prev?.error,
+    }));
+    
+    try {
+      const res = await getPrivateChannels({ network });
+      if (!res.ok) {
+        setPrivateChannels((prev) => ({
+          initializing: false,
+          loading: false,
+          refreshing: false,
+          channels: prev?.channels ?? [],
+          selectedChannelId: prev?.selectedChannelId,
+          error: res.error.message,
+        }));
+        return;
+      }
+      setPrivateChannels({
+        initializing: false,
+        loading: false,
+        refreshing: false,
+        channels: res.channels,
+        selectedChannelId: res.selectedChannelId,
+        error: undefined,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setPrivateChannels((prev) => ({
+        initializing: false,
+        loading: false,
+        refreshing: false,
+        channels: prev?.channels ?? [],
+        selectedChannelId: prev?.selectedChannelId,
+        error: message,
+      }));
+    }
+  };
+
+  const onAddPrivacyProvider = async (
+    channelId: string,
+    name: string,
+    url: string
+  ) => {
+    try {
+      await addPrivacyProvider({
+        network: selectedNetwork as ChainNetwork,
+        channelId,
+        name,
+        url,
+      });
+      await refreshPrivateChannels();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const onRemovePrivacyProvider = async (
+    channelId: string,
+    providerId: string
+  ) => {
+    try {
+      await removePrivacyProvider({
+        network: selectedNetwork as ChainNetwork,
+        channelId,
+        providerId,
+      });
+      await refreshPrivateChannels();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const onSelectPrivacyProvider = async (
+    channelId: string,
+    providerId: string | undefined
+  ) => {
+    try {
+      const channel = privateChannels?.channels.find((c) => c.id === channelId);
+      if (!channel) return;
+
+      // If providerId is undefined, it means we are disconnecting the currently selected provider
+      if (!providerId) {
+        const currentProviderId = channel.selectedProviderId;
+        if (!currentProviderId) return;
+
+        const provider = channel.providers.find(
+          (p) => p.id === currentProviderId
+        );
+        if (!provider) return;
+
+        if (selectedAccount?.accountId) {
+          await disconnectPrivacyProvider({
+            network: selectedNetwork as ChainNetwork,
+            channelId: channel.id,
+            providerId: currentProviderId,
+            accountId: selectedAccount.accountId,
+          });
+        }
+
+        // Don't clear selectedProviderId - it's a channel-level setting
+        // The connection status is per-account based on sessions
+        // Just refresh to update the UI
+        await refreshPrivateChannels();
+      } else {
+        // Connecting to a provider
+        const provider = channel.providers.find((p) => p.id === providerId);
+        if (!provider) return;
+
+        if (selectedAccount?.publicKey && selectedAccount?.accountId) {
+          // Request signing - background returns request ID immediately
+          // We navigate to signing page within the popup
+          const result = await connectPrivacyProvider({
+            channelId: channel.id,
+            channelAddress: channel.contractId,
+            providerId: provider.id,
+            providerUrl: provider.url,
+            accountId: selectedAccount.accountId,
+            publicKey: selectedAccount.publicKey,
+            network: selectedNetwork as ChainNetwork,
+          });
+
+          // Navigate to signing page within this popup
+          actions.goSignRequest(result.signingRequestId);
+        }
+      }
+
+      await refreshPrivateChannels();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const readSelectedChain = async (params: {
     network: ChainNetwork;
@@ -310,40 +466,70 @@ export function HomePage() {
     const network = selectedNetwork as ChainNetwork;
 
     if (viewMode !== "private") {
-      setPrivateChannels(undefined);
+      // Don't clear privateChannels - keep the cached data for when user returns
+      // Just reset the view state
       setPrivateView("list");
       setPrivateStats(undefined);
       lastPrivateStatsKeyRef.current = undefined;
       return;
     }
 
-    setPrivateChannels((prev) => ({
-      loading: true,
-      channels: prev?.channels ?? [],
-      selectedChannelId: prev?.selectedChannelId,
+    // Simply mark as initializing and fetch - use cached channels from ref
+    const cachedChannels = lastKnownChannelsRef.current;
+    const cachedSelectedId = lastKnownSelectedChannelIdRef.current;
+    const hasCachedData = cachedChannels.length > 0;
+    
+    console.log('[POPUP] setPrivateChannels initial:', {
+      cachedChannelsCount: cachedChannels.length,
+      cachedSelectedId,
+      hasCachedData,
+    });
+    
+    setPrivateChannels({
+      initializing: !hasCachedData,
+      loading: false,
+      refreshing: hasCachedData,
+      channels: cachedChannels,
+      selectedChannelId: cachedSelectedId,
       error: undefined,
-    }));
+    });
 
-    // Reset view to default; we'll re-select after fetching.
-    setPrivateView("list");
+    // Only reset view if we have no cached selection
+    if (!cachedSelectedId) {
+      setPrivateView("list");
+    }
 
     (async () => {
       try {
+        console.log('[POPUP] fetching getPrivateChannels...');
         const res = await getPrivateChannels({ network });
+        console.log('[POPUP] getPrivateChannels response:', {
+          ok: res.ok,
+          channelsCount: res.ok ? res.channels.length : 0,
+          selectedChannelId: res.ok ? res.selectedChannelId : null,
+        });
         if (cancelled) return;
 
         if (!res.ok) {
-          setPrivateChannels({
+          setPrivateChannels((prev) => ({
+            initializing: false,
             loading: false,
-            channels: [],
-            selectedChannelId: undefined,
+            refreshing: false,
+            channels: prev?.channels ?? [],
+            selectedChannelId: prev?.selectedChannelId,
             error: res.error.message ?? "Failed to load channels",
-          });
+          }));
           return;
         }
 
+        // Update the cache ref with new data
+        lastKnownChannelsRef.current = res.channels;
+        lastKnownSelectedChannelIdRef.current = res.selectedChannelId;
+        
         setPrivateChannels({
+          initializing: false,
           loading: false,
+          refreshing: false,
           channels: res.channels,
           selectedChannelId: res.selectedChannelId,
           error: undefined,
@@ -357,19 +543,21 @@ export function HomePage() {
       } catch (err) {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : String(err);
-        setPrivateChannels({
+        setPrivateChannels((prev) => ({
+          initializing: false,
           loading: false,
-          channels: [],
-          selectedChannelId: undefined,
+          refreshing: false,
+          channels: prev?.channels ?? [],
+          selectedChannelId: prev?.selectedChannelId,
           error: message,
-        });
+        }));
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [viewMode, selectedNetwork]);
+  }, [viewMode, selectedNetwork, state.privateChannelsRefreshKey]);
 
   // If we enter private mode and a channel is already selected, kick off the
   // tracking sync automatically so the stats spinner can complete.
@@ -393,9 +581,26 @@ export function HomePage() {
     if (alreadyLoadingThis) return;
 
     lastPrivateStatsKeyRef.current = key;
-    setPrivateStats({ loading: true, error: undefined, stats: undefined });
 
     (async () => {
+      // First, immediately get cached stats from background store (persisted)
+      try {
+        const cachedStats = await getPrivateStats({ network, accountId, channelId });
+        if (cancelled) return;
+        
+        // Show cached stats immediately, with loading=true to indicate refresh in progress
+        setPrivateStats({ 
+          loading: true, 
+          error: undefined, 
+          stats: cachedStats 
+        });
+      } catch {
+        // No cached stats available, start with loading state
+        if (cancelled) return;
+        setPrivateStats({ loading: true, error: undefined, stats: undefined });
+      }
+
+      // Then refresh from network
       try {
         const ensured = await ensurePrivateChannelTracking({
           network,
@@ -453,25 +658,47 @@ export function HomePage() {
 
   const onSelectPrivateChannel = async (channelId: string) => {
     const network = selectedNetwork as ChainNetwork;
+    const accountId = selectedAccount?.accountId;
+    const walletId = selectedAccount?.walletId;
+    
     try {
-      setChannelPickerOpen(false);
-
-      // We update the selected channel in the backend.
-      // The useEffect hook will detect the change in selectedChannelId and trigger the stats sync.
-      // We clear the current stats to indicate a switch is happening.
-      setPrivateStats(undefined);
+      // Set loading state and immediately get cached stats from background
       lastPrivateStatsKeyRef.current = undefined;
+      
+      if (accountId && walletId) {
+        try {
+          const cachedStats = await getPrivateStats({ network, accountId, channelId });
+          setPrivateStats({ loading: true, error: undefined, stats: cachedStats });
+        } catch {
+          setPrivateStats({ loading: true, error: undefined, stats: undefined });
+        }
+      } else {
+        setPrivateStats({ loading: true, error: undefined, stats: undefined });
+      }
+
+      // Optimistically update the selected channel ID while preserving channels
+      setPrivateChannels((prev) => ({
+        initializing: false,
+        loading: false,
+        refreshing: true,
+        channels: prev?.channels ?? [],
+        selectedChannelId: channelId,
+        error: undefined,
+      }));
+      setPrivateView("selected");
 
       const res = await setSelectedPrivateChannel({ network, channelId });
       if (!res.ok) return;
       const next = await getPrivateChannels({ network });
       if (!next.ok) return;
       setPrivateChannels({
+        initializing: false,
         loading: false,
+        refreshing: false,
         channels: next.channels,
         selectedChannelId: next.selectedChannelId,
+        error: undefined,
       });
-      setPrivateView("selected");
     } catch (err) {
       // Keep UI responsive; don't leave spinners running forever.
       if (privateStats?.loading) {
@@ -571,18 +798,32 @@ export function HomePage() {
   };
 
   const onSelectAccount = async (account: SafeAccount) => {
+    // If in private mode, get cached stats from background BEFORE changing account
+    if (viewMode === "private") {
+      const network = selectedNetwork as ChainNetwork;
+      const channelId = privateChannels?.selectedChannelId;
+      lastPrivateStatsKeyRef.current = undefined;
+      
+      if (channelId) {
+        try {
+          const cachedStats = await getPrivateStats({ 
+            network, 
+            accountId: account.accountId, 
+            channelId 
+          });
+          setPrivateStats({ loading: true, error: undefined, stats: cachedStats });
+        } catch {
+          setPrivateStats({ loading: true, error: undefined, stats: undefined });
+        }
+      }
+    }
+    
     await setSelectedAccount({
       walletId: account.walletId,
       accountId: account.accountId,
     });
     await actions.refreshStatus();
     setAccountPickerOpen(false);
-
-    // If in private mode, clear stats so they re-load for the new account
-    if (viewMode === "private") {
-      setPrivateStats(undefined);
-      lastPrivateStatsKeyRef.current = undefined;
-    }
   };
 
   const startRename = (account: SafeAccount) => {
@@ -652,6 +893,30 @@ export function HomePage() {
     }
   };
 
+  const selectedPrivateChannel = useMemo(
+    () =>
+      privateChannels?.channels.find(
+        (c) => c.id === privateChannels.selectedChannelId
+      ),
+    [privateChannels?.channels, privateChannels?.selectedChannelId]
+  );
+
+  // Check if the current account has a valid session with the selected provider
+  const isConnected = useMemo(() => {
+    if (!selectedPrivateChannel?.selectedProviderId) return false;
+    if (!selectedAccount?.accountId) return false;
+
+    const selectedProvider = selectedPrivateChannel.providers.find(
+      (p) => p.id === selectedPrivateChannel.selectedProviderId
+    );
+    if (!selectedProvider) return false;
+
+    const session = selectedProvider.sessions?.[selectedAccount.accountId];
+    if (!session) return false;
+
+    return session.expiresAt > Date.now();
+  }, [selectedPrivateChannel, selectedAccount?.accountId]);
+
   return (
     <HomeTemplate
       selectedAccount={selectedAccount}
@@ -667,13 +932,16 @@ export function HomePage() {
       privateStats={privateStats}
       onAddPrivateChannel={() => actions.goPrivateAddChannel()}
       onSelectPrivateChannel={onSelectPrivateChannel}
+      onAddPrivacyProvider={onAddPrivacyProvider}
+      onRemovePrivacyProvider={onRemovePrivacyProvider}
+      onSelectPrivacyProvider={onSelectPrivacyProvider}
       activation={activation}
       onFundWithFriendbot={onFundWithFriendbot}
       accountPickerOpen={accountPickerOpen}
       setAccountPickerOpen={setAccountPickerOpen}
       channelPickerOpen={channelPickerOpen}
       setChannelPickerOpen={setChannelPickerOpen}
-      isConnected={false} // Placeholder for now
+      isConnected={isConnected}
       rowMenuOpenFor={rowMenuOpenFor}
       setRowMenuOpenFor={setRowMenuOpenFor}
       editingAccountId={editingAccountId}

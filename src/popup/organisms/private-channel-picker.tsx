@@ -10,6 +10,7 @@ export type PrivateChannelPickerProps = {
 
   onSelectChannel: (channelId: string) => void | Promise<void>;
   onAddChannel: () => void | Promise<void>;
+  onManageChannel?: (channelId: string) => void | Promise<void>;
 };
 
 export function PrivateChannelPicker(props: PrivateChannelPickerProps) {
@@ -26,6 +27,11 @@ export function PrivateChannelPicker(props: PrivateChannelPickerProps) {
             title={c.name}
             subtitle={c.asset.code}
             onClick={() => props.onSelectChannel(c.id)}
+            onActionClick={
+              selected && props.onManageChannel
+                ? () => props.onManageChannel!(c.id)
+                : undefined
+            }
           />
         );
       })}

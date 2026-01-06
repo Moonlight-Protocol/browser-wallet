@@ -29,6 +29,17 @@ import { handleGetPrivateChannels } from "@/background/handlers/private/get-priv
 import { handleAddPrivateChannel } from "@/background/handlers/private/add-private-channel.ts";
 import { handleSetSelectedPrivateChannel } from "@/background/handlers/private/set-selected-private-channel.ts";
 import { handleEnsurePrivateChannelTracking } from "@/background/handlers/private/ensure-private-channel-tracking.ts";
+import { handleGetPrivateStats } from "@/background/handlers/private/get-private-stats.ts";
+import { handleAddPrivacyProvider } from "@/background/handlers/private/add-privacy-provider.ts";
+import { handleRemovePrivacyProvider } from "@/background/handlers/private/remove-privacy-provider.ts";
+import { handleSetSelectedPrivacyProvider } from "@/background/handlers/private/set-selected-privacy-provider.ts";
+import { handleConnectPrivacyProvider } from "@/background/handlers/private/connect-privacy-provider.ts";
+import { handleDisconnectPrivacyProvider } from "@/background/handlers/private/disconnect-privacy-provider.ts";
+import { handleGetPrivacyProviderAuthChallenge } from "@/background/handlers/private/get-privacy-provider-auth-challenge.ts";
+import { handleRequestSigning } from "@/background/handlers/signing/request-signing.ts";
+import { handleGetSigningRequest } from "@/background/handlers/signing/get-signing-request.ts";
+import { handleApproveSigningRequest } from "@/background/handlers/signing/approve-signing-request.ts";
+import { handleRejectSigningRequest } from "@/background/handlers/signing/reject-signing-request.ts";
 import { ensureSessionHydrated } from "@/background/session.ts";
 
 // Background service worker
@@ -57,6 +68,18 @@ const handlers: HandlerMap = {
   [MessageType.SetSelectedPrivateChannel]: handleSetSelectedPrivateChannel,
   [MessageType.EnsurePrivateChannelTracking]:
     handleEnsurePrivateChannelTracking,
+  [MessageType.GetPrivateStats]: handleGetPrivateStats,
+  [MessageType.AddPrivacyProvider]: handleAddPrivacyProvider,
+  [MessageType.RemovePrivacyProvider]: handleRemovePrivacyProvider,
+  [MessageType.SetSelectedPrivacyProvider]: handleSetSelectedPrivacyProvider,
+  [MessageType.ConnectPrivacyProvider]: handleConnectPrivacyProvider,
+  [MessageType.DisconnectPrivacyProvider]: handleDisconnectPrivacyProvider,
+  [MessageType.GetPrivacyProviderAuthChallenge]:
+    handleGetPrivacyProviderAuthChallenge,
+  [MessageType.RequestSigning]: handleRequestSigning,
+  [MessageType.GetSigningRequest]: handleGetSigningRequest,
+  [MessageType.ApproveSigningRequest]: handleApproveSigningRequest,
+  [MessageType.RejectSigningRequest]: handleRejectSigningRequest,
 };
 
 browser.runtime.onMessage.addListener(

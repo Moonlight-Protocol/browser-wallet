@@ -12,7 +12,12 @@ import { touch } from "@/popup/api/touch.ts";
 import { DEV } from "@/common/dev-flag.ts";
 import type { SafeAccount } from "@/background/handlers/accounts/get-accounts.types.ts";
 
-export type PopupRoute = "home" | "import" | "settings" | "private-add-channel";
+export type PopupRoute =
+  | "home"
+  | "import"
+  | "settings"
+  | "private-add-channel"
+  | "sign-request";
 
 type PopupState = {
   loading: boolean;
@@ -22,6 +27,11 @@ type PopupState = {
   accountsLoading: boolean;
   accountsError?: string;
   route: PopupRoute;
+  signingRequestId?: string;
+  /** True if signing was initiated from within popup (navigate back after) */
+  inPopupSigningFlow: boolean;
+  /** Incremented to trigger private channels refresh */
+  privateChannelsRefreshKey: number;
 };
 
 type PopupActions = {
@@ -30,6 +40,7 @@ type PopupActions = {
   goImport: () => void;
   goSettings: () => void;
   goPrivateAddChannel: () => void;
+  goSignRequest: (requestId: string) => void;
 };
 
 type PopupContextValue = {
@@ -40,10 +51,24 @@ type PopupContextValue = {
 const PopupContext = createContext<PopupContextValue | undefined>(undefined);
 
 export function PopupProvider(props: { children: React.ReactNode }) {
-  const [state, setState] = useState<PopupState>({
-    loading: true,
-    accountsLoading: false,
-    route: "home",
+  const [state, setState] = useState<PopupState>(() => {
+    const hash = window.location.hash;
+    let route: PopupRoute = "home";
+    let signingRequestId: string | undefined;
+
+    if (hash.startsWith("#/sign-request/")) {
+      route = "sign-request";
+      signingRequestId = hash.replace("#/sign-request/", "");
+    }
+
+    return {
+      loading: true,
+      accountsLoading: false,
+      route,
+      signingRequestId,
+      inPopupSigningFlow: false,
+      privateChannelsRefreshKey: 0,
+    };
   });
 
   const lastTouchAtRef = useRef(0);
@@ -60,11 +85,27 @@ export function PopupProvider(props: { children: React.ReactNode }) {
     touch({ ttlMs: 30 * 60 * 1000 }).catch(() => undefined);
   };
 
-  const goHome = () => setState((prev) => ({ ...prev, route: "home" }));
+  const goHome = () =>
+    setState((prev) => ({
+      ...prev,
+      route: "home",
+      inPopupSigningFlow: false,
+      // Increment refresh key if coming back from signing flow to trigger reload
+      privateChannelsRefreshKey: prev.inPopupSigningFlow
+        ? prev.privateChannelsRefreshKey + 1
+        : prev.privateChannelsRefreshKey,
+    }));
   const goImport = () => setState((prev) => ({ ...prev, route: "import" }));
   const goSettings = () => setState((prev) => ({ ...prev, route: "settings" }));
   const goPrivateAddChannel = () =>
     setState((prev) => ({ ...prev, route: "private-add-channel" }));
+  const goSignRequest = (requestId: string) =>
+    setState((prev) => ({
+      ...prev,
+      route: "sign-request",
+      signingRequestId: requestId,
+      inPopupSigningFlow: true,
+    }));
 
   const refreshStatus = async () => {
     const startedAt = Date.now();
@@ -163,6 +204,9 @@ export function PopupProvider(props: { children: React.ReactNode }) {
 
   // Defensive: if we lock or have no accounts, route must be home.
   useEffect(() => {
+    // If we are in a special flow like signing, do not force-reset to home.
+    if (state.route === "sign-request") return;
+
     const unlocked = state.status?.unlocked ?? false;
     const hasAccounts = (state.accounts?.length ?? 0) > 0;
     if (!unlocked || !hasAccounts) {
@@ -210,6 +254,7 @@ export function PopupProvider(props: { children: React.ReactNode }) {
         goImport,
         goSettings,
         goPrivateAddChannel,
+        goSignRequest,
       },
     }),
     [state]

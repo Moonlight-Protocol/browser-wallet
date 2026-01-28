@@ -13,10 +13,27 @@ function envFlag(name: string, defaultValue = false): boolean {
   return raw === "1" || raw.toLowerCase() === "true";
 }
 
+async function preBuildChecks() {
+  console.log("🔍 Running pre-build checks...");
+
+  const lint = new Deno.Command("deno", {
+    args: ["lint"],
+  });
+  const lintResult = await lint.output();
+  if (!lintResult.success) {
+    throw new Error("Linting failed! Fix errors before building.");
+  }
+
+  console.log("✅ Pre-build checks passed!");
+}
+
 async function build() {
   const DEV = envFlag("DEV", false);
   const MINIFY = envFlag("MINIFY", false);
 
+  if (Deno.env.get("DEV") !== "1") {
+    await preBuildChecks();
+  }
   const repoRoot = new URL("..", import.meta.url).pathname;
   const stellarSdkRoot =
     `${repoRoot}node_modules/.deno/@stellar+stellar-sdk@14.4.2/node_modules/@stellar/stellar-sdk/`;

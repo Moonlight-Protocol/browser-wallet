@@ -4,7 +4,7 @@ import { signingManager } from "@/background/session.ts";
 import browser from "webextension-polyfill";
 
 export const handleRequestSigning: Handler<MessageType.RequestSigning> = async (
-  message
+  message,
 ) => {
   const { requestType, xdr, accountId, network } = message;
 

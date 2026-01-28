@@ -30,7 +30,7 @@ export function Dropdown(props: Props) {
       <div
         className={cn(
           "absolute left-0 top-12 z-50 w-full rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95",
-          props.panelClassName
+          props.panelClassName,
         )}
       >
         {props.children}

@@ -1,6 +1,6 @@
 import { MessageType } from "@/background/messages.ts";
 import type { Handler } from "@/background/messages.ts";
-import { signingManager, vault, unlockVault } from "@/background/session.ts";
+import { signingManager, unlockVault, vault } from "@/background/session.ts";
 import { Keys } from "@/keys/keys.ts";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
 import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
@@ -44,7 +44,7 @@ export const handleApproveSigningRequest: Handler<
     // Mnemonic
     keypair = await Keys.deriveStellarKeypairFromMnemonic(
       found.wallet.mnemonic,
-      found.account.type === "derived" ? found.account.index : 0
+      found.account.type === "derived" ? found.account.index : 0,
     );
   }
 

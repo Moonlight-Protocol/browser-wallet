@@ -17,7 +17,7 @@ export async function renameAccount(params: {
   if (!res.ok) {
     throw new ApiError(
       res.error.message ?? "Failed to rename key",
-      res.error.code
+      res.error.code,
     );
   }
 }

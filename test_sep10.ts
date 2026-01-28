@@ -11,7 +11,7 @@ globalThis.fetch = (input, init) => {
   console.log("Fetch called with:", input, init);
   // Return a mock structure
   return Promise.resolve(
-    new Response(JSON.stringify({ transaction: "AAAA..." }))
+    new Response(JSON.stringify({ transaction: "AAAA..." })),
   );
 };
 

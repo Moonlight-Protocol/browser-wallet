@@ -29,10 +29,10 @@ export function HomePage() {
   const [accountPickerOpen, setAccountPickerOpen] = useState(false);
   const [channelPickerOpen, setChannelPickerOpen] = useState(false);
   const [rowMenuOpenFor, setRowMenuOpenFor] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [editingAccountId, setEditingAccountId] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [editingName, setEditingName] = useState("");
   const [actionBusy, setActionBusy] = useState(false);
@@ -42,26 +42,26 @@ export function HomePage() {
 
   const [selectedChain, setSelectedChain] = useState<
     | {
-        initialized?: boolean;
-        balanceXlm?: string;
-        sequence?: string;
-        created?: boolean;
-        createdConfirmed?: boolean;
-        syncing: boolean;
-        stale: boolean;
-        error?: string;
-      }
+      initialized?: boolean;
+      balanceXlm?: string;
+      sequence?: string;
+      created?: boolean;
+      createdConfirmed?: boolean;
+      syncing: boolean;
+      stale: boolean;
+      error?: string;
+    }
     | undefined
   >(undefined);
 
   const [activation, setActivation] = useState<
     | {
-        status: "created" | "not_created" | "unknown";
-        canUseFriendbot: boolean;
-        checking: boolean;
-        funding: boolean;
-        error?: string;
-      }
+      status: "created" | "not_created" | "unknown";
+      canUseFriendbot: boolean;
+      checking: boolean;
+      funding: boolean;
+      error?: string;
+    }
     | undefined
   >(undefined);
 
@@ -71,7 +71,7 @@ export function HomePage() {
     const pick = (ref?: { walletId: string; accountId: string }) => {
       if (!ref) return undefined;
       return accounts.find(
-        (a) => a.walletId === ref.walletId && a.accountId === ref.accountId
+        (a) => a.walletId === ref.walletId && a.accountId === ref.accountId,
       );
     };
 
@@ -81,10 +81,10 @@ export function HomePage() {
   const keyGroups = useMemo(() => {
     const main = mainKeyRef
       ? accounts.find(
-          (a) =>
-            a.walletId === mainKeyRef.walletId &&
-            a.accountId === mainKeyRef.accountId
-        )
+        (a) =>
+          a.walletId === mainKeyRef.walletId &&
+          a.accountId === mainKeyRef.accountId,
+      )
       : accounts[0];
 
     const mainWalletId = main?.walletId;
@@ -105,7 +105,7 @@ export function HomePage() {
 
     const derived = accounts.filter(isDerivedFromMain);
     const imported = accounts.filter(
-      (a) => !isMain(a) && !isDerivedFromMain(a)
+      (a) => !isMain(a) && !isDerivedFromMain(a),
     );
 
     return {
@@ -123,13 +123,13 @@ export function HomePage() {
 
   const [privateChannels, setPrivateChannels] = useState<
     | {
-        initializing?: boolean;
-        loading: boolean;
-        refreshing?: boolean;
-        error?: string;
-        channels: PrivateChannel[];
-        selectedChannelId?: string;
-      }
+      initializing?: boolean;
+      loading: boolean;
+      refreshing?: boolean;
+      error?: string;
+      channels: PrivateChannel[];
+      selectedChannelId?: string;
+    }
     | undefined
   >(undefined);
 
@@ -141,10 +141,10 @@ export function HomePage() {
 
   const [privateStats, setPrivateStats] = useState<
     | {
-        loading: boolean;
-        error?: string;
-        stats?: PrivateChannelStats;
-      }
+      loading: boolean;
+      error?: string;
+      stats?: PrivateChannelStats;
+    }
     | undefined
   >(undefined);
 
@@ -201,7 +201,7 @@ export function HomePage() {
   const onAddPrivacyProvider = async (
     channelId: string,
     name: string,
-    url: string
+    url: string,
   ) => {
     try {
       await addPrivacyProvider({
@@ -218,7 +218,7 @@ export function HomePage() {
 
   const onRemovePrivacyProvider = async (
     channelId: string,
-    providerId: string
+    providerId: string,
   ) => {
     try {
       await removePrivacyProvider({
@@ -234,7 +234,7 @@ export function HomePage() {
 
   const onSelectPrivacyProvider = async (
     channelId: string,
-    providerId: string | undefined
+    providerId: string | undefined,
   ) => {
     try {
       const channel = privateChannels?.channels.find((c) => c.id === channelId);
@@ -246,7 +246,7 @@ export function HomePage() {
         if (!currentProviderId) return;
 
         const provider = channel.providers.find(
-          (p) => p.id === currentProviderId
+          (p) => p.id === currentProviderId,
         );
         if (!provider) return;
 
@@ -534,7 +534,7 @@ export function HomePage() {
 
         const hasSelected = Boolean(
           res.selectedChannelId &&
-            res.channels.some((c) => c.id === res.selectedChannelId)
+            res.channels.some((c) => c.id === res.selectedChannelId),
         );
         setPrivateView(hasSelected ? "selected" : "list");
       } catch (err) {
@@ -570,8 +570,8 @@ export function HomePage() {
     if (!channelId || !accountId || !walletId) return;
 
     const key = `${network}:${walletId}:${accountId}:${channelId}`;
-    const alreadyLoadingThis =
-      privateStats?.loading && lastPrivateStatsKeyRef.current === key;
+    const alreadyLoadingThis = privateStats?.loading &&
+      lastPrivateStatsKeyRef.current === key;
 
     // Allow re-fetching even if we previously loaded stats for this key, so we
     // always pick up fresh balances when the user reopens or switches back.
@@ -620,8 +620,8 @@ export function HomePage() {
         } else {
           setPrivateStats({
             loading: false,
-            error:
-              ensured.error.message ?? "Failed to prepare private tracking",
+            error: ensured.error.message ??
+              "Failed to prepare private tracking",
             stats: undefined,
           });
         }
@@ -731,15 +731,13 @@ export function HomePage() {
     if (!pk) return;
 
     setActivation((prev) =>
-      prev
-        ? { ...prev, funding: true, error: undefined }
-        : {
-            status: "unknown",
-            canUseFriendbot: false,
-            checking: false,
-            funding: true,
-            error: undefined,
-          }
+      prev ? { ...prev, funding: true, error: undefined } : {
+        status: "unknown",
+        canUseFriendbot: false,
+        checking: false,
+        funding: true,
+        error: undefined,
+      }
     );
 
     try {
@@ -777,8 +775,8 @@ export function HomePage() {
           stale: res.stale,
         });
 
-        const done =
-          res.state.createdConfirmed === true || res.state.initialized === true;
+        const done = res.state.createdConfirmed === true ||
+          res.state.initialized === true;
         if (done) break;
 
         await new Promise((r) => setTimeout(r, pollMs));
@@ -794,15 +792,13 @@ export function HomePage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setActivation((prev) =>
-        prev
-          ? { ...prev, funding: false, error: msg }
-          : {
-              status: "unknown",
-              canUseFriendbot: false,
-              checking: false,
-              funding: false,
-              error: msg,
-            }
+        prev ? { ...prev, funding: false, error: msg } : {
+          status: "unknown",
+          canUseFriendbot: false,
+          checking: false,
+          funding: false,
+          error: msg,
+        }
       );
       return;
     }
@@ -880,8 +876,8 @@ export function HomePage() {
     }
   };
 
-  const canDeriveNew =
-    Boolean(keyGroups.main) && keyGroups.main?.walletType === "mnemonic";
+  const canDeriveNew = Boolean(keyGroups.main) &&
+    keyGroups.main?.walletType === "mnemonic";
 
   const onCreateNew = async () => {
     if (!canDeriveNew) return;
@@ -917,9 +913,9 @@ export function HomePage() {
   const selectedPrivateChannel = useMemo(
     () =>
       privateChannels?.channels.find(
-        (c) => c.id === privateChannels.selectedChannelId
+        (c) => c.id === privateChannels.selectedChannelId,
       ),
-    [privateChannels?.channels, privateChannels?.selectedChannelId]
+    [privateChannels?.channels, privateChannels?.selectedChannelId],
   );
 
   // Check if the current account has a valid session with the selected provider
@@ -928,7 +924,7 @@ export function HomePage() {
     if (!selectedAccount?.accountId) return false;
 
     const selectedProvider = selectedPrivateChannel.providers.find(
-      (p) => p.id === selectedPrivateChannel.selectedProviderId
+      (p) => p.id === selectedPrivateChannel.selectedProviderId,
     );
     if (!selectedProvider) return false;
 

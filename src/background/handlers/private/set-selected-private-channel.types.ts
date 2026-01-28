@@ -8,9 +8,9 @@ export type SetSelectedPrivateChannelRequest = {
 
 export type SetSelectedPrivateChannelResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

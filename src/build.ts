@@ -18,7 +18,8 @@ async function build() {
   const MINIFY = envFlag("MINIFY", false);
 
   const repoRoot = new URL("..", import.meta.url).pathname;
-  const stellarSdkRoot = `${repoRoot}node_modules/.deno/@stellar+stellar-sdk@14.4.2/node_modules/@stellar/stellar-sdk/`;
+  const stellarSdkRoot =
+    `${repoRoot}node_modules/.deno/@stellar+stellar-sdk@14.4.2/node_modules/@stellar/stellar-sdk/`;
   const _stellarSdkMinimalEntry = `${stellarSdkRoot}lib/minimal/index.js`;
   const _stellarSdkRpcEntry = `${stellarSdkRoot}lib/rpc/index.js`;
   const _stellarSdkContractEntry = `${stellarSdkRoot}lib/contract/index.js`;
@@ -113,7 +114,7 @@ async function build() {
     {
       from: "src/popup/style.css",
       to: `${buildDir}/style.css`,
-    }
+    },
   );
   await Deno.writeTextFile(`${buildDir}/style.css`, result.css);
 

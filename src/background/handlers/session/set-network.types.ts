@@ -6,9 +6,9 @@ export type SetNetworkRequest = {
 
 export type SetNetworkResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

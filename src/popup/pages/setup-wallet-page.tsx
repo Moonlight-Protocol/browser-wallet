@@ -28,8 +28,7 @@ export function SetupWalletPage() {
     return undefined;
   })();
 
-  const canSubmit =
-    password.length > 0 &&
+  const canSubmit = password.length > 0 &&
     confirmPassword.length > 0 &&
     password === confirmPassword &&
     !submitting;

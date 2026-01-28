@@ -52,16 +52,18 @@ export function AddWalletTemplate(props: Props) {
                 spellCheck={false}
                 className="font-mono text-sm"
               />
-              {props.mnemonicError ? (
-                <p className="text-sm text-destructive">
-                  {props.mnemonicError}
-                </p>
-              ) : null}
+              {props.mnemonicError
+                ? (
+                  <p className="text-sm text-destructive">
+                    {props.mnemonicError}
+                  </p>
+                )
+                : null}
             </div>
 
-            {props.submitError ? (
-              <p className="text-sm text-destructive">{props.submitError}</p>
-            ) : null}
+            {props.submitError
+              ? <p className="text-sm text-destructive">{props.submitError}</p>
+              : null}
           </CardContent>
           <CardFooter className="flex gap-2">
             <Button
@@ -95,9 +97,9 @@ export function AddWalletTemplate(props: Props) {
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
-          {props.submitError ? (
-            <p className="text-sm text-destructive">{props.submitError}</p>
-          ) : null}
+          {props.submitError
+            ? <p className="text-sm text-destructive">{props.submitError}</p>
+            : null}
         </CardContent>
         <CardFooter className="flex flex-col gap-2">
           <Button

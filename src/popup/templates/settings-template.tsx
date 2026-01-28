@@ -21,7 +21,7 @@ export type SettingsTemplateProps = {
   error?: string;
   onBack: () => void;
   onSelectNetwork: (
-    network: Exclude<Network, "custom">
+    network: Exclude<Network, "custom">,
   ) => void | Promise<void>;
 };
 
@@ -38,8 +38,7 @@ export function SettingsTemplate(props: SettingsTemplateProps) {
               <RadioGroup
                 value={props.selectedNetwork}
                 onValueChange={(v) =>
-                  props.onSelectNetwork(v as Exclude<Network, "custom">)
-                }
+                  props.onSelectNetwork(v as Exclude<Network, "custom">)}
                 disabled={props.busy}
               >
                 {props.networkItems.map((item) => (
@@ -56,7 +55,7 @@ export function SettingsTemplate(props: SettingsTemplateProps) {
                       htmlFor={item.key}
                       className={cn(
                         "cursor-pointer font-normal",
-                        item.disabled && "cursor-not-allowed opacity-50"
+                        item.disabled && "cursor-not-allowed opacity-50",
                       )}
                     >
                       {item.label}
@@ -68,11 +67,13 @@ export function SettingsTemplate(props: SettingsTemplateProps) {
           </Card>
         </section>
 
-        {props.error ? (
-          <Text tone="error" size="sm" className="mt-2">
-            {props.error}
-          </Text>
-        ) : null}
+        {props.error
+          ? (
+            <Text tone="error" size="sm" className="mt-2">
+              {props.error}
+            </Text>
+          )
+          : null}
       </div>
     </SubpageShell>
   );

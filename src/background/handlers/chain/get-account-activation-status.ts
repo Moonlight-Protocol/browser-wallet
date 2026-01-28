@@ -4,7 +4,7 @@ import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
 import { chain } from "@/background/session.ts";
 
 export const handleGetAccountActivationStatus = async (
-  message: MessageFor<MessageType.GetAccountActivationStatus>
+  message: MessageFor<MessageType.GetAccountActivationStatus>,
 ): Promise<ResponseFor<MessageType.GetAccountActivationStatus>> => {
   let canUseFriendbot = false;
   try {
@@ -19,7 +19,7 @@ export const handleGetAccountActivationStatus = async (
     if (status === "created") {
       chain.setAccountPartial(
         { network: message.network, publicKey: message.publicKey },
-        { created: true, createdConfirmed: true }
+        { created: true, createdConfirmed: true },
       );
       await chain.flush();
     }

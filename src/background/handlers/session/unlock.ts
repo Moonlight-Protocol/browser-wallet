@@ -2,7 +2,7 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { unlockVault } from "@/background/session.ts";
 
 export const handleUnlock = async (
-  message: MessageFor<MessageType.Unlock>
+  message: MessageFor<MessageType.Unlock>,
 ): Promise<ResponseFor<MessageType.Unlock>> => {
   try {
     if (!message.password) {

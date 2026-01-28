@@ -14,15 +14,16 @@ export class ApiError extends Error {
 
 export async function callBackground<T extends MessageType>(
   message: { type: T } & Record<string, unknown>,
-  options?: { timeoutMs?: number }
+  options?: { timeoutMs?: number },
 ): Promise<ResponseFor<T>> {
   const timeoutMs = options?.timeoutMs ?? 15_000;
   const startedAt = Date.now();
-  if (DEV)
+  if (DEV) {
     console.log("[popup] callBackground:start", {
       type: message.type,
       timeoutMs,
     });
+  }
 
   let timer: number | undefined;
   try {
@@ -33,18 +34,19 @@ export async function callBackground<T extends MessageType>(
           reject(
             new ApiError(
               "Background did not respond (timeout)",
-              "BACKGROUND_TIMEOUT"
-            )
+              "BACKGROUND_TIMEOUT",
+            ),
           );
         }, timeoutMs) as unknown as number;
       }),
     ])) as ResponseFor<T>;
 
-    if (DEV)
+    if (DEV) {
       console.log("[popup] callBackground:ok", {
         type: message.type,
         ms: Date.now() - startedAt,
       });
+    }
 
     return res;
   } catch (err) {

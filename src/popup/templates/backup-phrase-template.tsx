@@ -33,12 +33,12 @@ export function BackupPhraseTemplate(props: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           <MnemonicWords words={props.words} />
-          {props.copyInfo ? (
-            <p className="text-sm text-muted-foreground">{props.copyInfo}</p>
-          ) : null}
-          {props.submitError ? (
-            <p className="text-sm text-destructive">{props.submitError}</p>
-          ) : null}
+          {props.copyInfo
+            ? <p className="text-sm text-muted-foreground">{props.copyInfo}</p>
+            : null}
+          {props.submitError
+            ? <p className="text-sm text-destructive">{props.submitError}</p>
+            : null}
         </CardContent>
         <CardFooter className="flex flex-col gap-2">
           <Button

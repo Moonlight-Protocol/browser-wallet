@@ -34,7 +34,7 @@ function toSafeAccounts(wallet: VaultWallet): SafeAccount[] {
 }
 
 export const handleGetAccounts = (
-  _message: MessageFor<MessageType.GetAccounts>
+  _message: MessageFor<MessageType.GetAccounts>,
 ): ResponseFor<MessageType.GetAccounts> => {
   if (vault.isLocked()) {
     return { type: MessageType.GetAccounts, error: { code: "LOCKED" } };

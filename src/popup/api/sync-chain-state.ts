@@ -20,7 +20,7 @@ export async function syncChainState(params: {
   if ("ok" in res && res.ok === false) {
     throw new ApiError(
       res.error.message ?? "Failed to sync chain state",
-      res.error.code
+      res.error.code,
     );
   }
 }

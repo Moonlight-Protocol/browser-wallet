@@ -8,7 +8,7 @@ import type {
 import type { Ed25519PublicKey } from "@colibri/core";
 
 export const handleImportWallet = async (
-  message: MessageFor<MessageType.ImportWallet>
+  message: MessageFor<MessageType.ImportWallet>,
 ): Promise<ResponseFor<MessageType.ImportWallet>> => {
   try {
     if (vault.isLocked()) {
@@ -42,8 +42,8 @@ export const handleImportWallet = async (
     const account = await Keys.deriveStellarAccountFromMnemonic(mnemonic, 0);
     const publicKey = account.publicKey as Ed25519PublicKey;
 
-    const defaultName =
-      message.name ?? (hasMain ? `Imported ${walletNumber}` : "Account 1");
+    const defaultName = message.name ??
+      (hasMain ? `Imported ${walletNumber}` : "Account 1");
 
     const wallet: MnemonicWallet = {
       id: crypto.randomUUID(),

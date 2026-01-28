@@ -10,7 +10,7 @@ type EncryptedOptions = {
 };
 
 export class EncryptedPersistedStore<
-  State extends StoreState
+  State extends StoreState,
 > extends PersistedStore<State> {
   private encryption?: EncryptionAdapter;
   private readonly persistRequested: boolean;
@@ -19,7 +19,7 @@ export class EncryptedPersistedStore<
     name: string,
     initialState: State,
     encryption: EncryptionAdapter | undefined,
-    options: EncryptedOptions = {}
+    options: EncryptedOptions = {},
   ) {
     const persistRequested = options.persist ?? true;
     const persistNow = Boolean(encryption) && persistRequested;

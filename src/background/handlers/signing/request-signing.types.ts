@@ -11,11 +11,11 @@ export type RequestSigningRequest = {
 
 export type RequestSigningResponse =
   | {
-      ok: true;
-      requestId: string;
-      signedXdr: string;
-    }
+    ok: true;
+    requestId: string;
+    signedXdr: string;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

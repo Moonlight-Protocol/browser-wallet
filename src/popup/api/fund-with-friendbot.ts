@@ -19,7 +19,7 @@ export async function fundWithFriendbot(params: {
   if ("error" in res) {
     throw new ApiError(
       res.error.message ?? "Failed to fund account",
-      res.error.code
+      res.error.code,
     );
   }
 

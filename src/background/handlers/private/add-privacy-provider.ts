@@ -2,7 +2,7 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { privateChannels } from "@/background/session.ts";
 
 export const handleAddPrivacyProvider = async (
-  message: MessageFor<MessageType.AddPrivacyProvider>
+  message: MessageFor<MessageType.AddPrivacyProvider>,
 ): Promise<ResponseFor<MessageType.AddPrivacyProvider>> => {
   try {
     const providerId = crypto.randomUUID();

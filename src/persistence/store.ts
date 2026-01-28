@@ -1,4 +1,4 @@
-import { createStore, withProps, type Store, type StoreDef } from "@ngneat/elf";
+import { createStore, type Store, type StoreDef, withProps } from "@ngneat/elf";
 import { persistState, type StateStorage } from "@ngneat/elf-persist-state";
 import browser from "webextension-polyfill";
 import { PersistOptions, StoreState } from "@/persistence/types.ts";
@@ -12,15 +12,15 @@ export class PersistedStore<State extends StoreState> {
   protected readonly fallback: State;
 
   constructor(name: string, initialState: State, options: PersistOptions = {}) {
-    this.storageKey =
-      options.storageKey ?? `${name}${DEFAULT_STORAGE_KEY_SUFFIX}`;
+    this.storageKey = options.storageKey ??
+      `${name}${DEFAULT_STORAGE_KEY_SUFFIX}`;
     this.fallback = initialState;
 
     // Elf's createStore returns a Store whose StoreDef is derived from props factories.
     // Cast it to StoreDef<State> so downstream reducers infer State correctly.
     this.store = createStore(
       { name },
-      withProps<State>(initialState)
+      withProps<State>(initialState),
     ) as unknown as Store<StoreDef<State>, State>;
     this.destroyPersistence = this.setupPersistence(options.persist ?? true);
   }

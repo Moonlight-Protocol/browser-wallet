@@ -3,8 +3,8 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useState,
   useRef,
+  useState,
 } from "react";
 import { getStatus, type PopupStatus } from "@/popup/api/get-status.ts";
 import { getAccounts } from "@/popup/api/get-accounts.ts";
@@ -257,7 +257,7 @@ export function PopupProvider(props: { children: React.ReactNode }) {
         goSignRequest,
       },
     }),
-    [state]
+    [state],
   );
 
   return (

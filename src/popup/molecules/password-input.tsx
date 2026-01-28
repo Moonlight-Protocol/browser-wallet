@@ -17,7 +17,7 @@ export function PasswordInput(props: Props) {
 
   const inputId = useMemo(
     () => `password-${Math.random().toString(16).slice(2)}`,
-    []
+    [],
   );
 
   return (
@@ -50,19 +50,19 @@ export function PasswordInput(props: Props) {
           aria-label={visible ? "Hide password" : "Show password"}
           className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground hover:text-foreground"
         >
-          {visible ? (
-            <IconEyeClosed className="h-4 w-4" />
-          ) : (
-            <IconEye className="h-4 w-4" />
-          )}
+          {visible
+            ? <IconEyeClosed className="h-4 w-4" />
+            : <IconEye className="h-4 w-4" />}
         </button>
       </div>
 
-      {props.error ? (
-        <Text size="sm" tone="error" className="mt-1">
-          {props.error}
-        </Text>
-      ) : null}
+      {props.error
+        ? (
+          <Text size="sm" tone="error" className="mt-1">
+            {props.error}
+          </Text>
+        )
+        : null}
     </div>
   );
 }

@@ -14,9 +14,9 @@ export type SyncChainStateRequest = {
 
 export type SyncChainStateResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

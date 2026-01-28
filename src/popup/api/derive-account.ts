@@ -10,7 +10,7 @@ export async function deriveAccount(): Promise<void> {
   if (!res.ok) {
     throw new ApiError(
       res.error.message ?? "Failed to derive key",
-      res.error.code
+      res.error.code,
     );
   }
 }

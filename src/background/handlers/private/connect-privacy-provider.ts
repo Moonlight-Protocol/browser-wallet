@@ -41,7 +41,7 @@ export const handleConnectPrivacyProvider: Handler<
         {
           token: authResponse.token,
           expiresAt,
-        }
+        },
       );
 
       // 6. Auto-select the provider

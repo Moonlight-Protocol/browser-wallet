@@ -18,7 +18,7 @@ import {
 } from "@colibri/core";
 
 export const handleEnsurePrivateChannelTracking = async (
-  message: MessageFor<MessageType.EnsurePrivateChannelTracking>
+  message: MessageFor<MessageType.EnsurePrivateChannelTracking>,
 ): Promise<ResponseFor<MessageType.EnsurePrivateChannelTracking>> => {
   console.info("[private][ensure-tracking] request", {
     network: message.network,
@@ -81,19 +81,18 @@ export const handleEnsurePrivateChannelTracking = async (
       };
     }
 
-    const secretKey: Ed25519SecretKey =
-      found.wallet.type === "secret"
-        ? found.account.type === "imported"
-          ? (found.account.secret as Ed25519SecretKey)
-          : (() => {
-              throw new Error("Invalid account type for secret wallet");
-            })()
-        : ((
-            await Keys.deriveStellarAccountFromMnemonic(
-              found.wallet.mnemonic,
-              found.account.type === "derived" ? found.account.index : 0
-            )
-          ).secret as Ed25519SecretKey);
+    const secretKey: Ed25519SecretKey = found.wallet.type === "secret"
+      ? found.account.type === "imported"
+        ? (found.account.secret as Ed25519SecretKey)
+        : (() => {
+          throw new Error("Invalid account type for secret wallet");
+        })()
+      : ((
+        await Keys.deriveStellarAccountFromMnemonic(
+          found.wallet.mnemonic,
+          found.account.type === "derived" ? found.account.index : 0,
+        )
+      ).secret as Ed25519SecretKey);
 
     const networkConfig: NetworkConfig = getNetworkConfig(message.network);
 
@@ -124,7 +123,7 @@ export const handleEnsurePrivateChannelTracking = async (
       networkConfig,
       channel.contractId as ContractId,
       quorumContractId as ContractId,
-      assetId as ContractId
+      assetId as ContractId,
     );
 
     const utxoAccount = UtxoBasedStellarAccount.fromPrivacyChannel({

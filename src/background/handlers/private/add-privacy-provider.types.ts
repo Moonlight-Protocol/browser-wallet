@@ -10,10 +10,10 @@ export type AddPrivacyProviderRequest = {
 
 export type AddPrivacyProviderResponse =
   | {
-      ok: true;
-      providerId: string;
-    }
+    ok: true;
+    providerId: string;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

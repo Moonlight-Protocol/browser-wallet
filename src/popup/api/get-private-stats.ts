@@ -18,7 +18,7 @@ export async function getPrivateStats(params: {
   if (!res.ok) {
     throw new ApiError(
       res.error.message ?? "Failed to get private stats",
-      res.error.code
+      res.error.code,
     );
   }
 

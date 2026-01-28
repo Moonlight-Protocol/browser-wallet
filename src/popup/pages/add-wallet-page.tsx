@@ -4,8 +4,8 @@ import { importWallet } from "@/popup/api/import-wallet.ts";
 import { touch } from "@/popup/api/touch.ts";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import {
-  AddWalletTemplate,
   type AddWalletMode,
+  AddWalletTemplate,
 } from "@/popup/templates/add-wallet-template.tsx";
 import { BackupPhraseTemplate } from "@/popup/templates/backup-phrase-template.tsx";
 import { VerifyPhraseTemplate } from "@/popup/templates/verify-phrase-template.tsx";
@@ -107,12 +107,11 @@ export function AddWalletPage() {
       const value = verifyValues[index] ?? "";
       const dirty = verifyDirty[index] ?? false;
       const expected = generatedWords[index] ?? "";
-      const error =
-        dirty && value.trim() && value.trim() !== expected
-          ? "Incorrect word."
-          : dirty && !value.trim()
-          ? "Required."
-          : undefined;
+      const error = dirty && value.trim() && value.trim() !== expected
+        ? "Incorrect word."
+        : dirty && !value.trim()
+        ? "Required."
+        : undefined;
 
       return {
         index,

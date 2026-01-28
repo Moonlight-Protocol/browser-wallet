@@ -9,9 +9,9 @@ export type FundWithFriendbotRequest = {
 
 export type FundWithFriendbotResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

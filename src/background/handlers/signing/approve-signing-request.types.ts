@@ -7,10 +7,10 @@ export type ApproveSigningRequestRequest = {
 
 export type ApproveSigningRequestResponse =
   | {
-      ok: true;
-      signedXdr: string;
-    }
+    ok: true;
+    signedXdr: string;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

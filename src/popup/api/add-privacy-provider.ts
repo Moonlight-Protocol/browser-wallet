@@ -19,7 +19,7 @@ export async function addPrivacyProvider(params: {
   if ("ok" in res && res.ok === false) {
     throw new ApiError(
       res.error.message ?? "Failed to add provider",
-      res.error.code
+      res.error.code,
     );
   }
 

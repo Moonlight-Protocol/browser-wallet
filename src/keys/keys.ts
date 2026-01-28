@@ -1,6 +1,6 @@
 import "@/common/polyfills/node-globals.ts";
 
-import { mnemonicToSeed, generateMnemonic, validateMnemonic } from "bip39";
+import { generateMnemonic, mnemonicToSeed, validateMnemonic } from "bip39";
 import { Keypair } from "@stellar/stellar-base";
 
 const ED25519_CURVE_SEED = new TextEncoder().encode("ed25519 seed");
@@ -34,19 +34,19 @@ function concatBytes(...parts: Uint8Array[]): Uint8Array {
 
 async function hmacSha512(
   key: Uint8Array,
-  data: Uint8Array
+  data: Uint8Array,
 ): Promise<Uint8Array> {
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
     key as unknown as BufferSource,
     { name: "HMAC", hash: "SHA-512" },
     false,
-    ["sign"]
+    ["sign"],
   );
   const sig = await crypto.subtle.sign(
     "HMAC",
     cryptoKey,
-    data as unknown as BufferSource
+    data as unknown as BufferSource,
   );
   return new Uint8Array(sig);
 }
@@ -63,7 +63,7 @@ async function slip10MasterKeyFromSeed(seed: Uint8Array): Promise<ExtendedKey> {
 
 async function ckdPriv(
   parent: ExtendedKey,
-  index: number
+  index: number,
 ): Promise<ExtendedKey> {
   if (index < HARDENED_OFFSET) {
     throw new Error("ed25519 derivation requires hardened index");
@@ -86,7 +86,7 @@ function parseHardenedPath(path: string): number[] {
   for (const part of parts.slice(1)) {
     if (!part.endsWith("'")) {
       throw new Error(
-        "ed25519 derivation only supports hardened segments (must end with ')"
+        "ed25519 derivation only supports hardened segments (must end with ')",
       );
     }
 
@@ -103,7 +103,7 @@ function parseHardenedPath(path: string): number[] {
 
 async function deriveEd25519SeedFromMnemonic(
   mnemonic: string,
-  derivationPath: string
+  derivationPath: string,
 ): Promise<Uint8Array> {
   const seed = await mnemonicToSeed(mnemonic);
   const seedBytes = new Uint8Array(seed);
@@ -128,19 +128,19 @@ export class Keys {
 
   static async deriveStellarKeypairFromMnemonic(
     mnemonic: string,
-    index = 0
+    index = 0,
   ): Promise<Keypair> {
     const derivationPath = `m/44'/148'/${index}'`;
     const rawSeed = await deriveEd25519SeedFromMnemonic(
       mnemonic,
-      derivationPath
+      derivationPath,
     );
     return Keypair.fromRawEd25519Seed(rawSeed);
   }
 
   static async deriveStellarAccountFromMnemonic(
     mnemonic: string,
-    index = 0
+    index = 0,
   ): Promise<{
     publicKey: string;
     secret: string;
@@ -150,7 +150,7 @@ export class Keys {
     const derivationPath = `m/44'/148'/${index}'`;
     const keypair = await this.deriveStellarKeypairFromMnemonic(
       mnemonic,
-      index
+      index,
     );
     return {
       publicKey: keypair.publicKey(),

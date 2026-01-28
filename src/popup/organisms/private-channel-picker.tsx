@@ -26,11 +26,9 @@ export function PrivateChannelPicker(props: PrivateChannelPickerProps) {
             title={c.name}
             subtitle={c.asset.code}
             onClick={() => props.onSelectChannel(c.id)}
-            onActionClick={
-              selected && props.onManageChannel
-                ? () => props.onManageChannel!(c.id)
-                : undefined
-            }
+            onActionClick={selected && props.onManageChannel
+              ? () => props.onManageChannel!(c.id)
+              : undefined}
           />
         );
       })}

@@ -17,10 +17,10 @@ export type AddPrivateChannelPayload = AddPrivateChannelRequest;
 
 export type AddPrivateChannelResponse =
   | {
-      ok: true;
-      channel: PrivateChannel;
-    }
+    ok: true;
+    channel: PrivateChannel;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

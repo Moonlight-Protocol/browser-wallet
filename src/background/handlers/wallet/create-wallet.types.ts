@@ -7,9 +7,9 @@ export type CreateWalletRequest = {
 
 export type CreateWalletResponse =
   | {
-      firstPublicKey: Ed25519PublicKey;
-      mnemonic: string;
-    }
+    firstPublicKey: Ed25519PublicKey;
+    mnemonic: string;
+  }
   | {
-      error: BackgroundError;
-    };
+    error: BackgroundError;
+  };

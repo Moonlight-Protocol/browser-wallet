@@ -2,7 +2,7 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { extendVaultSession } from "@/background/session.ts";
 
 export const handleTouch = (
-  message: MessageFor<MessageType.Touch>
+  message: MessageFor<MessageType.Touch>,
 ): ResponseFor<MessageType.Touch> => {
   const ok = extendVaultSession({ ttlMs: message.ttlMs });
   if (!ok) {

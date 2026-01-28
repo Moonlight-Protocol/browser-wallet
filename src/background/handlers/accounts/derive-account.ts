@@ -8,7 +8,7 @@ import type {
 import type { Ed25519PublicKey } from "@colibri/core";
 
 export const handleDeriveAccount = async (
-  _message: MessageFor<MessageType.DeriveAccount>
+  _message: MessageFor<MessageType.DeriveAccount>,
 ): Promise<ResponseFor<MessageType.DeriveAccount>> => {
   try {
     if (vault.isLocked()) {
@@ -42,13 +42,13 @@ export const handleDeriveAccount = async (
     const mnemonicWallet = wallet as MnemonicWallet;
     const maxIndex = mnemonicWallet.accounts.reduce(
       (acc, a) => Math.max(acc, a.index ?? 0),
-      -1
+      -1,
     );
     const nextIndex = maxIndex + 1;
 
     const derived = await Keys.deriveStellarAccountFromMnemonic(
       mnemonicWallet.mnemonic,
-      nextIndex
+      nextIndex,
     );
 
     const newAccount: DerivedAccount = {

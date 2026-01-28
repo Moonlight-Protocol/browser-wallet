@@ -7,7 +7,7 @@ import type {
 import { PrioritySyncQueue } from "@/background/chain/queue.ts";
 import { fetchStellarAssetBalance } from "../contexts/chain/fetch-balance.ts";
 import { getNetworkConfig } from "../contexts/chain/network.ts";
-import { StrKey, type Ed25519PublicKey } from "@colibri/core";
+import { type Ed25519PublicKey, StrKey } from "@colibri/core";
 
 type SyncItem = {
   network: ChainNetwork;
@@ -56,7 +56,7 @@ async function runOne(params: { network: ChainNetwork; publicKey: string }) {
     const balance = await fetchStellarAssetBalance(
       networkConfig,
       { code: "XLM", issuer: undefined as never },
-      params.publicKey as Ed25519PublicKey
+      params.publicKey as Ed25519PublicKey,
     );
 
     // NOTE: Previously sourced from Horizon. We intentionally avoid Horizon now.
@@ -91,8 +91,7 @@ export function getChainState(params: {
   const all = chain.store.getValue();
   const existing = all.accounts[key];
 
-  const state: ChainAccountState =
-    existing ??
+  const state: ChainAccountState = existing ??
     ({
       network: params.network,
       publicKey: params.publicKey,
@@ -107,7 +106,7 @@ export function getChainState(params: {
 
 export function enqueueSync(
   items: SyncItem[],
-  options?: { onlyIfStale?: boolean }
+  options?: { onlyIfStale?: boolean },
 ) {
   const onlyIfStale = options?.onlyIfStale ?? true;
 

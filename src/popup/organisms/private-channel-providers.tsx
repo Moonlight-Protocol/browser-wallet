@@ -4,7 +4,7 @@ import { Button } from "@/popup/atoms/button.tsx";
 import { Input } from "@/popup/atoms/input.tsx";
 import { Label } from "@/popup/atoms/label.tsx";
 import { PickerItem } from "@/popup/molecules/picker-item.tsx";
-import { IconServer, IconTrash, IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconServer, IconTrash } from "@tabler/icons-react";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 
 export type PrivateChannelProvidersProps = {
@@ -127,11 +127,10 @@ export function PrivateChannelProviders(props: PrivateChannelProvidersProps) {
                 "h-8 text-xs",
                 selected
                   ? "border-destructive/50 text-destructive hover:bg-destructive/10"
-                  : ""
+                  : "",
               )}
               onClick={() =>
-                props.onSelectProvider(selected ? undefined : p.id)
-              }
+                props.onSelectProvider(selected ? undefined : p.id)}
             >
               {selected ? "Disconnect" : "Connect"}
             </Button>

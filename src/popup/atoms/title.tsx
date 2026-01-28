@@ -17,7 +17,8 @@ const titleVariants = cva("font-light tracking-wide text-primary", {
 });
 
 export interface TitleProps
-  extends React.HTMLAttributes<HTMLHeadingElement>,
+  extends
+    React.HTMLAttributes<HTMLHeadingElement>,
     VariantProps<typeof titleVariants> {}
 
 const Title = React.forwardRef<HTMLHeadingElement, TitleProps>(
@@ -29,7 +30,7 @@ const Title = React.forwardRef<HTMLHeadingElement, TitleProps>(
         {...props}
       />
     );
-  }
+  },
 );
 Title.displayName = "Title";
 

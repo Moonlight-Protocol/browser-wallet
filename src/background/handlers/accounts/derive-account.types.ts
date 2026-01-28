@@ -4,13 +4,13 @@ export type DeriveAccountRequest = Record<string, never>;
 
 export type DeriveAccountResponse =
   | {
-      ok: true;
-      walletId: string;
-      accountId: string;
-      publicKey: string;
-      index: number;
-    }
+    ok: true;
+    walletId: string;
+    accountId: string;
+    publicKey: string;
+    index: number;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

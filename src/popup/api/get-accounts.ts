@@ -5,7 +5,7 @@ import { ApiError, callBackground } from "@/popup/api/client.ts";
 export async function getAccounts(): Promise<SafeAccount[]> {
   const res = await callBackground(
     { type: MessageType.GetAccounts },
-    { timeoutMs: 60_000 }
+    { timeoutMs: 60_000 },
   );
 
   if ("error" in res) {

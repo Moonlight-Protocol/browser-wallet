@@ -5,7 +5,7 @@ import { Input } from "@/popup/atoms/input.tsx";
 import { Label } from "@/popup/atoms/label.tsx";
 import { Spinner } from "@/popup/atoms/spinner.tsx";
 import { PickerItem } from "@/popup/molecules/picker-item.tsx";
-import { IconServer, IconTrash, IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconServer, IconTrash } from "@tabler/icons-react";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 
 export type PrivacyProvidersProps = {
@@ -141,18 +141,20 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
                 "h-8 text-xs min-w-[80px]",
                 selected
                   ? "border-destructive/50 text-destructive hover:bg-destructive/10"
-                  : ""
+                  : "",
               )}
               disabled={!!processingProviderId}
               onClick={() => handleToggleConnection(p.id, selected)}
             >
-              {processingProviderId === p.id ? (
-                <Spinner className="h-4 w-4" />
-              ) : selected ? (
-                "Disconnect"
-              ) : (
-                "Connect"
-              )}
+              {processingProviderId === p.id
+                ? <Spinner className="h-4 w-4" />
+                : selected
+                ? (
+                  "Disconnect"
+                )
+                : (
+                  "Connect"
+                )}
             </Button>
             <Button
               variant="ghost"

@@ -20,10 +20,10 @@ import {
 } from "@/popup/atoms/sheet.tsx";
 import { SidebarTrigger } from "@/popup/atoms/sidebar.tsx";
 import {
-  IconWorld,
-  IconShieldLock,
   IconPlugConnected,
   IconPlugConnectedX,
+  IconShieldLock,
+  IconWorld,
 } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
@@ -56,7 +56,7 @@ export function HomeHeader(props: HomeHeaderProps) {
       <header
         className={cn(
           "flex flex-col justify-center relative z-50 px-3 border-b border-border/50 transition-all duration-300 ease-in-out bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-          props.viewMode === "private" ? "h-24 py-2 gap-1" : "h-14"
+          props.viewMode === "private" ? "h-24 py-2 gap-1" : "h-14",
         )}
       >
         <div className="flex items-center justify-between w-full">
@@ -104,14 +104,12 @@ export function HomeHeader(props: HomeHeaderProps) {
                     onClick={() => props.onToggleViewMode()}
                     className={cn(
                       "h-9 w-9 inline-flex items-center justify-center rounded-md transition-colors shrink-0",
-                      "hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+                      "hover:bg-accent hover:text-accent-foreground text-muted-foreground",
                     )}
                   >
-                    {props.viewMode === "private" ? (
-                      <IconShieldLock className="h-5 w-5" />
-                    ) : (
-                      <IconWorld className="h-5 w-5" />
-                    )}
+                    {props.viewMode === "private"
+                      ? <IconShieldLock className="h-5 w-5" />
+                      : <IconWorld className="h-5 w-5" />}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="end">
@@ -154,17 +152,19 @@ export function HomeHeader(props: HomeHeaderProps) {
                         "text-[9px] font-medium whitespace-nowrap",
                         props.isConnected
                           ? "text-green-500"
-                          : "text-destructive"
+                          : "text-destructive",
                       )}
                     >
                       {props.isConnected ? "Connected" : "Not connected"}
                     </span>
                   </div>
-                  {props.isConnected ? (
-                    <IconPlugConnected className="h-4 w-4 text-green-500 shrink-0" />
-                  ) : (
-                    <IconPlugConnectedX className="h-4 w-4 text-destructive shrink-0" />
-                  )}
+                  {props.isConnected
+                    ? (
+                      <IconPlugConnected className="h-4 w-4 text-green-500 shrink-0" />
+                    )
+                    : (
+                      <IconPlugConnectedX className="h-4 w-4 text-destructive shrink-0" />
+                    )}
                 </button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[80vh] flex flex-col">

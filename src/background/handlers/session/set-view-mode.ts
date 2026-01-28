@@ -2,7 +2,7 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { meta } from "@/background/session.ts";
 
 export const handleSetViewMode = async (
-  message: MessageFor<MessageType.SetViewMode>
+  message: MessageFor<MessageType.SetViewMode>,
 ): Promise<ResponseFor<MessageType.SetViewMode>> => {
   const viewMode = message.viewMode;
 

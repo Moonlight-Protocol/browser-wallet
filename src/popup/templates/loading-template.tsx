@@ -21,11 +21,13 @@ export function LoadingTemplate(props: { error?: string }) {
         <div className="flex-1 w-full flex flex-col items-center justify-center">
           <LoadingSpinner uiSize="md" />
 
-          {props.error ? (
-            <Text tone="error" size="sm" className="mt-4 text-center">
-              {props.error}
-            </Text>
-          ) : null}
+          {props.error
+            ? (
+              <Text tone="error" size="sm" className="mt-4 text-center">
+                {props.error}
+              </Text>
+            )
+            : null}
         </div>
 
         <div className="w-full flex items-center justify-center pb-2">

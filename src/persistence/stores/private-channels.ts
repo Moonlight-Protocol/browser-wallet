@@ -1,10 +1,10 @@
 import { PersistedStore } from "@/persistence/store.ts";
 import type {
-  PrivateChannel,
-  PrivateChannelsState,
-  PrivateChannelAsset,
   PrivacyProvider,
   PrivacyProviderSession,
+  PrivateChannel,
+  PrivateChannelAsset,
+  PrivateChannelsState,
 } from "@/persistence/stores/private-channels.types.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 
@@ -13,14 +13,16 @@ type LegacyPrivacyProvider = Omit<PrivacyProvider, "sessions"> & {
   sessions?: Record<string, PrivacyProviderSession>;
 };
 
-type LegacyPrivateChannel = Omit<
-  PrivateChannel,
-  "quorumContractId" | "providers"
-> & {
-  authContractId?: string;
-  quorumContractId?: string;
-  providers?: LegacyPrivacyProvider[];
-};
+type LegacyPrivateChannel =
+  & Omit<
+    PrivateChannel,
+    "quorumContractId" | "providers"
+  >
+  & {
+    authContractId?: string;
+    quorumContractId?: string;
+    providers?: LegacyPrivacyProvider[];
+  };
 
 type LegacyPrivateChannelsState = {
   version?: number;
@@ -43,7 +45,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
   }
 
   protected override async safeDeserialize(
-    value: string
+    value: string,
   ): Promise<PrivateChannelsState> {
     // Migrate legacy persisted shapes.
     const parsed = (await super.safeDeserialize(value)) as unknown as
@@ -67,8 +69,8 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
         migratedChannelsByNetwork[network as ChainNetwork] = list.map((c) => {
           const quorumContractId =
             (c as LegacyPrivateChannel).quorumContractId ??
-            (c as LegacyPrivateChannel).authContractId ??
-            "";
+              (c as LegacyPrivateChannel).authContractId ??
+              "";
 
           // Check if it already has providers (if it was already v3 but maybe partial)
           const existingProviders = (c as unknown as PrivateChannel).providers;
@@ -85,15 +87,15 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
             createdAt: c.createdAt,
             providers: Array.isArray(existingProviders)
               ? (existingProviders as unknown as LegacyPrivacyProvider[]).map(
-                  (p) => ({
-                    id: p.id,
-                    name: p.name,
-                    url: p.url,
-                    sessions: p.session
-                      ? { default: p.session }
-                      : p.sessions || {},
-                  })
-                )
+                (p) => ({
+                  id: p.id,
+                  name: p.name,
+                  url: p.url,
+                  sessions: p.session
+                    ? { default: p.session }
+                    : p.sessions || {},
+                }),
+              )
               : [],
             selectedProviderId: existingSelectedProviderId,
           } satisfies PrivateChannel;
@@ -103,7 +105,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
 
     const selectedChannelIdByNetwork =
       (parsed as LegacyPrivateChannelsState).selectedChannelIdByNetwork ??
-      DEFAULT_PRIVATE_CHANNELS_STATE.selectedChannelIdByNetwork;
+        DEFAULT_PRIVATE_CHANNELS_STATE.selectedChannelIdByNetwork;
 
     return {
       version: 3,
@@ -168,7 +170,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
   addProvider(
     network: ChainNetwork,
     channelId: string,
-    provider: { id: string; name: string; url: string }
+    provider: { id: string; name: string; url: string },
   ) {
     this.store.update((prev) => {
       const channels = prev.channelsByNetwork[network] ?? [];
@@ -203,12 +205,13 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
           [network]: channels.map((c) => {
             if (c.id !== channelId) return c;
             const nextProviders = c.providers.filter(
-              (p) => p.id !== providerId
+              (p) => p.id !== providerId,
             );
             let nextSelected = c.selectedProviderId;
             if (c.selectedProviderId === providerId) {
-              nextSelected =
-                nextProviders.length > 0 ? nextProviders[0].id : undefined;
+              nextSelected = nextProviders.length > 0
+                ? nextProviders[0].id
+                : undefined;
             }
             return {
               ...c,
@@ -224,7 +227,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
   setSelectedProvider(
     network: ChainNetwork,
     channelId: string,
-    providerId: string | undefined
+    providerId: string | undefined,
   ) {
     this.store.update((prev) => {
       const channels = prev.channelsByNetwork[network] ?? [];
@@ -249,7 +252,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
     channelId: string,
     providerId: string,
     accountId: string,
-    session: { token: string; expiresAt: number }
+    session: { token: string; expiresAt: number },
   ) {
     this.store.update((prev) => {
       const channels = prev.channelsByNetwork[network] ?? [];
@@ -282,7 +285,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
     network: ChainNetwork,
     channelId: string,
     providerId: string,
-    accountId: string
+    accountId: string,
   ) {
     this.store.update((prev) => {
       const channels = prev.channelsByNetwork[network] ?? [];

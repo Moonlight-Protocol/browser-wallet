@@ -14,7 +14,7 @@ export async function setSelectedAccount(params: {
   if ("ok" in res && res.ok === false) {
     throw new ApiError(
       res.error.message ?? "Failed to select account",
-      res.error.code
+      res.error.code,
     );
   }
 }

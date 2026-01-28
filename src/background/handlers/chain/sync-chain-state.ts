@@ -2,7 +2,7 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { enqueueSync } from "@/background/chain/engine.ts";
 
 export const handleSyncChainState = (
-  message: MessageFor<MessageType.SyncChainState>
+  message: MessageFor<MessageType.SyncChainState>,
 ): ResponseFor<MessageType.SyncChainState> => {
   enqueueSync(
     message.items.map((i) => ({
@@ -10,7 +10,7 @@ export const handleSyncChainState = (
       publicKey: i.publicKey,
       priority: i.priority === true,
     })),
-    { onlyIfStale: message.onlyIfStale }
+    { onlyIfStale: message.onlyIfStale },
   );
 
   return {

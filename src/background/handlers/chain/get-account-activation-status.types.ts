@@ -10,11 +10,11 @@ export type GetAccountActivationStatusRequest = {
 
 export type GetAccountActivationStatusResponse =
   | {
-      status: AccountActivationStatus;
-      canUseFriendbot: boolean;
-    }
+    status: AccountActivationStatus;
+    canUseFriendbot: boolean;
+  }
   | {
-      status: "unknown";
-      canUseFriendbot: boolean;
-      error: BackgroundError;
-    };
+    status: "unknown";
+    canUseFriendbot: boolean;
+    error: BackgroundError;
+  };

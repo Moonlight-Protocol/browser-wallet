@@ -6,10 +6,11 @@ export const getPrivacyProviderAuthChallenge = async (params: {
   providerUrl: string;
   publicKey: string;
 }): Promise<GetPrivacyProviderAuthChallengeResponse> => {
-  const response =
-    await callBackground<MessageType.GetPrivacyProviderAuthChallenge>({
-      type: MessageType.GetPrivacyProviderAuthChallenge,
-      ...params,
-    });
+  const response = await callBackground<
+    MessageType.GetPrivacyProviderAuthChallenge
+  >({
+    type: MessageType.GetPrivacyProviderAuthChallenge,
+    ...params,
+  });
   return response;
 };

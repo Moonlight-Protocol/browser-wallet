@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getSigningRequest } from "@/popup/api/get-signing-request.ts";
 import { approveSigningRequest } from "@/popup/api/approve-signing-request.ts";
@@ -24,13 +24,13 @@ import {
   TooltipTrigger,
 } from "@/popup/atoms/tooltip.tsx";
 import {
-  TransactionBuilder,
   Networks,
-  Transaction,
   Operation,
+  Transaction,
+  TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { shortenAddress } from "@/popup/utils/common.ts";
-import { IconCopy, IconCheck } from "@tabler/icons-react";
+import { IconCheck, IconCopy } from "@tabler/icons-react";
 
 // Helper to parse XDR safely
 const parseTransaction = (xdr: string | undefined): Transaction | null => {
@@ -56,7 +56,7 @@ export function SignRequestPage() {
   const accounts = state.accounts || [];
 
   const [requestDetails, setRequestDetails] = useState<SigningRequest | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -66,7 +66,7 @@ export function SignRequestPage() {
 
   const transaction = useMemo(
     () => parseTransaction(requestDetails?.xdr),
-    [requestDetails?.xdr]
+    [requestDetails?.xdr],
   );
 
   const sep10Details = useMemo(() => {
@@ -76,7 +76,7 @@ export function SignRequestPage() {
     const ops = transaction.operations;
     const authDomainOp = ops.find(
       (op): op is Operation.ManageData =>
-        op.type === "manageData" && op.name === "web_auth_domain"
+        op.type === "manageData" && op.name === "web_auth_domain",
     );
 
     const webAuthDomain = authDomainOp?.value
@@ -92,7 +92,8 @@ export function SignRequestPage() {
       const maxDate = maxTime === "0" ? null : new Date(Number(maxTime) * 1000);
 
       if (minDate && maxDate) {
-        timeboundsString = `${minDate.toLocaleString()} - ${maxDate.toLocaleString()}`;
+        timeboundsString =
+          `${minDate.toLocaleString()} - ${maxDate.toLocaleString()}`;
       } else if (maxDate) {
         timeboundsString = `Until ${maxDate.toLocaleString()}`;
       } else if (minDate) {
@@ -111,7 +112,7 @@ export function SignRequestPage() {
   }, [transaction]);
 
   const signingAccount = accounts.find(
-    (a) => a.accountId === requestDetails?.accountId
+    (a) => a.accountId === requestDetails?.accountId,
   );
 
   useEffect(() => {
@@ -232,11 +233,9 @@ export function SignRequestPage() {
                       onClick={handleCopyXdr}
                       className="h-7 w-7 flex items-center justify-center rounded-md text-primary hover:bg-primary/10 transition-colors"
                     >
-                      {copied ? (
-                        <IconCheck size={16} />
-                      ) : (
-                        <IconCopy size={16} />
-                      )}
+                      {copied
+                        ? <IconCheck size={16} />
+                        : <IconCopy size={16} />}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>

@@ -8,9 +8,9 @@ export type SetViewModeRequest = {
 
 export type SetViewModeResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

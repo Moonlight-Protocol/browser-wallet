@@ -21,9 +21,8 @@ try {
   if (typeof __DEV__ !== "undefined" && __DEV__) {
     // eslint-disable-next-line no-console
     console.log("[private-tracking] exports registered", {
-      hasHandler:
-        typeof (globalThis as unknown as Record<string, unknown>)
-          .MoonlightPrivateTracking === "object",
+      hasHandler: typeof (globalThis as unknown as Record<string, unknown>)
+        .MoonlightPrivateTracking === "object",
     });
   }
 } catch {

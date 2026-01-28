@@ -2,7 +2,13 @@
   "tasks": {
     "dev": "DEV=1 deno run -A --watch src/build.ts",
     "build": "DEV=1 deno run -A src/build.ts",
-    "build-prod": "DEV=0 MINIFY=1 deno run -A src/build.ts"
+    "build-prod": "DEV=0 MINIFY=1 deno run -A src/build.ts",
+
+    "fmt": "deno fmt",
+    "fmt:check": "deno fmt --check",
+    "lint": "deno lint",
+    "lint:fix": "deno lint --fix",
+    "check": "deno fmt --check && deno lint && deno check **/*.ts"
   },
   "nodeModulesDir": "auto",
   "imports": {

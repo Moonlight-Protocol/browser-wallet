@@ -13,7 +13,7 @@ async function runCheck(
   hint?: string,
 ): Promise<CheckResult> {
   console.log(`  → ${name}...`);
- 
+
   const cmd = new Deno.Command(command, {
     args,
     stdout: "inherit",

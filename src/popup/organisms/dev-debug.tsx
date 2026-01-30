@@ -5,6 +5,7 @@ import { Text } from "@/popup/atoms/text.tsx";
 import { lock } from "@/popup/api/lock.ts";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { cn } from "@/popup/utils/cn.ts";
+import { DebugIcon } from "@/popup/icons/index.tsx";
 
 export function DevDebug() {
   const { actions } = usePopup();
@@ -45,7 +46,7 @@ export function DevDebug() {
   };
 
   return (
-    <div className={cn("pt-2", open ? "border-t border-muted" : "")}>
+    <div className="fixed bottom-4 left-4 z-20">
       <Button
         variant="link"
         size="sm"
@@ -54,17 +55,16 @@ export function DevDebug() {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "w-full text-center lowercase",
           "text-white hover:text-white",
-          "px-0 h-auto",
+          "px-0 h-auto cursor-pointer",
         )}
       >
-        debug
+        <DebugIcon className="w-8 h-8" />
       </Button>
 
       {open
         ? (
-          <div className="pt-2">
+          <div className="absolute bottom-full left-0 mb-2 p-3 bg-background border border-muted rounded-lg shadow-lg min-w-[160px]">
             {error
               ? (
                 <Text size="sm" tone="error" className="mt-0">
@@ -74,7 +74,7 @@ export function DevDebug() {
               : null}
 
             <Button
-              className="mt-2 w-full"
+              className="w-full"
               disabled={busy}
               onClick={onForceLock}
             >

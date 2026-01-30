@@ -63,6 +63,7 @@ export function UnlockWalletTemplate(props: Props) {
                   type="submit"
                   disabled={!props.canSubmit}
                   className="mt-4 w-full"
+                  size="lg"
                 >
                   Unlock
                 </Button>

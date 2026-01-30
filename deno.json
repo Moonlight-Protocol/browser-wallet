@@ -12,7 +12,7 @@
     "fmt:check": "deno fmt --check",
     "lint": "deno lint",
     "lint:fix": "deno lint --fix",
-    "check": "deno fmt --check && deno lint && deno check src/**/*.ts"
+    "check": "deno fmt --check && deno lint && deno check **/*.ts"
   },
   "nodeModulesDir": "auto",
   "imports": {

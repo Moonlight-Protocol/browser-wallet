@@ -67,6 +67,13 @@ export function UnlockWalletTemplate(props: Props) {
                 >
                   Unlock
                 </Button>
+
+                <Text
+                  size="sm"
+                  className="mt-4 text-center w-full cursor-pointer text-white font-medium"
+                >
+                  Forgot Password?
+                </Text>
               </div>
             </form>
           </div>

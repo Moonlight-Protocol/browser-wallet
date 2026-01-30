@@ -16,6 +16,15 @@ function envFlag(name: string, defaultValue = false): boolean {
 async function preBuildChecks() {
   console.log("🔍 Running pre-build checks...");
 
+  const typeCheck = new Deno.Command("deno", {
+    args: ["check", "**/*.ts"],
+  });
+
+  const typeResult = await typeCheck.output();
+  if (!typeResult.success) {
+    throw new Error("Type check failed! Fix errors before building.");
+  }
+
   const lint = new Deno.Command("deno", {
     args: ["lint"],
   });
@@ -31,7 +40,7 @@ async function build() {
   const DEV = envFlag("DEV", false);
   const MINIFY = envFlag("MINIFY", false);
 
-  if (Deno.env.get("DEV") !== "1") {
+  if (Deno.env.get("DEV") == "1") {
     await preBuildChecks();
   }
   const repoRoot = new URL("..", import.meta.url).pathname;

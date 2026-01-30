@@ -15,14 +15,18 @@ console.log("StellarToml type:", typeof StellarToml);
 
 try {
   // Try to spy on constructor by passing nothing
+  // @ts-ignore: TBD
   new Sep10Client();
 } catch (e) {
-  console.log("Sep10Client ctor error:", e.message);
+  const error = e instanceof Error ? e : new Error(String(e));
+  console.log("Sep10Client ctor error:", error.message);
 }
 
 try {
+  // @ts-ignore: TBD
   const t = new StellarToml("http://example.com");
   console.log("StellarToml instance:", t);
 } catch (e) {
-  console.log("StellarToml ctor error:", e.message);
+  const error = e instanceof Error ? e : new Error(String(e));
+  console.log("StellarToml ctor error:", error.message);
 }

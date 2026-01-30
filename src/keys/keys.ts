@@ -2,6 +2,7 @@ import "@/common/polyfills/node-globals.ts";
 
 import { generateMnemonic, mnemonicToSeed, validateMnemonic } from "bip39";
 import { Keypair } from "@stellar/stellar-base";
+import { Buffer } from "node:buffer";
 
 const ED25519_CURVE_SEED = new TextEncoder().encode("ed25519 seed");
 const HARDENED_OFFSET = 0x80000000;
@@ -135,7 +136,8 @@ export class Keys {
       mnemonic,
       derivationPath,
     );
-    return Keypair.fromRawEd25519Seed(rawSeed);
+    const seedBuffer = Buffer.from(rawSeed);
+    return Keypair.fromRawEd25519Seed(seedBuffer);
   }
 
   static async deriveStellarAccountFromMnemonic(

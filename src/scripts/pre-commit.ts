@@ -59,14 +59,14 @@ async function main() {
   );
 
   // Type checking
-  // checks.push(
-  //   await runCheck(
-  //     "Type checking",
-  //     "deno",
-  //     ["check", "src/**/*.ts"],
-  //     "💡 Fix the TypeScript errors shown above",
-  //   ),
-  // );
+  checks.push(
+    await runCheck(
+      "Type checking",
+      "deno",
+      ["check", "src/**/*.ts"],
+      "💡 Fix the TypeScript errors shown above",
+    ),
+  );
 
   console.log("");
   const failed = checks.filter((c) => !c.success);

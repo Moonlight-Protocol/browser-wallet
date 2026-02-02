@@ -7,10 +7,10 @@ export type GetSigningRequestRequest = {
 
 export type GetSigningRequestResponse =
   | {
-      ok: true;
-      request: SigningRequest | undefined;
-    }
+    ok: true;
+    request: SigningRequest | undefined;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

@@ -13,7 +13,7 @@ export async function setViewMode(params: { viewMode: "public" | "private" }) {
   if ("error" in res) {
     throw new ApiError(
       res.error.message ?? "Failed to set view mode",
-      res.error.code
+      res.error.code,
     );
   }
 

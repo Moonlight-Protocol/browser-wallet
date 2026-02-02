@@ -142,7 +142,7 @@ export type Message = MessageFor<MessageType>;
 export type Response = ResponseFor<MessageType>;
 
 export type Handler<K extends MessageType> = (
-  message: MessageFor<K>
+  message: MessageFor<K>,
 ) => ResponseFor<K> | Promise<ResponseFor<K>>;
 
 export type HandlerMap = {
@@ -208,14 +208,16 @@ export type MessagePayloadMap = {
   [MessageType.GetPrivateChannels]: GetPrivateChannelsRequest;
   [MessageType.AddPrivateChannel]: AddPrivateChannelRequest;
   [MessageType.SetSelectedPrivateChannel]: SetSelectedPrivateChannelRequest;
-  [MessageType.EnsurePrivateChannelTracking]: EnsurePrivateChannelTrackingRequest;
+  [MessageType.EnsurePrivateChannelTracking]:
+    EnsurePrivateChannelTrackingRequest;
   [MessageType.GetPrivateStats]: GetPrivateStatsRequest;
   [MessageType.AddPrivacyProvider]: AddPrivacyProviderRequest;
   [MessageType.RemovePrivacyProvider]: RemovePrivacyProviderRequest;
   [MessageType.SetSelectedPrivacyProvider]: SetSelectedPrivacyProviderRequest;
   [MessageType.ConnectPrivacyProvider]: ConnectPrivacyProviderRequest;
   [MessageType.DisconnectPrivacyProvider]: DisconnectPrivacyProviderRequest;
-  [MessageType.GetPrivacyProviderAuthChallenge]: GetPrivacyProviderAuthChallengeRequest;
+  [MessageType.GetPrivacyProviderAuthChallenge]:
+    GetPrivacyProviderAuthChallengeRequest;
   [MessageType.RequestSigning]: RequestSigningRequest;
   [MessageType.GetSigningRequest]: GetSigningRequestRequest;
   [MessageType.ApproveSigningRequest]: ApproveSigningRequestRequest;
@@ -243,14 +245,16 @@ export type ResponsePayloadMap = {
   [MessageType.GetPrivateChannels]: GetPrivateChannelsResponse;
   [MessageType.AddPrivateChannel]: AddPrivateChannelResponse;
   [MessageType.SetSelectedPrivateChannel]: SetSelectedPrivateChannelResponse;
-  [MessageType.EnsurePrivateChannelTracking]: EnsurePrivateChannelTrackingResponse;
+  [MessageType.EnsurePrivateChannelTracking]:
+    EnsurePrivateChannelTrackingResponse;
   [MessageType.GetPrivateStats]: GetPrivateStatsResponse;
   [MessageType.AddPrivacyProvider]: AddPrivacyProviderResponse;
   [MessageType.RemovePrivacyProvider]: RemovePrivacyProviderResponse;
   [MessageType.SetSelectedPrivacyProvider]: SetSelectedPrivacyProviderResponse;
   [MessageType.ConnectPrivacyProvider]: ConnectPrivacyProviderResponse;
   [MessageType.DisconnectPrivacyProvider]: DisconnectPrivacyProviderResponse;
-  [MessageType.GetPrivacyProviderAuthChallenge]: GetPrivacyProviderAuthChallengeResponse;
+  [MessageType.GetPrivacyProviderAuthChallenge]:
+    GetPrivacyProviderAuthChallengeResponse;
   [MessageType.RequestSigning]: RequestSigningResponse;
   [MessageType.GetSigningRequest]: GetSigningRequestResponse;
   [MessageType.ApproveSigningRequest]: ApproveSigningRequestResponse;

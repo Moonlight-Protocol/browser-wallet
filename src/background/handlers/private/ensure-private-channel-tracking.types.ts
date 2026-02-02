@@ -11,10 +11,10 @@ export type EnsurePrivateChannelTrackingRequest = {
 
 export type EnsurePrivateChannelTrackingResponse =
   | {
-      ok: true;
-      stats: PrivateChannelStats;
-    }
+    ok: true;
+    stats: PrivateChannelStats;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

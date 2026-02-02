@@ -10,10 +10,10 @@ export type GetPrivateStatsRequest = {
 
 export type GetPrivateStatsResponse =
   | {
-      ok: true;
-      stats: PrivateChannelStats | undefined;
-    }
+    ok: true;
+    stats: PrivateChannelStats | undefined;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

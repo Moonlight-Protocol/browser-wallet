@@ -8,7 +8,7 @@ import type {
 import type { Ed25519PublicKey, Ed25519SecretKey } from "@colibri/core";
 
 export const handleImportSecret = async (
-  message: MessageFor<MessageType.ImportSecret>
+  message: MessageFor<MessageType.ImportSecret>,
 ): Promise<ResponseFor<MessageType.ImportSecret>> => {
   try {
     if (vault.isLocked()) {

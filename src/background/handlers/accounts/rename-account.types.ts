@@ -8,9 +8,9 @@ export type RenameAccountRequest = {
 
 export type RenameAccountResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

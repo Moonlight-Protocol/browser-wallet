@@ -21,7 +21,7 @@ export class PrivacyProviderClient {
   // but in future versions we need to review to conform with sep10 as the provider platform is updated
   // and we hosting the stellar.toml file.
   async getAuthChallenge(
-    accountPublicKey: string
+    accountPublicKey: string,
   ): Promise<AuthChallengeResponse> {
     const response = await axios.get<AuthChallengeResponse>(
       `${this.baseUrl}/api/v1/stellar/auth`,
@@ -29,7 +29,7 @@ export class PrivacyProviderClient {
         params: {
           account: accountPublicKey,
         },
-      }
+      },
     );
     return response.data;
   }
@@ -42,7 +42,7 @@ export class PrivacyProviderClient {
       `${this.baseUrl}/api/v1/stellar/auth`,
       {
         signedChallenge,
-      }
+      },
     );
     return response.data;
   }

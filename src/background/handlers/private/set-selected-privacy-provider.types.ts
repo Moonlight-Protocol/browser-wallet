@@ -9,9 +9,9 @@ export type SetSelectedPrivacyProviderRequest = {
 
 export type SetSelectedPrivacyProviderResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

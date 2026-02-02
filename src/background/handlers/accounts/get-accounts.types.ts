@@ -17,8 +17,8 @@ export type GetAccountsRequest = Record<string, never>;
 
 export type GetAccountsResponse =
   | {
-      accounts: SafeAccount[];
-    }
+    accounts: SafeAccount[];
+  }
   | {
-      error: BackgroundError;
-    };
+    error: BackgroundError;
+  };

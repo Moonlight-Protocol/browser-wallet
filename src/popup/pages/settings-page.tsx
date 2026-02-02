@@ -21,7 +21,7 @@ export function SettingsPage() {
       { key: "futurenet" as const, label: "Futurenet", disabled: false },
       { key: "custom" as const, label: "Custom (disabled)", disabled: true },
     ],
-    []
+    [],
   );
 
   const onSelectNetwork = async (network: Exclude<Network, "custom">) => {

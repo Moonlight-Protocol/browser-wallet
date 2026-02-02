@@ -11,7 +11,7 @@ export function Container({ children, className }: Props) {
     <div
       className={cn(
         "w-full h-full p-5 flex flex-col overflow-hidden",
-        className
+        className,
       )}
     >
       {children}

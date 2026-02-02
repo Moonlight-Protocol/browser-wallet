@@ -11,10 +11,10 @@ export type GetChainStateRequest = {
 
 export type GetChainStateResponse =
   | {
-      state: ChainAccountState;
-      stale: boolean;
-      syncing: boolean;
-    }
+    state: ChainAccountState;
+    stale: boolean;
+    syncing: boolean;
+  }
   | {
-      error: BackgroundError;
-    };
+    error: BackgroundError;
+  };

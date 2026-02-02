@@ -11,7 +11,7 @@ export function MnemonicWords(props: { words: string[] }) {
           <div
             className={cn(
               "flex-1 rounded-md border border-muted",
-              "bg-background px-2 py-1"
+              "bg-background px-2 py-1",
             )}
           >
             <span className="text-sm text-primary">{word}</span>

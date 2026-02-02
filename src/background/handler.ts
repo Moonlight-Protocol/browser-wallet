@@ -1,12 +1,12 @@
 import "@/common/polyfills/node-globals.ts";
 import browser from "webextension-polyfill";
 import {
-  MessageType,
-  type Message,
-  type MessageFor,
-  type Response,
   type Handler,
   HandlerMap,
+  type Message,
+  type MessageFor,
+  MessageType,
+  type Response,
 } from "@/background/messages.ts";
 import { handleGetAccounts } from "@/background/handlers/accounts/get-accounts.ts";
 import { handleGetStatus } from "@/background/handlers/session/get-status.ts";
@@ -124,5 +124,5 @@ browser.runtime.onMessage.addListener(
       });
       throw err;
     }
-  }
+  },
 );

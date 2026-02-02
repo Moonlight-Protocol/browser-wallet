@@ -3,7 +3,7 @@ import type { Handler } from "@/background/messages.ts";
 import { signingManager } from "@/background/session.ts";
 
 export const handleGetSigningRequest: Handler<MessageType.GetSigningRequest> = (
-  message
+  message,
 ) => {
   const { requestId } = message;
   const request = signingManager.getRequest(requestId);

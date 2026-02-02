@@ -22,8 +22,7 @@ export function privateUtxosKey(params: {
 function toStats(tracking: PrivateChannelTracking): PrivateChannelStats {
   const derived = tracking.utxos.filter((u) => u.status !== "empty");
   const derivedCount = derived.length;
-  const nonZeroCount =
-    tracking.nonZeroCount ??
+  const nonZeroCount = tracking.nonZeroCount ??
     derived.filter((u) => {
       const v = u.balance;
       if (!v) return false;
@@ -45,7 +44,7 @@ function toStats(tracking: PrivateChannelTracking): PrivateChannelStats {
 
 function ensureUtxoSlots(
   utxos: PrivateChannelTracking["utxos"],
-  target: number
+  target: number,
 ) {
   if (utxos.length >= target) return utxos;
   const next = [...utxos];

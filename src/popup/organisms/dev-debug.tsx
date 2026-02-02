@@ -56,29 +56,37 @@ export function DevDebug() {
         className={cn(
           "w-full text-center lowercase",
           "text-white hover:text-white",
-          "px-0 h-auto"
+          "px-0 h-auto",
         )}
       >
         debug
       </Button>
 
-      {open ? (
-        <div className="pt-2">
-          {error ? (
-            <Text size="sm" tone="error" className="mt-0">
-              {error}
-            </Text>
-          ) : null}
+      {open
+        ? (
+          <div className="pt-2">
+            {error
+              ? (
+                <Text size="sm" tone="error" className="mt-0">
+                  {error}
+                </Text>
+              )
+              : null}
 
-          <Button className="mt-2 w-full" disabled={busy} onClick={onForceLock}>
-            Lock wallet
-          </Button>
+            <Button
+              className="mt-2 w-full"
+              disabled={busy}
+              onClick={onForceLock}
+            >
+              Lock wallet
+            </Button>
 
-          <Button className="mt-2 w-full" disabled={busy} onClick={onClear}>
-            Clear storage
-          </Button>
-        </div>
-      ) : null}
+            <Button className="mt-2 w-full" disabled={busy} onClick={onClear}>
+              Clear storage
+            </Button>
+          </div>
+        )
+        : null}
     </div>
   );
 }

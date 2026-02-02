@@ -7,9 +7,9 @@ export type SetSelectedAccountRequest = {
 
 export type SetSelectedAccountResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

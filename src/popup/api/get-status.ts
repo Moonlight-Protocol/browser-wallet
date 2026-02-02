@@ -22,7 +22,7 @@ export async function getStatus(): Promise<PopupStatus> {
   const attempt = async () =>
     await callBackground(
       { type: MessageType.GetStatus },
-      { timeoutMs: 30_000 }
+      { timeoutMs: 30_000 },
     );
 
   let res: Awaited<ReturnType<typeof attempt>>;

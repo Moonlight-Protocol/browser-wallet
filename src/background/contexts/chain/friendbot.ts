@@ -1,6 +1,6 @@
 import {
-  initializeWithFriendbot,
   type Ed25519PublicKey,
+  initializeWithFriendbot,
   type NetworkConfig,
 } from "@colibri/core";
 

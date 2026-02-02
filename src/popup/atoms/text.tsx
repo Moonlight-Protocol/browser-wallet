@@ -25,7 +25,8 @@ const textVariants = cva("mt-4", {
 });
 
 export interface TextProps
-  extends React.HTMLAttributes<HTMLParagraphElement>,
+  extends
+    React.HTMLAttributes<HTMLParagraphElement>,
     VariantProps<typeof textVariants> {}
 
 const Text = React.forwardRef<HTMLParagraphElement, TextProps>(
@@ -37,7 +38,7 @@ const Text = React.forwardRef<HTMLParagraphElement, TextProps>(
         {...props}
       />
     );
-  }
+  },
 );
 Text.displayName = "Text";
 

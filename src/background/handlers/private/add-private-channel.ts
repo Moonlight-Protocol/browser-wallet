@@ -5,7 +5,7 @@ import { ChannelReadMethods, ChannelSpec } from "@moonlight/moonlight-sdk";
 import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
 
 export const handleAddPrivateChannel = async (
-  message: MessageFor<MessageType.AddPrivateChannel>
+  message: MessageFor<MessageType.AddPrivateChannel>,
 ): Promise<ResponseFor<MessageType.AddPrivateChannel>> => {
   try {
     const name = message.name.trim();

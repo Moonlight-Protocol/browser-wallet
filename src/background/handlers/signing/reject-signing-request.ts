@@ -8,7 +8,7 @@ export const handleRejectSigningRequest: Handler<
   const { requestId } = message;
   signingManager.rejectRequest(
     requestId,
-    new Error("User rejected signing request")
+    new Error("User rejected signing request"),
   );
 
   return {

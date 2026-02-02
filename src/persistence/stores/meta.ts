@@ -25,7 +25,7 @@ export class MetaStore extends PersistedStore<MetaState> {
   }
 
   setLastSelectedNetwork(
-    lastSelectedNetwork: MetaState["lastSelectedNetwork"]
+    lastSelectedNetwork: MetaState["lastSelectedNetwork"],
   ) {
     this.store.update((state) => ({ ...state, lastSelectedNetwork }));
   }
@@ -39,7 +39,7 @@ export class MetaStore extends PersistedStore<MetaState> {
   }
 
   setLastSelectedAccount(
-    lastSelectedAccount: MetaState["lastSelectedAccount"]
+    lastSelectedAccount: MetaState["lastSelectedAccount"],
   ) {
     this.store.update((state) => ({ ...state, lastSelectedAccount }));
   }

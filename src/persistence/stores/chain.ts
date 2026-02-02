@@ -1,7 +1,7 @@
 import { PersistedStore } from "@/persistence/store.ts";
 import type {
-  ChainState,
   ChainAccountState,
+  ChainState,
 } from "@/persistence/stores/chain.types.ts";
 
 const DEFAULT_CHAIN_STATE: ChainState = {
@@ -37,7 +37,7 @@ export class ChainStore extends PersistedStore<ChainState> {
 
   setAccountPartial(
     params: { network: string; publicKey: string },
-    patch: Partial<ChainAccountState>
+    patch: Partial<ChainAccountState>,
   ) {
     const key = chainKey(params);
     this.store.update((prev) => {

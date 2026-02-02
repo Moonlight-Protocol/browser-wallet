@@ -2,7 +2,7 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { meta } from "@/background/session.ts";
 
 export const handleSetNetwork = async (
-  message: MessageFor<MessageType.SetNetwork>
+  message: MessageFor<MessageType.SetNetwork>,
 ): Promise<ResponseFor<MessageType.SetNetwork>> => {
   const network = message.network;
 

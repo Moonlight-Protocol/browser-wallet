@@ -9,9 +9,9 @@ export type RemovePrivacyProviderRequest = {
 
 export type RemovePrivacyProviderResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

@@ -6,9 +6,9 @@ export type RejectSigningRequestRequest = {
 
 export type RejectSigningRequestResponse =
   | {
-      ok: true;
-    }
+    ok: true;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

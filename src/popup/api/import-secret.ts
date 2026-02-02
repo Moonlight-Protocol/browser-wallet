@@ -9,12 +9,11 @@ export async function importSecret(params: { secret: string }): Promise<void> {
   })) as ImportSecretResponse;
 
   if (!res.ok) {
-    const fallback =
-      res.error.code === "LOCKED"
-        ? "Wallet is locked. Unlock to continue."
-        : res.error.code === "INVALID_SECRET"
-        ? "Invalid secret key."
-        : "Failed to import secret";
+    const fallback = res.error.code === "LOCKED"
+      ? "Wallet is locked. Unlock to continue."
+      : res.error.code === "INVALID_SECRET"
+      ? "Invalid secret key."
+      : "Failed to import secret";
 
     throw new ApiError(res.error.message ?? fallback, res.error.code);
   }

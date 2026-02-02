@@ -16,19 +16,19 @@ export type PrivateChannelMenuProps = {
   onAddProvider: (
     channelId: string,
     name: string,
-    url: string
+    url: string,
   ) => Promise<void>;
   onRemoveProvider: (channelId: string, providerId: string) => Promise<void>;
   onSelectProvider: (
     channelId: string,
-    providerId: string | undefined
+    providerId: string | undefined,
   ) => Promise<void>;
 };
 
 export function PrivateChannelMenu(props: PrivateChannelMenuProps) {
   const [view, setView] = useState<"picker" | "providers">("picker");
   const [managedChannelId, setManagedChannelId] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   const managedChannel = props.channels.find((c) => c.id === managedChannelId);
@@ -53,14 +53,11 @@ export function PrivateChannelMenu(props: PrivateChannelMenuProps) {
           channel={managedChannel}
           accountId={props.accountId}
           onAddProvider={(name, url) =>
-            props.onAddProvider(managedChannel.id, name, url)
-          }
+            props.onAddProvider(managedChannel.id, name, url)}
           onRemoveProvider={(providerId) =>
-            props.onRemoveProvider(managedChannel.id, providerId)
-          }
+            props.onRemoveProvider(managedChannel.id, providerId)}
           onSelectProvider={(providerId) =>
-            props.onSelectProvider(managedChannel.id, providerId)
-          }
+            props.onSelectProvider(managedChannel.id, providerId)}
         />
       </div>
     );

@@ -17,7 +17,7 @@ export async function setSelectedPrivacyProvider(params: {
   if ("ok" in res && res.ok === false) {
     throw new ApiError(
       res.error.message ?? "Failed to select provider",
-      res.error.code
+      res.error.code,
     );
   }
 }

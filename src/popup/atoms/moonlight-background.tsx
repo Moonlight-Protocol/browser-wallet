@@ -13,48 +13,38 @@ export function MoonlightBackground({
         {/* Using pure colors with decreasing opacity to create a stepped gradient effect */}
         <div
           className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full bg-blue-400 animate-breathe"
-          style={
-            {
-              "--min-opacity": 0.02,
-              "--max-opacity": 0.04,
-            } as React.CSSProperties
-          }
+          style={{
+            "--min-opacity": 0.02,
+            "--max-opacity": 0.04,
+          } as React.CSSProperties}
         />
         <div
           className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[850px] h-[850px] rounded-full bg-blue-400 animate-breathe"
-          style={
-            {
-              "--min-opacity": 0.03,
-              "--max-opacity": 0.05,
-            } as React.CSSProperties
-          }
+          style={{
+            "--min-opacity": 0.03,
+            "--max-opacity": 0.05,
+          } as React.CSSProperties}
         />
         <div
           className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-blue-400 animate-breathe"
-          style={
-            {
-              "--min-opacity": 0.04,
-              "--max-opacity": 0.06,
-            } as React.CSSProperties
-          }
+          style={{
+            "--min-opacity": 0.04,
+            "--max-opacity": 0.06,
+          } as React.CSSProperties}
         />
         <div
           className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[550px] h-[550px] rounded-full bg-blue-400 animate-breathe"
-          style={
-            {
-              "--min-opacity": 0.05,
-              "--max-opacity": 0.08,
-            } as React.CSSProperties
-          }
+          style={{
+            "--min-opacity": 0.05,
+            "--max-opacity": 0.08,
+          } as React.CSSProperties}
         />
         <div
           className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[420px] h-[420px] rounded-full bg-blue-400 animate-breathe"
-          style={
-            {
-              "--min-opacity": 0.06,
-              "--max-opacity": 0.1,
-            } as React.CSSProperties
-          }
+          style={{
+            "--min-opacity": 0.06,
+            "--max-opacity": 0.1,
+          } as React.CSSProperties}
         />
 
         {/* The Moon */}

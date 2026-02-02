@@ -16,7 +16,7 @@ export async function getChainState(params: {
   if ("error" in res) {
     throw new ApiError(
       res.error.message ?? "Failed to load chain state",
-      res.error.code
+      res.error.code,
     );
   }
 

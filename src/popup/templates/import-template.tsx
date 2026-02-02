@@ -74,17 +74,21 @@ export function ImportTemplate(props: ImportTemplateProps) {
       </Tabs>
 
       <div className="mt-2 min-h-[20px]">
-        {props.validationError ? (
-          <Text tone="error" size="sm">
-            {props.validationError}
-          </Text>
-        ) : null}
+        {props.validationError
+          ? (
+            <Text tone="error" size="sm">
+              {props.validationError}
+            </Text>
+          )
+          : null}
 
-        {props.submitError ? (
-          <Text tone="error" size="sm">
-            {props.submitError}
-          </Text>
-        ) : null}
+        {props.submitError
+          ? (
+            <Text tone="error" size="sm">
+              {props.submitError}
+            </Text>
+          )
+          : null}
       </div>
 
       <div className="mt-4">

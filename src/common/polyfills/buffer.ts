@@ -13,7 +13,7 @@ export class Buffer extends Uint8Array {
   // @ts-ignore: intentionally overriding with different signature for Node.js Buffer compatibility
   static override from(
     input: ArrayBuffer | ArrayBufferView | ArrayLike<number> | string,
-    encoding?: "utf8" | "utf-8" | "base64"
+    encoding?: "utf8" | "utf-8" | "base64",
   ): Buffer {
     if (typeof input === "string") {
       // Only UTF-8 and base64 are implemented; extend if needed.
@@ -32,7 +32,7 @@ export class Buffer extends Uint8Array {
 
     if (ArrayBuffer.isView(input)) {
       return new Buffer(
-        new Uint8Array(input.buffer, input.byteOffset, input.byteLength)
+        new Uint8Array(input.buffer, input.byteOffset, input.byteLength),
       );
     }
 

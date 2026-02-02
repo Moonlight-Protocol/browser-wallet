@@ -22,11 +22,13 @@ export function LoadingSpinner({
       {...props}
     >
       <Spinner className={cn("text-primary", sizeClass)} />
-      {message ? (
-        <div className="mt-2 text-xs text-muted-foreground text-center">
-          {message}
-        </div>
-      ) : null}
+      {message
+        ? (
+          <div className="mt-2 text-xs text-muted-foreground text-center">
+            {message}
+          </div>
+        )
+        : null}
     </div>
   );
 }

@@ -51,11 +51,13 @@ export function UnlockWalletTemplate(props: Props) {
                   error={props.passwordError}
                 />
 
-                {props.submitError ? (
-                  <Text tone="error" size="sm" className="mt-3">
-                    {props.submitError}
-                  </Text>
-                ) : null}
+                {props.submitError
+                  ? (
+                    <Text tone="error" size="sm" className="mt-3">
+                      {props.submitError}
+                    </Text>
+                  )
+                  : null}
 
                 <Button
                   type="submit"

@@ -2,13 +2,13 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { privateChannels } from "@/background/session.ts";
 
 export const handleRemovePrivacyProvider = async (
-  message: MessageFor<MessageType.RemovePrivacyProvider>
+  message: MessageFor<MessageType.RemovePrivacyProvider>,
 ): Promise<ResponseFor<MessageType.RemovePrivacyProvider>> => {
   try {
     privateChannels.removeProvider(
       message.network,
       message.channelId,
-      message.providerId
+      message.providerId,
     );
 
     await privateChannels.flush();

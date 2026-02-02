@@ -6,12 +6,12 @@ export type ImportSecretRequest = {
 
 export type ImportSecretResponse =
   | {
-      ok: true;
-      walletId: string;
-      accountId: string;
-      publicKey: string;
-    }
+    ok: true;
+    walletId: string;
+    accountId: string;
+    publicKey: string;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

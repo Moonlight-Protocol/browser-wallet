@@ -4,7 +4,7 @@
 export function randomBytes(size: number): Uint8Array {
   if (!Number.isFinite(size) || size < 0) {
     throw new RangeError(
-      `randomBytes size must be a non-negative number, got: ${size}`
+      `randomBytes size must be a non-negative number, got: ${size}`,
     );
   }
 

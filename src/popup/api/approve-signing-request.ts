@@ -4,7 +4,7 @@ import type { ApproveSigningRequestResponse } from "@/background/handlers/signin
 
 export async function approveSigningRequest(
   requestId: string,
-  password: string
+  password: string,
 ): Promise<ApproveSigningRequestResponse> {
   const response = await callBackground({
     type: MessageType.ApproveSigningRequest,

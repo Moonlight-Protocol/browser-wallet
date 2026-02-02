@@ -2,7 +2,7 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { privateChannels } from "@/background/session.ts";
 
 export const handleSetSelectedPrivateChannel = async (
-  message: MessageFor<MessageType.SetSelectedPrivateChannel>
+  message: MessageFor<MessageType.SetSelectedPrivateChannel>,
 ): Promise<ResponseFor<MessageType.SetSelectedPrivateChannel>> => {
   try {
     privateChannels.setSelectedChannelId(message.network, message.channelId);

@@ -6,7 +6,7 @@ import type {
 } from "@/background/handlers/private/connect-privacy-provider.types.ts";
 
 export const connectPrivacyProvider = async (
-  params: ConnectPrivacyProviderRequest
+  params: ConnectPrivacyProviderRequest,
 ): Promise<ConnectPrivacyProviderResponse> => {
   const response = await callBackground<MessageType.ConnectPrivacyProvider>(
     {
@@ -15,7 +15,7 @@ export const connectPrivacyProvider = async (
     },
     {
       timeoutMs: 30_000, // Just needs to get the challenge, not wait for signing
-    }
+    },
   );
   return response;
 };

@@ -42,11 +42,13 @@ export function SetupWalletTemplate(props: Props) {
         error={props.confirmError}
       />
 
-      {props.submitError ? (
-        <Text tone="error" size="sm">
-          {props.submitError}
-        </Text>
-      ) : null}
+      {props.submitError
+        ? (
+          <Text tone="error" size="sm">
+            {props.submitError}
+          </Text>
+        )
+        : null}
 
       <Button
         type="button"

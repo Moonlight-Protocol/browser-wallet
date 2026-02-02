@@ -8,12 +8,12 @@ export type GetPrivateChannelsRequest = {
 
 export type GetPrivateChannelsResponse =
   | {
-      ok: true;
-      network: ChainNetwork;
-      channels: PrivateChannel[];
-      selectedChannelId?: string;
-    }
+    ok: true;
+    network: ChainNetwork;
+    channels: PrivateChannel[];
+    selectedChannelId?: string;
+  }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

@@ -48,20 +48,21 @@ export function VerifyPhraseTemplate(props: Props) {
                 id={`word-${item.index}`}
                 uiSize="sm"
                 value={item.value}
-                onChange={(e) => item.onChange(e.target.value)}
+                onChange={(e) =>
+                  item.onChange(e.target.value)}
                 placeholder="word"
                 autoComplete="off"
                 spellCheck={false}
               />
-              {item.error ? (
-                <p className="text-sm text-destructive">{item.error}</p>
-              ) : null}
+              {item.error
+                ? <p className="text-sm text-destructive">{item.error}</p>
+                : null}
             </div>
           ))}
 
-          {props.submitError ? (
-            <p className="text-sm text-destructive">{props.submitError}</p>
-          ) : null}
+          {props.submitError
+            ? <p className="text-sm text-destructive">{props.submitError}</p>
+            : null}
         </CardContent>
         <CardFooter>
           <Button

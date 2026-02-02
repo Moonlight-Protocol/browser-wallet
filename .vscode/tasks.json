@@ -1,16 +1,16 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "append_css",
-			"type": "shell",
-			"command": "cat >> src/popup/style.css",
-			"args": [
-				"src/popup/style.css",
-				"\n@keyframes breathe {\n  0%, 100% {\n    opacity: var(--min-opacity, 0.05);\n    transform: translateX(-50%) scale(1);\n  }\n  50% {\n    opacity: var(--max-opacity, 0.1);\n    transform: translateX(-50%) scale(1.05);\n  }\n}\n\n.animate-breathe {\n  animation: breathe 4s infinite ease-in-out;\n}\n"
-			],
-			"isBackground": false,
-			"group": "none"
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "append_css",
+      "type": "shell",
+      "command": "cat >> src/popup/style.css",
+      "args": [
+        "src/popup/style.css",
+        "\n@keyframes breathe {\n  0%, 100% {\n    opacity: var(--min-opacity, 0.05);\n    transform: translateX(-50%) scale(1);\n  }\n  50% {\n    opacity: var(--max-opacity, 0.1);\n    transform: translateX(-50%) scale(1.05);\n  }\n}\n\n.animate-breathe {\n  animation: breathe 4s infinite ease-in-out;\n}\n"
+      ],
+      "isBackground": false,
+      "group": "none"
+    }
+  ]
 }

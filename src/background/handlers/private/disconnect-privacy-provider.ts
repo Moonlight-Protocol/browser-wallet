@@ -11,7 +11,7 @@ export const handleDisconnectPrivacyProvider: Handler<
     network,
     channelId,
     providerId,
-    accountId
+    accountId,
   );
 
   return {

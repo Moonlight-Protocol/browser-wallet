@@ -1,4 +1,4 @@
-import { StellarAssetContract, type Ed25519PublicKey } from "@colibri/core";
+import { type Ed25519PublicKey, StellarAssetContract } from "@colibri/core";
 import type { NetworkConfig } from "@colibri/core";
 
 type AssetDetails =
@@ -8,7 +8,7 @@ type AssetDetails =
 export function fetchStellarAssetBalance(
   networkConfig: NetworkConfig,
   asset: AssetDetails,
-  publicKey: Ed25519PublicKey
+  publicKey: Ed25519PublicKey,
 ): Promise<bigint> {
   let sac: StellarAssetContract;
 

@@ -24,7 +24,7 @@ export class SigningRequestManager {
   > = new Map();
 
   createRequest(
-    params: Omit<TransactionSigningRequest, "id" | "createdAt">
+    params: Omit<TransactionSigningRequest, "id" | "createdAt">,
   ): SigningRequest {
     const id = crypto.randomUUID();
     const request: SigningRequest = {

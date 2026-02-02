@@ -36,37 +36,39 @@ export function PickerItem({
         isSelected
           ? "bg-accent text-accent-foreground"
           : "text-muted-foreground",
-        className
+        className,
       )}
     >
-      {editing ? (
-        <div className="flex-1 text-left">
-          <div className="flex items-center gap-2">
-            {icon}
-            <div className="min-w-0 flex-1">{editingContent}</div>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={onClick}
-          className="flex-1 text-left outline-none min-w-0"
-        >
-          <div className="flex items-center gap-2">
-            <div className="shrink-0">{icon}</div>
-            <div className="min-w-0">
-              <div className="min-w-0 text-xs truncate font-medium">
-                {title}
-              </div>
-              {subtitle && (
-                <div className="text-[9px] leading-tight truncate opacity-80">
-                  {subtitle}
-                </div>
-              )}
+      {editing
+        ? (
+          <div className="flex-1 text-left">
+            <div className="flex items-center gap-2">
+              {icon}
+              <div className="min-w-0 flex-1">{editingContent}</div>
             </div>
           </div>
-        </button>
-      )}
+        )
+        : (
+          <button
+            type="button"
+            onClick={onClick}
+            className="flex-1 text-left outline-none min-w-0"
+          >
+            <div className="flex items-center gap-2">
+              <div className="shrink-0">{icon}</div>
+              <div className="min-w-0">
+                <div className="min-w-0 text-xs truncate font-medium">
+                  {title}
+                </div>
+                {subtitle && (
+                  <div className="text-[9px] leading-tight truncate opacity-80">
+                    {subtitle}
+                  </div>
+                )}
+              </div>
+            </div>
+          </button>
+        )}
 
       {!editing && onActionClick && (
         <div className="flex items-center gap-2 shrink-0">

@@ -7,6 +7,6 @@ export type TouchRequest = {
 export type TouchResponse =
   | { ok: true }
   | {
-      ok: false;
-      error: BackgroundError;
-    };
+    ok: false;
+    error: BackgroundError;
+  };

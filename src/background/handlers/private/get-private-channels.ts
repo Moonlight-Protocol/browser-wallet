@@ -2,12 +2,12 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { privateChannels } from "@/background/session.ts";
 
 export const handleGetPrivateChannels = (
-  message: MessageFor<MessageType.GetPrivateChannels>
+  message: MessageFor<MessageType.GetPrivateChannels>,
 ): ResponseFor<MessageType.GetPrivateChannels> => {
   try {
     const channels = privateChannels.getChannels(message.network);
     const selectedChannelId = privateChannels.getSelectedChannelId(
-      message.network
+      message.network,
     );
 
     console.log("[BG] getPrivateChannels returning:", {

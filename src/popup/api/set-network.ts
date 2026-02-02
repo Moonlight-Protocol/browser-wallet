@@ -7,7 +7,7 @@ export async function setNetwork(network: "mainnet" | "testnet" | "futurenet") {
   if ("ok" in res && res.ok === false) {
     throw new ApiError(
       res.error.message ?? "Failed to set network",
-      res.error.code
+      res.error.code,
     );
   }
 }

@@ -6,7 +6,7 @@ import type {
 } from "@/background/handlers/signing/request-signing.types.ts";
 
 export const requestSigning = (
-  params: RequestSigningRequest
+  params: RequestSigningRequest,
 ): Promise<RequestSigningResponse> => {
   return callBackground({
     type: MessageType.RequestSigning,

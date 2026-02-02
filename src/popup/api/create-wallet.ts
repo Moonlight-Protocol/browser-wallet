@@ -13,7 +13,7 @@ export async function createWallet(params?: { name?: string }): Promise<{
   if ("error" in res) {
     throw new ApiError(
       res.error.message ?? "Failed to create wallet",
-      res.error.code
+      res.error.code,
     );
   }
 

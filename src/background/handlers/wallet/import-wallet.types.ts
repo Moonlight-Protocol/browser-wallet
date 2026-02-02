@@ -8,9 +8,9 @@ export type ImportWalletRequest = {
 
 export type ImportWalletResponse =
   | {
-      walletId: string;
-      firstPublicKey: Ed25519PublicKey;
-    }
+    walletId: string;
+    firstPublicKey: Ed25519PublicKey;
+  }
   | {
-      error: BackgroundError;
-    };
+    error: BackgroundError;
+  };

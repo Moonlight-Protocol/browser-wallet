@@ -43,7 +43,7 @@ async function readMetaFromStorage(): Promise<StoredMeta | undefined> {
 }
 
 export const handleGetStatus = async (
-  _message: MessageFor<MessageType.GetStatus>
+  _message: MessageFor<MessageType.GetStatus>,
 ): Promise<ResponseFor<MessageType.GetStatus>> => {
   const storedMeta = await readMetaFromStorage();
   const inMemoryMeta = meta.store.getValue();
@@ -67,24 +67,23 @@ export const handleGetStatus = async (
     return false;
   })();
 
-  const passwordSet =
-    storedMeta?.passwordSet === true ||
+  const passwordSet = storedMeta?.passwordSet === true ||
     inMemoryMeta.passwordSet === true ||
     hasSalt ||
     hasVault;
 
   const viewMode = storedMeta?.viewMode ?? inMemoryMeta.viewMode ?? "public";
 
-  const lastSelectedNetwork =
-    storedMeta?.lastSelectedNetwork ?? inMemoryMeta.lastSelectedNetwork;
+  const lastSelectedNetwork = storedMeta?.lastSelectedNetwork ??
+    inMemoryMeta.lastSelectedNetwork;
 
-  const customNetworkName =
-    storedMeta?.customNetworkName ?? inMemoryMeta.customNetworkName;
+  const customNetworkName = storedMeta?.customNetworkName ??
+    inMemoryMeta.customNetworkName;
 
   const mainKey = storedMeta?.mainKey ?? inMemoryMeta.mainKey;
 
-  const lastSelectedAccount =
-    storedMeta?.lastSelectedAccount ?? inMemoryMeta.lastSelectedAccount;
+  const lastSelectedAccount = storedMeta?.lastSelectedAccount ??
+    inMemoryMeta.lastSelectedAccount;
 
   return {
     type: MessageType.GetStatus,

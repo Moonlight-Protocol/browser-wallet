@@ -16,10 +16,10 @@ import {
 import {
   IconCashPlus,
   IconDownload,
-  IconSettings,
   IconLock,
-  IconWallet,
+  IconSettings,
   IconShieldLock,
+  IconWallet,
 } from "@tabler/icons-react";
 import { toDecimals } from "@colibri/core";
 import {
@@ -45,15 +45,15 @@ type KeyGroups = {
 
 type SelectedChain =
   | {
-      initialized?: boolean;
-      balanceXlm?: string;
-      sequence?: string;
-      created?: boolean;
-      createdConfirmed?: boolean;
-      syncing: boolean;
-      stale: boolean;
-      error?: string;
-    }
+    initialized?: boolean;
+    balanceXlm?: string;
+    sequence?: string;
+    created?: boolean;
+    createdConfirmed?: boolean;
+    syncing: boolean;
+    stale: boolean;
+    error?: string;
+  }
   | undefined;
 
 export type HomeTemplateProps = {
@@ -86,15 +86,15 @@ export type HomeTemplateProps = {
   onAddPrivacyProvider?: (
     channelId: string,
     name: string,
-    url: string
+    url: string,
   ) => Promise<void>;
   onRemovePrivacyProvider?: (
     channelId: string,
-    providerId: string
+    providerId: string,
   ) => Promise<void>;
   onSelectPrivacyProvider?: (
     channelId: string,
-    providerId: string | undefined
+    providerId: string | undefined,
   ) => Promise<void>;
 
   activation?: {
@@ -115,7 +115,7 @@ export type HomeTemplateProps = {
 
   rowMenuOpenFor: string | undefined;
   setRowMenuOpenFor: (
-    v: string | undefined | ((v: string | undefined) => string | undefined)
+    v: string | undefined | ((v: string | undefined) => string | undefined),
   ) => void;
 
   editingAccountId: string | undefined;
@@ -143,8 +143,7 @@ export type HomeTemplateProps = {
 };
 
 export function HomeTemplate(props: HomeTemplateProps) {
-  const isInitialized =
-    props.viewMode === "public" &&
+  const isInitialized = props.viewMode === "public" &&
     (props.selectedChain?.createdConfirmed === true ||
       props.selectedChain?.initialized === true ||
       props.activation?.status === "created");
@@ -176,8 +175,8 @@ export function HomeTemplate(props: HomeTemplateProps) {
   const selectedPrivateChannel =
     props.viewMode === "private" && props.privateChannels?.selectedChannelId
       ? props.privateChannels.channels.find(
-          (c) => c.id === props.privateChannels?.selectedChannelId
-        )
+        (c) => c.id === props.privateChannels?.selectedChannelId,
+      )
       : undefined;
 
   return (
@@ -304,211 +303,242 @@ export function HomeTemplate(props: HomeTemplateProps) {
             </Card>
           )}
 
-          {props.viewMode === "private" ? (
-            <div className="mt-4 space-y-4">
-              {/* Error state (only if no channels to show) */}
-              {props.privateChannels?.error &&
-              (props.privateChannels?.channels?.length ?? 0) === 0 &&
-              !props.privateChannels?.initializing ? (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm text-destructive">
-                      Failed to load channels
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      {props.privateChannels.error}
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button
-                      uiSize="sm"
-                      className="w-full"
-                      onClick={() => props.onAddPrivateChannel?.()}
-                      disabled={!props.onAddPrivateChannel}
-                    >
-                      Add channel
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ) : (props.privateChannels?.channels?.length ?? 0) === 0 &&
-                !props.privateChannels?.initializing ? (
-                // Only show "No channels" when we've finished loading and truly have none
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm">No channels yet</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Add a channel to start using private mode.
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button
-                      uiSize="sm"
-                      className="w-full"
-                      onClick={() => props.onAddPrivateChannel?.()}
-                      disabled={!props.onAddPrivateChannel}
-                    >
-                      Add channel
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ) : (props.privateChannels?.channels?.length ?? 0) > 0 ? (
-                <>
-                  {selectedPrivateChannel ? (
-                    <Card className="border-primary/20 bg-primary/5">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="flex items-center justify-between text-base">
-                          <div className="flex items-center gap-2">
-                            <IconShieldLock className="h-5 w-5 text-primary" />
-                            Private Channel
-                            {/* Small spinner in header when loading */}
-                            {props.privateStats?.loading && (
-                              <Spinner className="size-3 text-muted-foreground" />
-                            )}
-                          </div>
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                            {selectedPrivateChannel.asset.code}
-                          </span>
+          {props.viewMode === "private"
+            ? (
+              <div className="mt-4 space-y-4">
+                {/* Error state (only if no channels to show) */}
+                {props.privateChannels?.error &&
+                    (props.privateChannels?.channels?.length ?? 0) === 0 &&
+                    !props.privateChannels?.initializing
+                  ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm text-destructive">
+                          Failed to load channels
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        {props.privateStats?.error &&
-                        !props.privateStats?.stats ? (
-                          <p className="text-sm text-destructive">
-                            {props.privateStats.error}
-                          </p>
-                        ) : (
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-baseline">
-                              <span className="text-sm text-muted-foreground font-medium">
-                                Confidential Balance
-                              </span>
-                              <span className="text-2xl font-black text-primary">
-                                {props.privateStats?.stats
-                                  ? toDecimals(
-                                      BigInt(
-                                        props.privateStats.stats.totalBalance ||
-                                          "0"
-                                      ),
-                                      7
-                                    )
-                                  : "-"}
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4 pt-3 border-t border-primary/10">
-                              <div>
-                                <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-                                  Derived UTXOs
-                                </p>
-                                <p className="text-sm font-bold">
-                                  {props.privateStats?.stats
-                                    ? `${props.privateStats.stats.derivedCount} / ${props.privateStats.stats.targetCount}`
-                                    : "-"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-                                  Non-zero UTXOs
-                                </p>
-                                <p className="text-sm font-bold">
-                                  {props.privateStats?.stats
-                                    ? props.privateStats.stats.nonZeroCount
-                                    : "-"}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <Card>
-                      <CardContent className="pt-6 text-center">
                         <p className="text-sm text-muted-foreground">
-                          Select a channel from the header to view details.
+                          {props.privateChannels.error}
                         </p>
                       </CardContent>
+                      <CardFooter>
+                        <Button
+                          uiSize="sm"
+                          className="w-full"
+                          onClick={() => props.onAddPrivateChannel?.()}
+                          disabled={!props.onAddPrivateChannel}
+                        >
+                          Add channel
+                        </Button>
+                      </CardFooter>
                     </Card>
-                  )}
-                </>
-              ) : null}
-            </div>
-          ) : null}
+                  )
+                  : (props.privateChannels?.channels?.length ?? 0) === 0 &&
+                      !props.privateChannels?.initializing
+                  ? (
+                    // Only show "No channels" when we've finished loading and truly have none
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">
+                          No channels yet
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          Add a channel to start using private mode.
+                        </p>
+                      </CardContent>
+                      <CardFooter>
+                        <Button
+                          uiSize="sm"
+                          className="w-full"
+                          onClick={() => props.onAddPrivateChannel?.()}
+                          disabled={!props.onAddPrivateChannel}
+                        >
+                          Add channel
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  )
+                  : (props.privateChannels?.channels?.length ?? 0) > 0
+                  ? (
+                    <>
+                      {selectedPrivateChannel
+                        ? (
+                          <Card className="border-primary/20 bg-primary/5">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="flex items-center justify-between text-base">
+                                <div className="flex items-center gap-2">
+                                  <IconShieldLock className="h-5 w-5 text-primary" />
+                                  Private Channel
+                                  {/* Small spinner in header when loading */}
+                                  {props.privateStats?.loading && (
+                                    <Spinner className="size-3 text-muted-foreground" />
+                                  )}
+                                </div>
+                                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                                  {selectedPrivateChannel.asset.code}
+                                </span>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {props.privateStats?.error &&
+                                  !props.privateStats?.stats
+                                ? (
+                                  <p className="text-sm text-destructive">
+                                    {props.privateStats.error}
+                                  </p>
+                                )
+                                : (
+                                  <div className="space-y-3">
+                                    <div className="flex justify-between items-baseline">
+                                      <span className="text-sm text-muted-foreground font-medium">
+                                        Confidential Balance
+                                      </span>
+                                      <span className="text-2xl font-black text-primary">
+                                        {props.privateStats?.stats
+                                          ? toDecimals(
+                                            BigInt(
+                                              props.privateStats.stats
+                                                .totalBalance ||
+                                                "0",
+                                            ),
+                                            7,
+                                          )
+                                          : "-"}
+                                      </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-primary/10">
+                                      <div>
+                                        <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                                          Derived UTXOs
+                                        </p>
+                                        <p className="text-sm font-bold">
+                                          {props.privateStats?.stats
+                                            ? `${props.privateStats.stats.derivedCount} / ${props.privateStats.stats.targetCount}`
+                                            : "-"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                                          Non-zero UTXOs
+                                        </p>
+                                        <p className="text-sm font-bold">
+                                          {props.privateStats?.stats
+                                            ? props.privateStats.stats
+                                              .nonZeroCount
+                                            : "-"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                            </CardContent>
+                          </Card>
+                        )
+                        : (
+                          <Card>
+                            <CardContent className="pt-6 text-center">
+                              <p className="text-sm text-muted-foreground">
+                                Select a channel from the header to view
+                                details.
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                    </>
+                  )
+                  : null}
+              </div>
+            )
+            : null}
 
           {props.viewMode === "public" &&
-          props.selectedAccount &&
-          props.activation &&
-          !isInitialized &&
-          props.activation.status !== "created" ? (
-            <Card className="mt-4">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <IconCashPlus className="h-5 w-5" />
-                  Initialize Account
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pb-2">
-                {props.activation.checking || props.activation.funding ? (
-                  <LoadingSpinner
-                    uiSize="md"
-                    message={
-                      props.activation.funding ? "Initializing…" : undefined
-                    }
-                    className="py-6"
-                  />
-                ) : props.activation.status === "not_created" ? (
-                  <>
-                    <p className="text-sm text-muted-foreground">
-                      This account isn&apos;t initialized yet.
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      It needs funds to exist on-chain and hold public balances.
-                    </p>
-                    {props.activation.canUseFriendbot ? (
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        You can create it with Friendbot.
+              props.selectedAccount &&
+              props.activation &&
+              !isInitialized &&
+              props.activation.status !== "created"
+            ? (
+              <Card className="mt-4">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <IconCashPlus className="h-5 w-5" />
+                    Initialize Account
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  {props.activation.checking || props.activation.funding
+                    ? (
+                      <LoadingSpinner
+                        uiSize="md"
+                        message={props.activation.funding
+                          ? "Initializing…"
+                          : undefined}
+                        className="py-6"
+                      />
+                    )
+                    : props.activation.status === "not_created"
+                    ? (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          This account isn&apos;t initialized yet.
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          It needs funds to exist on-chain and hold public
+                          balances.
+                        </p>
+                        {props.activation.canUseFriendbot
+                          ? (
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              You can create it with Friendbot.
+                            </p>
+                          )
+                          : null}
+                      </>
+                    )
+                    : (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          Couldn&apos;t verify whether this account is
+                          initialized.
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Public balances may be unavailable until this check
+                          succeeds.
+                        </p>
+                      </>
+                    )}
+                  {props.activation.error
+                    ? (
+                      <p className="mt-1 text-sm text-error">
+                        {props.activation.error}
                       </p>
-                    ) : null}
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm text-muted-foreground">
-                      Couldn&apos;t verify whether this account is initialized.
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Public balances may be unavailable until this check
-                      succeeds.
-                    </p>
-                  </>
-                )}
-                {props.activation.error ? (
-                  <p className="mt-1 text-sm text-error">
-                    {props.activation.error}
-                  </p>
-                ) : null}
-              </CardContent>
-              {props.activation.status === "not_created" &&
-              props.activation.canUseFriendbot &&
-              props.onFundWithFriendbot ? (
-                <CardFooter>
-                  <Button
-                    uiSize="lg"
-                    className="w-full"
-                    onClick={() => props.onFundWithFriendbot?.()}
-                    loading={props.activation.funding}
-                    disabled={props.activation.checking}
-                  >
-                    {props.activation.funding
-                      ? "Initializing…"
-                      : "Initialize with 10,000 XLM"}
-                  </Button>
-                </CardFooter>
-              ) : null}
-            </Card>
-          ) : null}
+                    )
+                    : null}
+                </CardContent>
+                {props.activation.status === "not_created" &&
+                    props.activation.canUseFriendbot &&
+                    props.onFundWithFriendbot
+                  ? (
+                    <CardFooter>
+                      <Button
+                        uiSize="lg"
+                        className="w-full"
+                        onClick={() => props.onFundWithFriendbot?.()}
+                        loading={props.activation.funding}
+                        disabled={props.activation.checking}
+                      >
+                        {props.activation.funding
+                          ? "Initializing…"
+                          : "Initialize with 10,000 XLM"}
+                      </Button>
+                    </CardFooter>
+                  )
+                  : null}
+              </Card>
+            )
+            : null}
 
           {/* HomeMenuDrawer removed as it is replaced by NavigationMenu in HomeHeader */}
         </div>

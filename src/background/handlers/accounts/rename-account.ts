@@ -2,7 +2,7 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { vault } from "@/background/session.ts";
 
 export const handleRenameAccount = async (
-  message: MessageFor<MessageType.RenameAccount>
+  message: MessageFor<MessageType.RenameAccount>,
 ): Promise<ResponseFor<MessageType.RenameAccount>> => {
   try {
     if (vault.isLocked()) {
@@ -45,8 +45,8 @@ export const handleRenameAccount = async (
 
           // Keep wallet name in sync with the main derived key (index 0).
           const renamed = accounts.find((a) => a.id === accountId);
-          const shouldUpdateWalletName =
-            renamed?.type === "derived" && (renamed.index ?? 0) === 0;
+          const shouldUpdateWalletName = renamed?.type === "derived" &&
+            (renamed.index ?? 0) === 0;
 
           return {
             ...w,

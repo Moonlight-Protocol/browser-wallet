@@ -34,16 +34,18 @@ export type PrivateAddChannelTemplateProps = {
 };
 
 export function PrivateAddChannelTemplate(
-  props: PrivateAddChannelTemplateProps
+  props: PrivateAddChannelTemplateProps,
 ) {
   return (
     <SubpageShell title="Add Channel" onBack={props.onBack}>
       <div className="space-y-4">
-        {props.error ? (
-          <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
-            {props.error}
-          </div>
-        ) : null}
+        {props.error
+          ? (
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+              {props.error}
+            </div>
+          )
+          : null}
 
         <Card>
           <CardContent className="pt-6 space-y-4">
@@ -105,9 +107,9 @@ export function PrivateAddChannelTemplate(
                     value={props.assetIssuer}
                     disabled={props.busy || props.isNativeXlm}
                     onChange={(e) => props.setAssetIssuer(e.target.value)}
-                    placeholder={
-                      props.isNativeXlm ? "Native" : "Issuer Address"
-                    }
+                    placeholder={props.isNativeXlm
+                      ? "Native"
+                      : "Issuer Address"}
                     className={cn(props.isNativeXlm && "opacity-50")}
                   />
                 </div>

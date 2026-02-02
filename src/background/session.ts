@@ -106,7 +106,7 @@ async function deriveAesKeyFromPassword(password: string): Promise<CryptoKey> {
     enc.encode(password) as unknown as BufferSource,
     "PBKDF2",
     false,
-    ["deriveKey"]
+    ["deriveKey"],
   );
 
   return crypto.subtle.deriveKey(
@@ -119,7 +119,7 @@ async function deriveAesKeyFromPassword(password: string): Promise<CryptoKey> {
     keyMaterial,
     { name: "AES-GCM", length: 256 },
     false,
-    ["encrypt", "decrypt"]
+    ["encrypt", "decrypt"],
   );
 }
 
@@ -131,7 +131,7 @@ function makeAdapter(key: CryptoKey): EncryptionAdapter {
       const cipher = await crypto.subtle.encrypt(
         { name: "AES-GCM", iv: iv as unknown as BufferSource },
         key,
-        encoded as unknown as BufferSource
+        encoded as unknown as BufferSource,
       );
       return `v1:${bytesToBase64(iv)}:${bytesToBase64(new Uint8Array(cipher))}`;
     },
@@ -145,7 +145,7 @@ function makeAdapter(key: CryptoKey): EncryptionAdapter {
       const plainBuf = await crypto.subtle.decrypt(
         { name: "AES-GCM", iv: iv as unknown as BufferSource },
         key,
-        data as unknown as BufferSource
+        data as unknown as BufferSource,
       );
       return new TextDecoder().decode(new Uint8Array(plainBuf));
     },

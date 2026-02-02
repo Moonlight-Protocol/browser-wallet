@@ -12,12 +12,11 @@ export async function importWallet(params: {
   });
 
   if ("error" in res) {
-    const fallbackMessage =
-      res.error.code === "LOCKED"
-        ? "Wallet is locked. Unlock to continue."
-        : res.error.code === "INVALID_MNEMONIC"
-        ? "Invalid recovery phrase."
-        : "Failed to import wallet";
+    const fallbackMessage = res.error.code === "LOCKED"
+      ? "Wallet is locked. Unlock to continue."
+      : res.error.code === "INVALID_MNEMONIC"
+      ? "Invalid recovery phrase."
+      : "Failed to import wallet";
 
     throw new ApiError(res.error.message ?? fallbackMessage, res.error.code);
   }

@@ -3,7 +3,7 @@ import { requestFriendbotFunding } from "@/background/contexts/chain/friendbot.t
 import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
 
 export const handleFundWithFriendbot = async (
-  message: MessageFor<MessageType.FundWithFriendbot>
+  message: MessageFor<MessageType.FundWithFriendbot>,
 ): Promise<ResponseFor<MessageType.FundWithFriendbot>> => {
   try {
     const networkConfig = getNetworkConfig(message.network);

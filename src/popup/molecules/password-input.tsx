@@ -39,7 +39,7 @@ export function PasswordInput(props: Props) {
           placeholder={props.placeholder}
           autoComplete={props.autoComplete}
           aria-invalid={props.error ? true : undefined}
-          uiSize="sm"
+          uiSize="lg"
           className="pr-10"
           onChange={(e) => props.onChange(e.currentTarget.value)}
         />

@@ -495,125 +495,177 @@ export function HomeTemplate(props: HomeTemplateProps) {
 
           {props.viewMode === "private"
             ? (
-              <div className="mt-4 space-y-4">
+              <div className="mt-6 flex flex-col h-full animate-fade-in-up">
+                {/* Error state */}
                 {props.privateChannels?.error &&
                     (props.privateChannels?.channels?.length ?? 0) === 0 &&
                     !props.privateChannels?.initializing
                   ? (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-sm text-destructive">
-                          Failed to load channels
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                          {props.privateChannels.error}
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <Button
-                          uiSize="sm"
-                          className="w-full"
-                          onClick={() => props.onAddPrivateChannel?.()}
-                          disabled={!props.onAddPrivateChannel}
-                        >
-                          Add channel
-                        </Button>
-                      </CardFooter>
-                    </Card>
+                    <div
+                      className="p-5 rounded-2xl text-center"
+                      style={{
+                        background: "oklch(0.6 0.2 25 / 0.1)",
+                        border: "1px solid oklch(0.6 0.2 25 / 0.2)",
+                      }}
+                    >
+                      <p className="text-sm font-bold text-red-400 mb-2">
+                        Failed to load channels
+                      </p>
+                      <p className="text-xs text-foreground/50 mb-4">
+                        {props.privateChannels.error}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => props.onAddPrivateChannel?.()}
+                        disabled={!props.onAddPrivateChannel}
+                        className="px-4 py-2 rounded-lg text-sm font-bold text-secondary bg-secondary/10 border border-secondary/20 hover:bg-secondary/20 transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        Add channel
+                      </button>
+                    </div>
                   )
                   : (props.privateChannels?.channels?.length ?? 0) === 0 &&
                       !props.privateChannels?.initializing
                   ? (
-                    // Only show "No channels" when we've finished loading and truly have none
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-sm">
-                          No channels yet
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                          Add a channel to start using private mode.
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <Button
-                          uiSize="sm"
-                          className="w-full"
-                          onClick={() => props.onAddPrivateChannel?.()}
-                          disabled={!props.onAddPrivateChannel}
-                        >
-                          Add channel
-                        </Button>
-                      </CardFooter>
-                    </Card>
+                    /* Empty state */
+                    <div
+                      className="p-6 rounded-2xl text-center"
+                      style={{
+                        background: "oklch(0.15 0.03 265 / 0.5)",
+                        border: "1px dashed oklch(0.55 0.20 300 / 0.3)",
+                      }}
+                    >
+                      <div
+                        className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, oklch(0.55 0.20 300 / 0.2) 0%, oklch(0.45 0.18 280 / 0.1) 100%)",
+                          border: "1px solid oklch(0.55 0.20 300 / 0.2)",
+                        }}
+                      >
+                        <IconShieldLock className="h-8 w-8 text-secondary" />
+                      </div>
+                      <h3 className="text-lg font-bold text-foreground/80 mb-1">
+                        No Private Channels
+                      </h3>
+                      <p className="text-sm text-foreground/50 mb-5">
+                        Create a channel to start using confidential
+                        transactions
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => props.onAddPrivateChannel?.()}
+                        disabled={!props.onAddPrivateChannel}
+                        className="px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, oklch(0.55 0.20 300) 0%, oklch(0.45 0.18 280) 100%)",
+                          color: "white",
+                          boxShadow: "0 4px 16px oklch(0.55 0.20 300 / 0.3)",
+                        }}
+                      >
+                        Create Channel
+                      </button>
+                    </div>
                   )
                   : (props.privateChannels?.channels?.length ?? 0) > 0
                   ? (
                     <>
                       {selectedPrivateChannel
                         ? (
-                          <Card className="border-primary/20 bg-primary/5">
-                            <CardHeader className="pb-2">
-                              <CardTitle className="flex items-center justify-between text-base">
+                          <div className="space-y-5">
+                            {/* Channel Balance Card */}
+                            <div
+                              className="p-5 rounded-2xl"
+                              style={{
+                                background:
+                                  "linear-gradient(135deg, oklch(0.55 0.20 300 / 0.15) 0%, oklch(0.45 0.18 280 / 0.08) 100%)",
+                                border: "1px solid oklch(0.55 0.20 300 / 0.2)",
+                                boxShadow:
+                                  "0 8px 32px oklch(0.55 0.20 300 / 0.1)",
+                              }}
+                            >
+                              {/* Header */}
+                              <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
-                                  <IconShieldLock className="h-5 w-5 text-primary" />
-                                  Private Channel
-                                  {/* Small spinner in header when loading */}
+                                  <IconShieldLock className="h-5 w-5 text-secondary" />
+                                  <span className="text-sm font-bold text-foreground/70">
+                                    {selectedPrivateChannel.name}
+                                  </span>
                                   {props.privateStats?.loading && (
-                                    <Spinner className="size-3 text-muted-foreground" />
+                                    <Spinner className="size-3 text-secondary" />
                                   )}
                                 </div>
-                                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                                <span
+                                  className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md"
+                                  style={{
+                                    background: "oklch(0.55 0.20 300 / 0.2)",
+                                    color: "oklch(0.65 0.20 300)",
+                                  }}
+                                >
                                   {selectedPrivateChannel.asset.code}
                                 </span>
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                              </div>
+
                               {props.privateStats?.error &&
                                   !props.privateStats?.stats
                                 ? (
-                                  <p className="text-sm text-destructive">
+                                  <p className="text-sm text-red-400">
                                     {props.privateStats.error}
                                   </p>
                                 )
                                 : (
-                                  <div className="space-y-3">
-                                    <div className="flex justify-between items-baseline">
-                                      <span className="text-sm text-muted-foreground font-medium">
+                                  <>
+                                    {/* Balance */}
+                                    <div className="text-center py-4">
+                                      <p className="text-xs font-semibold text-foreground/40 uppercase tracking-widest mb-1">
                                         Confidential Balance
-                                      </span>
-                                      <span className="text-2xl font-black text-primary">
-                                        {props.privateStats?.stats
-                                          ? toDecimals(
-                                            BigInt(
-                                              props.privateStats.stats
-                                                .totalBalance ||
-                                                "0",
-                                            ),
-                                            7,
-                                          )
-                                          : "-"}
-                                      </span>
+                                      </p>
+                                      <div className="flex items-baseline justify-center gap-2">
+                                        <span
+                                          className="text-4xl font-extrabold"
+                                          style={{
+                                            background:
+                                              "linear-gradient(135deg, oklch(0.70 0.22 300) 0%, oklch(0.55 0.20 300) 50%, oklch(0.75 0.18 45) 100%)",
+                                            WebkitBackgroundClip: "text",
+                                            WebkitTextFillColor: "transparent",
+                                            backgroundClip: "text",
+                                          }}
+                                        >
+                                          {props.privateStats?.stats
+                                            ? toDecimals(
+                                              BigInt(
+                                                props.privateStats.stats
+                                                  .totalBalance || "0",
+                                              ),
+                                              7,
+                                            )
+                                            : "-"}
+                                        </span>
+                                        <span className="text-sm font-bold text-foreground/40">
+                                          XLM
+                                        </span>
+                                      </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-primary/10">
-                                      <div>
-                                        <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+
+                                    {/* Stats */}
+                                    <div className="h-px bg-gradient-to-r from-transparent via-secondary/20 to-transparent my-3" />
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="text-center">
+                                        <p className="text-[10px] uppercase tracking-widest font-bold text-foreground/40 mb-1">
                                           Derived UTXOs
                                         </p>
-                                        <p className="text-sm font-bold">
+                                        <p className="text-sm font-bold text-foreground/80">
                                           {props.privateStats?.stats
                                             ? `${props.privateStats.stats.derivedCount} / ${props.privateStats.stats.targetCount}`
                                             : "-"}
                                         </p>
                                       </div>
-                                      <div>
-                                        <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                                      <div className="text-center">
+                                        <p className="text-[10px] uppercase tracking-widest font-bold text-foreground/40 mb-1">
                                           Non-zero UTXOs
                                         </p>
-                                        <p className="text-sm font-bold">
+                                        <p className="text-sm font-bold text-foreground/80">
                                           {props.privateStats?.stats
                                             ? props.privateStats.stats
                                               .nonZeroCount
@@ -621,20 +673,23 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                         </p>
                                       </div>
                                     </div>
-                                  </div>
+                                  </>
                                 )}
-                            </CardContent>
-                          </Card>
+                            </div>
+                          </div>
                         )
                         : (
-                          <Card>
-                            <CardContent className="pt-6 text-center">
-                              <p className="text-sm text-muted-foreground">
-                                Select a channel from the header to view
-                                details.
-                              </p>
-                            </CardContent>
-                          </Card>
+                          <div
+                            className="p-5 rounded-2xl text-center"
+                            style={{
+                              background: "oklch(0.15 0.03 265 / 0.4)",
+                              border: "1px solid oklch(1 0 0 / 0.06)",
+                            }}
+                          >
+                            <p className="text-sm text-foreground/50">
+                              Select a channel from the header to view details
+                            </p>
+                          </div>
                         )}
                     </>
                   )

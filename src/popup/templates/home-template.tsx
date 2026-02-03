@@ -14,7 +14,10 @@ import {
   CardTitle,
 } from "@/popup/atoms/card.tsx";
 import {
+  IconArrowDownLeft,
+  IconArrowUpRight,
   IconCashPlus,
+  IconCoinFilled,
   IconDownload,
   IconLock,
   IconSettings,
@@ -278,29 +281,150 @@ export function HomeTemplate(props: HomeTemplateProps) {
           />
 
           {props.viewMode === "public" && isInitialized && (
-            <Card className="mt-4">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <IconWallet className="h-5 w-5" />
-                  Wallet Balance
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold">
-                    {props.selectedChain?.balanceXlm
-                      ? toDecimals(BigInt(props.selectedChain.balanceXlm), 7)
-                      : "0.00"}
+            <div className="mt-6 flex flex-col h-full">
+              {/* Hero Private Balance Section - Main Focus */}
+              <div className="text-center animate-fade-in-up mb-6">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <IconShieldLock className="h-4 w-4 text-secondary" />
+                  <p className="text-xs font-semibold text-secondary uppercase tracking-widest">
+                    Private Balance
+                  </p>
+                </div>
+                <div className="flex items-baseline justify-center gap-2">
+                  <span
+                    className="text-5xl font-extrabold tracking-tight"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, oklch(0.70 0.22 300) 0%, oklch(0.55 0.20 300) 50%, oklch(0.75 0.18 45) 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    0.00
                   </span>
-                  <span className="text-sm font-medium text-muted-foreground">
+                  <span className="text-lg font-bold text-foreground/40 uppercase">
                     XLM
                   </span>
-                  {props.selectedChain?.syncing && (
-                    <Spinner className="ml-2 size-4" />
-                  )}
                 </div>
-              </CardContent>
-            </Card>
+                {/* Decorative line */}
+                <div className="mt-4 mx-auto w-24 h-0.5 rounded-full bg-gradient-to-r from-transparent via-secondary/40 to-transparent" />
+              </div>
+
+              {/* Public Balance - Secondary Display */}
+              <div
+                className="animate-fade-in-up mb-6"
+                style={{ animationDelay: "0.1s" }}
+              >
+                <div
+                  className="p-4 rounded-2xl"
+                  style={{
+                    background: "oklch(0.15 0.03 265 / 0.5)",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid oklch(1 0 0 / 0.06)",
+                    boxShadow: "0 4px 24px oklch(0 0 0 / 0.2)",
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, oklch(0.75 0.18 45 / 0.2) 0%, oklch(0.65 0.16 40 / 0.1) 100%)",
+                          border: "1px solid oklch(0.75 0.18 45 / 0.15)",
+                        }}
+                      >
+                        <IconWallet className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-foreground/90">
+                          Public Balance
+                        </p>
+                        <p className="text-[10px] font-medium text-foreground/40 uppercase tracking-wider">
+                          On-chain
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <p className="text-xl font-extrabold text-gradient-moonlight">
+                        {props.selectedChain?.balanceXlm
+                          ? toDecimals(
+                            BigInt(props.selectedChain.balanceXlm),
+                            7,
+                          )
+                          : "0.00"}
+                      </p>
+                      <p className="text-xs font-medium text-foreground/40">
+                        XLM
+                      </p>
+                      {props.selectedChain?.syncing && (
+                        <Spinner className="ml-1 size-3" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Action Buttons */}
+              <div
+                className="grid grid-cols-3 gap-2 animate-fade-in-up mb-4"
+                style={{ animationDelay: "0.15s" }}
+              >
+                {[
+                  { icon: IconArrowDownLeft, label: "Receive" },
+                  { icon: IconArrowUpRight, label: "Send" },
+                  { icon: IconCoinFilled, label: "Ramp" },
+                ].map((action) => (
+                  <button
+                    key={action.label}
+                    type="button"
+                    className="group flex flex-col items-center gap-2 py-4 px-2 rounded-xl transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      background: "oklch(0.18 0.03 265 / 0.6)",
+                      border: "1px solid oklch(1 0 0 / 0.06)",
+                    }}
+                    onClick={() => {}}
+                  >
+                    <div
+                      className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, oklch(0.75 0.18 45) 0%, oklch(0.65 0.16 40) 100%)",
+                        boxShadow: "0 4px 12px oklch(0.75 0.18 45 / 0.3)",
+                      }}
+                    >
+                      <action.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="text-xs font-bold text-foreground/70 group-hover:text-foreground/90 transition-colors">
+                      {action.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Deposit Button - Distinct CTA */}
+              <div
+                className="animate-fade-in-up mt-auto"
+                style={{ animationDelay: "0.2s" }}
+              >
+                <button
+                  type="button"
+                  className="w-full py-3.5 px-5 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, oklch(0.55 0.20 300 / 0.15) 0%, oklch(0.45 0.18 280 / 0.08) 100%)",
+                    border: "1px solid oklch(0.55 0.20 300 / 0.25)",
+                  }}
+                  onClick={() => {}}
+                >
+                  <IconDownload className="h-4 w-4 text-secondary" />
+                  <span className="text-sm font-bold text-secondary">
+                    Deposit to Private
+                  </span>
+                </button>
+              </div>
+            </div>
           )}
 
           {props.viewMode === "private"

@@ -46,7 +46,7 @@ export function PrivateChannelProviders(props: PrivateChannelProvidersProps) {
     return (
       <div className="space-y-4 p-1">
         <div className="space-y-2">
-          <Label htmlFor="provider-name">Provider Name</Label>
+          <Label htmlFor="provider-name">Provider Note</Label>
           <Input
             id="provider-name"
             value={name}

@@ -117,30 +117,6 @@ export function PrivateAddChannelTemplate(
             </div>
           </div>
 
-          {/* Channel Name */}
-          <div className="space-y-2">
-            <label
-              htmlFor="name"
-              className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider"
-            >
-              Channel Name
-            </label>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                <IconHash className="h-4 w-4 text-foreground/30" />
-              </div>
-              <input
-                id="name"
-                type="text"
-                value={props.name}
-                disabled={props.busy}
-                onChange={(e) => props.setName(e.target.value)}
-                placeholder="My Private Channel"
-                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors disabled:opacity-50"
-              />
-            </div>
-          </div>
-
           {/* Contract ID */}
           <div className="space-y-2">
             <label
@@ -161,6 +137,30 @@ export function PrivateAddChannelTemplate(
             <p className="text-[10px] text-foreground/40">
               The contract ID of the private channel on the Stellar network.
             </p>
+          </div>
+
+          {/* Channel Note */}
+          <div className="space-y-2">
+            <label
+              htmlFor="name"
+              className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider"
+            >
+              Channel Note
+            </label>
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                <IconHash className="h-4 w-4 text-foreground/30" />
+              </div>
+              <input
+                id="name"
+                type="text"
+                value={props.name}
+                disabled={props.busy}
+                onChange={(e) => props.setName(e.target.value)}
+                placeholder="My Private Channel"
+                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors disabled:opacity-50"
+              />
+            </div>
           </div>
 
           {/* Asset */}

@@ -74,23 +74,6 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
         </div>
 
         <div className="space-y-3">
-          <div>
-            <label
-              htmlFor="provider-name"
-              className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider mb-1.5"
-            >
-              Provider Name
-            </label>
-            <input
-              id="provider-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="My Provider"
-              className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors"
-            />
-          </div>
-
           <div className="flex gap-2">
             <div className="flex-1">
               <label
@@ -124,6 +107,22 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
                 className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors"
               />
             </div>
+          </div>
+          <div>
+            <label
+              htmlFor="provider-name"
+              className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider mb-1.5"
+            >
+              Provider Note
+            </label>
+            <input
+              id="provider-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="My Provider"
+              className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors"
+            />
           </div>
         </div>
 

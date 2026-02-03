@@ -31,7 +31,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
 } from "@/popup/atoms/sidebar.tsx";
@@ -185,38 +184,105 @@ export function HomeTemplate(props: HomeTemplateProps) {
   return (
     <SidebarProvider defaultOpen={false}>
       <Sidebar collapsible="offcanvas" variant="floating">
-        <SidebarContent>
-          <SidebarGroup>
+        <SidebarContent className="p-4">
+          {/* Branding header */}
+          <div className="mb-6 pt-2">
+            <h2 className="text-xl font-extrabold text-gradient-moonlight">
+              Moonlight
+            </h2>
+            <p className="text-[10px] font-medium text-foreground/40 uppercase tracking-widest mt-0.5">
+              Wallet
+            </p>
+            <div className="mt-3 h-px bg-gradient-to-r from-primary/30 via-secondary/20 to-transparent" />
+          </div>
+
+          {/* Menu items */}
+          <SidebarGroup className="p-0">
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="gap-2">
                 <SidebarMenuItem>
-                  <SidebarMenuButton onClick={props.goImport} tooltip="Import">
-                    <IconDownload />
-                    <span>Import</span>
-                  </SidebarMenuButton>
+                  <button
+                    type="button"
+                    onClick={props.goImport}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      background: "oklch(0.18 0.03 265 / 0.5)",
+                      border: "1px solid oklch(1 0 0 / 0.06)",
+                    }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, oklch(0.75 0.18 45 / 0.2) 0%, oklch(0.65 0.16 40 / 0.1) 100%)",
+                        border: "1px solid oklch(0.75 0.18 45 / 0.15)",
+                      }}
+                    >
+                      <IconDownload className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-bold text-foreground/90">
+                        Import
+                      </span>
+                      <span className="text-[10px] text-foreground/40">
+                        Import wallet or key
+                      </span>
+                    </div>
+                  </button>
                 </SidebarMenuItem>
+
                 <SidebarMenuItem>
-                  <SidebarMenuButton
+                  <button
+                    type="button"
                     onClick={props.goSettings}
-                    tooltip="Settings"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      background: "oklch(0.18 0.03 265 / 0.5)",
+                      border: "1px solid oklch(1 0 0 / 0.06)",
+                    }}
                   >
-                    <IconSettings />
-                    <span>Settings</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    onClick={props.onLockFromMenu}
-                    tooltip="Lock wallet"
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <IconLock />
-                    <span>Lock wallet</span>
-                  </SidebarMenuButton>
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, oklch(0.75 0.18 45 / 0.2) 0%, oklch(0.65 0.16 40 / 0.1) 100%)",
+                        border: "1px solid oklch(0.75 0.18 45 / 0.15)",
+                      }}
+                    >
+                      <IconSettings className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-bold text-foreground/90">
+                        Settings
+                      </span>
+                      <span className="text-[10px] text-foreground/40">
+                        Preferences & security
+                      </span>
+                    </div>
+                  </button>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+
+          {/* Lock button */}
+          <div className="mt-auto pt-6">
+            <div className="h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent mb-4" />
+            <button
+              type="button"
+              onClick={props.onLockFromMenu}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: "oklch(0.6 0.2 25 / 0.1)",
+                border: "1px solid oklch(0.6 0.2 25 / 0.2)",
+              }}
+            >
+              <IconLock className="h-4 w-4 text-red-400" />
+              <span className="text-sm font-bold text-red-400">
+                Lock Wallet
+              </span>
+            </button>
+          </div>
         </SidebarContent>
       </Sidebar>
       <Shell>
@@ -282,7 +348,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
 
           {props.viewMode === "public" && isInitialized && (
             <div className="mt-6 flex flex-col h-full">
-              {/* Hero Private Balance Section - Main Focus */}
+              {/* Private Balance Section */}
               <div className="text-center animate-fade-in-up mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <IconShieldLock className="h-4 w-4 text-secondary" />
@@ -311,7 +377,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                 <div className="mt-4 mx-auto w-24 h-0.5 rounded-full bg-gradient-to-r from-transparent via-secondary/40 to-transparent" />
               </div>
 
-              {/* Public Balance - Secondary Display */}
+              {/* Public Balance */}
               <div
                 className="animate-fade-in-up mb-6"
                 style={{ animationDelay: "0.1s" }}
@@ -403,7 +469,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                 ))}
               </div>
 
-              {/* Deposit Button - Distinct CTA */}
+              {/* Deposit Button */}
               <div
                 className="animate-fade-in-up mt-auto"
                 style={{ animationDelay: "0.2s" }}
@@ -420,7 +486,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                 >
                   <IconDownload className="h-4 w-4 text-secondary" />
                   <span className="text-sm font-bold text-secondary">
-                    Deposit to Private
+                    Deposit Funds
                   </span>
                 </button>
               </div>
@@ -430,7 +496,6 @@ export function HomeTemplate(props: HomeTemplateProps) {
           {props.viewMode === "private"
             ? (
               <div className="mt-4 space-y-4">
-                {/* Error state (only if no channels to show) */}
                 {props.privateChannels?.error &&
                     (props.privateChannels?.channels?.length ?? 0) === 0 &&
                     !props.privateChannels?.initializing
@@ -663,8 +728,6 @@ export function HomeTemplate(props: HomeTemplateProps) {
               </Card>
             )
             : null}
-
-          {/* HomeMenuDrawer removed as it is replaced by NavigationMenu in HomeHeader */}
         </div>
       </Shell>
     </SidebarProvider>

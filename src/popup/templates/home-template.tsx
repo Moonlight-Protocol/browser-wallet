@@ -655,10 +655,12 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               key: "ramp",
                                               onClick: () => {
                                                 if (!canStartDeposit) return;
-                                                if (!selectedPrivateChannel
-                                                  ?.id ||
+                                                if (
                                                   !selectedPrivateChannel
-                                                    ?.selectedProviderId) {
+                                                    ?.id ||
+                                                  !selectedPrivateChannel
+                                                    ?.selectedProviderId
+                                                ) {
                                                   return;
                                                 }
                                                 props.onStartDeposit?.(

@@ -2,8 +2,8 @@ import { MessageType } from "@/background/messages.ts";
 import type { Handler } from "@/background/messages.ts";
 import { privateChannels, vault } from "@/background/session.ts";
 import {
-  PrivacyProviderClient,
   PrivacyProviderAuthError,
+  PrivacyProviderClient,
 } from "@/background/services/privacy-provider-client.ts";
 import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
 import { Keys } from "@/keys/keys.ts";
@@ -152,24 +152,29 @@ export const handleDeposit: Handler<MessageType.Deposit> = async (message) => {
         ok: false,
         error: {
           code: "SESSION_NOT_FOUND",
-          message: "Provider session not found. Please connect to the provider.",
+          message:
+            "Provider session not found. Please connect to the provider.",
         },
       };
     }
 
     // Validate token exists in session
     if (!session.token || typeof session.token !== "string") {
-      console.error("[deposit] Session exists but token is missing or invalid", {
-        accountId,
-        providerId,
-        hasToken: !!session.token,
-      });
+      console.error(
+        "[deposit] Session exists but token is missing or invalid",
+        {
+          accountId,
+          providerId,
+          hasToken: !!session.token,
+        },
+      );
       return {
         type: MessageType.Deposit,
         ok: false,
         error: {
           code: "INVALID_SESSION",
-          message: "Provider session token is missing. Please reconnect to the provider.",
+          message:
+            "Provider session token is missing. Please reconnect to the provider.",
         },
       };
     }
@@ -304,8 +309,8 @@ export const handleDeposit: Handler<MessageType.Deposit> = async (message) => {
 
     for (let i = 0; i < reservedUTXOs.length; i++) {
       const utxo = reservedUTXOs[i];
-      const amountForUtxo =
-        baseAmount + (i === reservedUTXOs.length - 1 ? remainder : 0n);
+      const amountForUtxo = baseAmount +
+        (i === reservedUTXOs.length - 1 ? remainder : 0n);
 
       if (amountForUtxo <= 0n) continue;
 

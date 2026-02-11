@@ -89,12 +89,14 @@ export class PrivacyProviderClient {
         signedChallenge,
       },
     );
-    
+
     // Extract token from response.data.data.jwt
     const token = response.data.data?.jwt;
     if (!token || typeof token !== "string") {
       throw new Error(
-        `Invalid auth response: token not found in ${JSON.stringify(response.data)}`,
+        `Invalid auth response: token not found in ${
+          JSON.stringify(response.data)
+        }`,
       );
     }
 

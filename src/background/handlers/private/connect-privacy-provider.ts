@@ -33,7 +33,9 @@ export const handleConnectPrivacyProvider: Handler<
       // Validate token was received
       if (!authResponse.token || typeof authResponse.token !== "string") {
         throw new Error(
-          `Invalid token received from provider: ${JSON.stringify(authResponse)}`,
+          `Invalid token received from provider: ${
+            JSON.stringify(authResponse)
+          }`,
         );
       }
 

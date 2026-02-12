@@ -589,15 +589,17 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                             backgroundClip: "text",
                                           }}
                                         >
-                                          {props.privateStats?.stats
-                                            ? toDecimals(
-                                              BigInt(
-                                                props.privateStats.stats
-                                                  .totalBalance || "0",
-                                              ),
-                                              7,
-                                            )
-                                            : "-"}
+                                          {props.isConnected
+                                            ? props.privateStats?.stats
+                                              ? toDecimals(
+                                                BigInt(
+                                                  props.privateStats.stats
+                                                    .totalBalance || "0",
+                                                ),
+                                                7,
+                                              )
+                                              : "-"
+                                            : "0.00"}
                                         </span>
                                         <span className="text-sm font-bold text-foreground/40">
                                           XLM
@@ -613,9 +615,10 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                           Derived UTXOs
                                         </p>
                                         <p className="text-sm font-bold text-foreground/80">
-                                          {props.privateStats?.stats
+                                          {props.isConnected &&
+                                              props.privateStats?.stats
                                             ? `${props.privateStats.stats.derivedCount} / ${props.privateStats.stats.targetCount}`
-                                            : "-"}
+                                            : "0 / 0"}
                                         </p>
                                       </div>
                                       <div className="text-center">
@@ -623,13 +626,20 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                           Non-zero UTXOs
                                         </p>
                                         <p className="text-sm font-bold text-foreground/80">
-                                          {props.privateStats?.stats
+                                          {props.isConnected &&
+                                              props.privateStats?.stats
                                             ? props.privateStats.stats
                                               .nonZeroCount
-                                            : "-"}
+                                            : "0"}
                                         </p>
                                       </div>
                                     </div>
+                                    {!props.isConnected && (
+                                      <p className="mt-2 text-xs text-foreground/50 text-center">
+                                        Connect provider to view private
+                                        balances and UTXO details.
+                                      </p>
+                                    )}
                                     {/* Main Action Buttons (Private view) */}
                                     <div className="pt-4 border-t border-primary/10">
                                       <TooltipProvider>

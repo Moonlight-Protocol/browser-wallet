@@ -24,7 +24,11 @@ import {
   type Ed25519SecretKey,
   fromDecimals,
 } from "@colibri/core";
-import type { DepositRequest, EntropyLevel } from "./deposit.types.ts";
+import type {
+  DepositRequest,
+  EntropyLevel,
+} from "@/background/handlers/private/deposit.types.ts";
+import { partitionAmountRandom } from "@/background/utils/random-partition.ts";
 import { Buffer } from "node:buffer";
 
 async function rpcGetLatestLedger(params: { rpcUrl: string }) {
@@ -303,14 +307,24 @@ export const handleDeposit: Handler<MessageType.Deposit> = async (message) => {
 
     // 9. Create CREATE operations distributing the total amount among UTXOs
     const createOps = [];
-    const utxoCountBigInt = BigInt(reservedUTXOs.length);
-    const baseAmount = amountBigInt / utxoCountBigInt;
-    const remainder = amountBigInt % utxoCountBigInt;
+    const MIN_PER_UTXO = 1n;
 
+    // Ensure we have enough amount to distribute across all reserved UTXOs
+    if (amountBigInt < BigInt(reservedUTXOs.length) * MIN_PER_UTXO) {
+      throw new Error("Insufficient amount to distribute across UTXOs");
+    }
+
+    // Randomly partition the amount to improve privacy
+    const amounts = partitionAmountRandom(
+      amountBigInt,
+      reservedUTXOs.length,
+      { minPerPart: MIN_PER_UTXO },
+    );
+
+    // Create CREATE operations with randomized amounts
     for (let i = 0; i < reservedUTXOs.length; i++) {
       const utxo = reservedUTXOs[i];
-      const amountForUtxo = baseAmount +
-        (i === reservedUTXOs.length - 1 ? remainder : 0n);
+      const amountForUtxo = amounts[i];
 
       if (amountForUtxo <= 0n) continue;
 

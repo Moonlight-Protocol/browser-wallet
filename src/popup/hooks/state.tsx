@@ -17,7 +17,9 @@ export type PopupRoute =
   | "import"
   | "settings"
   | "private-add-channel"
-  | "sign-request";
+  | "sign-request"
+  | "deposit"
+  | "deposit-review";
 
 type PopupState = {
   loading: boolean;
@@ -32,6 +34,14 @@ type PopupState = {
   inPopupSigningFlow: boolean;
   /** Incremented to trigger private channels refresh */
   privateChannelsRefreshKey: number;
+  /** Temporary deposit form data */
+  depositFormData?: {
+    channelId: string;
+    providerId: string;
+    method: "DIRECT" | "3RD-PARTY RAMP";
+    amount: string;
+    entropyLevel: "LOW" | "MEDIUM" | "HIGH" | "V_HIGH";
+  };
 };
 
 type PopupActions = {
@@ -41,6 +51,10 @@ type PopupActions = {
   goSettings: () => void;
   goPrivateAddChannel: () => void;
   goSignRequest: (requestId: string) => void;
+  goDeposit: (channelId?: string, providerId?: string) => void;
+  goDepositReview: () => void;
+  setDepositFormData: (data: PopupState["depositFormData"]) => void;
+  clearDepositFormData: () => void;
 };
 
 type PopupContextValue = {
@@ -68,6 +82,7 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       signingRequestId,
       inPopupSigningFlow: false,
       privateChannelsRefreshKey: 0,
+      depositFormData: undefined,
     };
   });
 
@@ -106,6 +121,32 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       signingRequestId: requestId,
       inPopupSigningFlow: true,
     }));
+  const goDeposit = (channelId?: string, providerId?: string) =>
+    setState((prev) => ({
+      ...prev,
+      route: "deposit",
+      depositFormData: channelId && providerId
+        ? {
+          channelId,
+          providerId,
+          method: "DIRECT",
+          amount: "",
+          entropyLevel: "MEDIUM",
+        }
+        : prev.depositFormData,
+    }));
+  const goDepositReview = () =>
+    setState((prev) => {
+      if (!prev.depositFormData) {
+        console.warn("Cannot navigate to deposit review without form data");
+        return prev;
+      }
+      return { ...prev, route: "deposit-review" };
+    });
+  const setDepositFormData = (data: PopupState["depositFormData"]) =>
+    setState((prev) => ({ ...prev, depositFormData: data }));
+  const clearDepositFormData = () =>
+    setState((prev) => ({ ...prev, depositFormData: undefined }));
 
   const refreshStatus = async () => {
     const startedAt = Date.now();
@@ -255,6 +296,10 @@ export function PopupProvider(props: { children: React.ReactNode }) {
         goSettings,
         goPrivateAddChannel,
         goSignRequest,
+        goDeposit,
+        goDepositReview,
+        setDepositFormData,
+        clearDepositFormData,
       },
     }),
     [state],

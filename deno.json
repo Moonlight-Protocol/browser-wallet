@@ -4,10 +4,8 @@
     "build": "DEV=1 deno run -A src/build.ts",
     "build-prod": "DEV=0 MINIFY=1 deno run -A src/build.ts",
     "update-deps": "rm deno.lock && deno cache --reload src/build.ts",
-
     "pre-commit": "deno run --allow-run --allow-read src/scripts/pre-commit.ts",
     "prepare": "deno run --allow-read --allow-write src/scripts/install-hooks.ts",
-
     "fmt": "deno fmt",
     "fmt:check": "deno fmt --check",
     "lint": "deno lint",

@@ -127,6 +127,10 @@ import type {
   RejectSigningRequestRequest,
   RejectSigningRequestResponse,
 } from "@/background/handlers/signing/reject-signing-request.types.ts";
+import type {
+  DepositRequest,
+  DepositResponse,
+} from "@/background/handlers/private/deposit.types.ts";
 
 // Helper types and mapped types for messages and responses
 // ==============================================================================
@@ -185,6 +189,7 @@ export enum MessageType {
   GetSigningRequest = "GET_SIGNING_REQUEST",
   ApproveSigningRequest = "APPROVE_SIGNING_REQUEST",
   RejectSigningRequest = "REJECT_SIGNING_REQUEST",
+  Deposit = "DEPOSIT",
 }
 
 export type MessagePayloadMap = {
@@ -222,6 +227,7 @@ export type MessagePayloadMap = {
   [MessageType.GetSigningRequest]: GetSigningRequestRequest;
   [MessageType.ApproveSigningRequest]: ApproveSigningRequestRequest;
   [MessageType.RejectSigningRequest]: RejectSigningRequestRequest;
+  [MessageType.Deposit]: DepositRequest;
 };
 
 export type ResponsePayloadMap = {
@@ -259,4 +265,5 @@ export type ResponsePayloadMap = {
   [MessageType.GetSigningRequest]: GetSigningRequestResponse;
   [MessageType.ApproveSigningRequest]: ApproveSigningRequestResponse;
   [MessageType.RejectSigningRequest]: RejectSigningRequestResponse;
+  [MessageType.Deposit]: DepositResponse;
 };

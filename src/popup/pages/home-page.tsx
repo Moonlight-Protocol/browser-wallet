@@ -979,6 +979,8 @@ export function HomePage() {
       goSettings={() => actions.goSettings()}
       onStartDeposit={(channelId, providerId) =>
         actions.goDeposit(channelId, providerId)}
+      onStartReceive={(channelId, providerId) =>
+        actions.goReceive(channelId, providerId)}
     />
   );
 }

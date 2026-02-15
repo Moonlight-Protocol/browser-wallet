@@ -157,6 +157,10 @@ export type HomeTemplateProps = {
     channelId: string,
     providerId: string,
   ) => void | Promise<void>;
+  onStartSend?: (
+    channelId: string,
+    providerId: string,
+  ) => void | Promise<void>;
 };
 
 export function HomeTemplate(props: HomeTemplateProps) {
@@ -674,8 +678,21 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               icon: IconArrowUpRight,
                                               label: "Send",
                                               key: "send",
-                                              // TODO: Wire real private send flow
-                                              onClick: () => {},
+                                              onClick: () => {
+                                                if (
+                                                  !selectedPrivateChannel
+                                                    ?.id ||
+                                                  !selectedPrivateChannel
+                                                    ?.selectedProviderId
+                                                ) {
+                                                  return;
+                                                }
+                                                props.onStartSend?.(
+                                                  selectedPrivateChannel.id,
+                                                  selectedPrivateChannel
+                                                    .selectedProviderId!,
+                                                );
+                                              },
                                             },
                                             {
                                               icon: IconCoinFilled,

@@ -135,6 +135,10 @@ import type {
   ReceiveRequest,
   ReceiveResponse,
 } from "@/background/handlers/private/receive.types.ts";
+import type {
+  SendRequest,
+  SendResponse,
+} from "@/background/handlers/private/send.types.ts";
 
 // Helper types and mapped types for messages and responses
 // ==============================================================================
@@ -195,6 +199,7 @@ export enum MessageType {
   RejectSigningRequest = "REJECT_SIGNING_REQUEST",
   Deposit = "DEPOSIT",
   Receive = "RECEIVE",
+  Send = "SEND",
 }
 
 export type MessagePayloadMap = {
@@ -234,6 +239,7 @@ export type MessagePayloadMap = {
   [MessageType.RejectSigningRequest]: RejectSigningRequestRequest;
   [MessageType.Deposit]: DepositRequest;
   [MessageType.Receive]: ReceiveRequest;
+  [MessageType.Send]: SendRequest;
 };
 
 export type ResponsePayloadMap = {
@@ -273,4 +279,5 @@ export type ResponsePayloadMap = {
   [MessageType.RejectSigningRequest]: RejectSigningRequestResponse;
   [MessageType.Deposit]: DepositResponse;
   [MessageType.Receive]: ReceiveResponse;
+  [MessageType.Send]: SendResponse;
 };

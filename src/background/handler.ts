@@ -42,6 +42,7 @@ import { handleApproveSigningRequest } from "@/background/handlers/signing/appro
 import { handleRejectSigningRequest } from "@/background/handlers/signing/reject-signing-request.ts";
 import { handleDeposit } from "@/background/handlers/private/deposit.ts";
 import { handleReceive } from "@/background/handlers/private/receive.ts";
+import { handleSend } from "@/background/handlers/private/send.ts";
 import { ensureSessionHydrated } from "@/background/session.ts";
 
 // Background service worker
@@ -84,6 +85,7 @@ const handlers: HandlerMap = {
   [MessageType.RejectSigningRequest]: handleRejectSigningRequest,
   [MessageType.Deposit]: handleDeposit,
   [MessageType.Receive]: handleReceive,
+  [MessageType.Send]: handleSend,
 };
 
 browser.runtime.onMessage.addListener(

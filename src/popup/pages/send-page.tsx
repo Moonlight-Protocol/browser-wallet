@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
-import { send } from "@/popup/api/send.ts";
+import { prepareSend } from "@/popup/api/send.ts";
 import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Input } from "@/popup/atoms/input.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
@@ -185,8 +185,8 @@ export function SendPage() {
         entropyLevel,
       });
 
-      // Call send API
-      const result = await send({
+      // Call prepareSend to prepare operations
+      const result = await prepareSend({
         network,
         channelId: selectedChannel.id,
         providerId: selectedProvider.id,
@@ -197,16 +197,34 @@ export function SendPage() {
       });
 
       if (!result.ok) {
-        setError(result.error?.message ?? "Failed to send transaction");
+        setError(result.error?.message ?? "Failed to prepare transaction");
         setBusy(false);
         return;
       }
 
-      // Navigate to confirmation (we'll create this page next)
-      actions.goSendConfirmation();
+      // Save result and navigate to confirmation
+      if (
+        result.createOperations && result.spendOperations &&
+        result.operationsMLXDR
+      ) {
+        actions.setSendResult({
+          createOperations: result.createOperations,
+          spendOperations: result.spendOperations,
+          operationsMLXDR: result.operationsMLXDR,
+          totalSpendAmount: result.totalSpendAmount ?? "0",
+          changeAmount: result.changeAmount ?? "0",
+          receiverAmount: result.receiverAmount ?? "0",
+          numSpends: result.numSpends ?? 0,
+          numCreates: result.numCreates ?? 0,
+        });
+        actions.goSendConfirmation();
+      } else {
+        setError("Invalid response from prepare send");
+        setBusy(false);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      setError(`Failed to send transaction: ${msg}`);
+      setError(`Failed to prepare transaction: ${msg}`);
       setBusy(false);
     }
   };
@@ -409,7 +427,7 @@ export function SendPage() {
         <CardFooter className="px-0">
           <Button
             className="w-full"
-            disabled={busy || !canSubmit}
+            disabled={!canSubmit || busy}
             onClick={handleSubmit}
             loading={busy}
           >

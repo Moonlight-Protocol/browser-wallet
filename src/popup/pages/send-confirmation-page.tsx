@@ -6,7 +6,12 @@ import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
 import { Card, CardContent, CardFooter } from "@/popup/atoms/card.tsx";
 import { Text } from "@/popup/atoms/text.tsx";
-import { IconAlertTriangle } from "@tabler/icons-react";
+import {
+  IconAlertTriangle,
+  IconChevronDown,
+  IconChevronUp,
+} from "@tabler/icons-react";
+import { shortenAddress } from "@/popup/utils/common.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 
@@ -45,8 +50,10 @@ export function SendConfirmationPage() {
   >(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [operationsExpanded, setOperationsExpanded] = useState(false);
 
   const formData = state.sendFormData;
+  const sendResult = state.sendResult;
 
   // Load private channels to get channel name
   useMemo(() => {
@@ -95,8 +102,8 @@ export function SendConfirmationPage() {
   }, [formData]);
 
   const handleExecute = async () => {
-    if (!formData || !selectedAccount) {
-      setError("Missing form data or account");
+    if (!formData || !selectedAccount || !sendResult) {
+      setError("Missing form data, account, or prepared operations");
       return;
     }
 
@@ -104,6 +111,7 @@ export function SendConfirmationPage() {
     setBusy(true);
 
     try {
+      // Use prepared operations if available
       const result = await send({
         network,
         channelId: formData.channelId,
@@ -112,6 +120,7 @@ export function SendConfirmationPage() {
         receiverOperationsMLXDR: formData.receiverOperationsMLXDR,
         amount: formData.amount,
         entropyLevel: formData.entropyLevel,
+        preparedOperationsMLXDR: sendResult.operationsMLXDR,
       });
 
       if (!result.ok) {
@@ -255,6 +264,107 @@ export function SendConfirmationPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Transaction Operations */}
+        {sendResult && (
+          <Card>
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex items-center justify-between mb-2">
+                <Text className="text-sm font-semibold">
+                  Transaction Operations
+                </Text>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setOperationsExpanded(!operationsExpanded)}
+                  className="h-6 px-2"
+                >
+                  <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-medium rounded-full mr-1">
+                    {sendResult.numSpends + sendResult.numCreates} Operations
+                  </span>
+                  {operationsExpanded
+                    ? <IconChevronUp className="h-3 w-3" />
+                    : <IconChevronDown className="h-3 w-3" />}
+                </Button>
+              </div>
+              <Text className="text-sm text-muted-foreground">
+                {sendResult.numSpends} SPEND operations, {sendResult.numCreates}
+                {" "}
+                CREATE operations
+              </Text>
+              {operationsExpanded && (
+                <div className="pt-2 space-y-2">
+                  {/* CREATE Operations */}
+                  {sendResult.createOperations &&
+                    sendResult.createOperations.length > 0 && (
+                    <div className="space-y-1">
+                      <Text className="text-xs font-semibold text-muted-foreground">
+                        CREATE Operations ({sendResult.createOperations.length})
+                      </Text>
+                      {sendResult.createOperations.map((op, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                              <span className="text-xs font-bold text-primary">
+                                +
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <Text className="text-sm font-mono truncate">
+                                {shortenAddress(op.publicKey)}
+                              </Text>
+                              <Text className="text-xs text-muted-foreground">
+                                {op.type === "receiver" ? "Receiver" : "Change"}
+                              </Text>
+                            </div>
+                            <Text className="text-sm font-medium whitespace-nowrap">
+                              {(parseFloat(op.amount) / 1e7).toFixed(7)} XLM
+                            </Text>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* SPEND Operations */}
+                  {sendResult.spendOperations &&
+                    sendResult.spendOperations.length > 0 && (
+                    <div className="space-y-1">
+                      <Text className="text-xs font-semibold text-muted-foreground">
+                        SPEND Operations ({sendResult.spendOperations.length})
+                      </Text>
+                      {sendResult.spendOperations.map((op, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                              <span className="text-xs font-bold text-orange-500">
+                                -
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <Text className="text-sm font-mono truncate">
+                                {shortenAddress(op.utxoPublicKey)}
+                              </Text>
+                              <Text className="text-xs text-muted-foreground">
+                                {op.conditionsCount} conditions
+                              </Text>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Warning */}
         <Card className="bg-orange-500/10 border-orange-500/20">

@@ -70,6 +70,24 @@ type PopupState = {
     amount: string;
     entropyLevel: "LOW" | "MEDIUM" | "HIGH" | "V_HIGH";
   };
+  /** Send result data (prepared operations) */
+  sendResult?: {
+    createOperations: Array<{
+      publicKey: string;
+      amount: string;
+      type: "receiver" | "change";
+    }>;
+    spendOperations: Array<{
+      utxoPublicKey: string;
+      conditionsCount: number;
+    }>;
+    operationsMLXDR: string[];
+    totalSpendAmount: string;
+    changeAmount: string;
+    receiverAmount: string;
+    numSpends: number;
+    numCreates: number;
+  };
 };
 
 type PopupActions = {
@@ -91,6 +109,7 @@ type PopupActions = {
   goSend: (channelId?: string, providerId?: string) => void;
   goSendConfirmation: () => void;
   setSendFormData: (data: PopupState["sendFormData"]) => void;
+  setSendResult: (data: PopupState["sendResult"]) => void;
   clearSendData: () => void;
 };
 
@@ -123,6 +142,7 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       receiveFormData: undefined,
       receiveResult: undefined,
       sendFormData: undefined,
+      sendResult: undefined,
     };
   });
 
@@ -245,10 +265,13 @@ export function PopupProvider(props: { children: React.ReactNode }) {
     });
   const setSendFormData = (data: PopupState["sendFormData"]) =>
     setState((prev) => ({ ...prev, sendFormData: data }));
+  const setSendResult = (data: PopupState["sendResult"]) =>
+    setState((prev) => ({ ...prev, sendResult: data }));
   const clearSendData = () =>
     setState((prev) => ({
       ...prev,
       sendFormData: undefined,
+      sendResult: undefined,
     }));
 
   const refreshStatus = async () => {
@@ -411,6 +434,7 @@ export function PopupProvider(props: { children: React.ReactNode }) {
         goSend,
         goSendConfirmation,
         setSendFormData,
+        setSendResult,
         clearSendData,
       },
     }),

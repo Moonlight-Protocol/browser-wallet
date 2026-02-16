@@ -136,6 +136,8 @@ import type {
   ReceiveResponse,
 } from "@/background/handlers/private/receive.types.ts";
 import type {
+  PrepareSendRequest,
+  PrepareSendResponse,
   SendRequest,
   SendResponse,
 } from "@/background/handlers/private/send.types.ts";
@@ -200,6 +202,7 @@ export enum MessageType {
   Deposit = "DEPOSIT",
   Receive = "RECEIVE",
   Send = "SEND",
+  PrepareSend = "PREPARE_SEND",
 }
 
 export type MessagePayloadMap = {
@@ -240,6 +243,7 @@ export type MessagePayloadMap = {
   [MessageType.Deposit]: DepositRequest;
   [MessageType.Receive]: ReceiveRequest;
   [MessageType.Send]: SendRequest;
+  [MessageType.PrepareSend]: PrepareSendRequest;
 };
 
 export type ResponsePayloadMap = {
@@ -280,4 +284,5 @@ export type ResponsePayloadMap = {
   [MessageType.Deposit]: DepositResponse;
   [MessageType.Receive]: ReceiveResponse;
   [MessageType.Send]: SendResponse;
+  [MessageType.PrepareSend]: PrepareSendResponse;
 };

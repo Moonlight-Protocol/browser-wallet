@@ -166,7 +166,10 @@ export function WithdrawConfirmationPage() {
   };
 
   return (
-    <SubpageShell title="Confirm Withdraw" onBack={() => actions.goWithdraw()}>
+    <SubpageShell
+      title="Confirm Withdraw"
+      onBack={() => actions.goWithdraw()}
+    >
       <div className="space-y-4">
         {/* Total Amount */}
         <Card>
@@ -280,7 +283,9 @@ export function WithdrawConfirmationPage() {
                   className="h-6 px-2"
                 >
                   <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-medium rounded-full mr-1">
-                    {1 + withdrawResult.numSpends + withdrawResult.numCreates} Operations
+                    {1 + withdrawResult.numSpends + withdrawResult.numCreates}
+                    {" "}
+                    Operations
                   </span>
                   {operationsExpanded
                     ? <IconChevronUp className="h-3 w-3" />
@@ -288,9 +293,8 @@ export function WithdrawConfirmationPage() {
                 </Button>
               </div>
               <Text className="text-sm text-muted-foreground">
-                1 WITHDRAW operation, {withdrawResult.numSpends} SPEND operations, {withdrawResult.numCreates}
-                {" "}
-                CREATE operations
+                1 WITHDRAW operation, {withdrawResult.numSpends}{" "}
+                SPEND operations, {withdrawResult.numCreates} CREATE operations
               </Text>
               {operationsExpanded && (
                 <div className="pt-2 space-y-2">
@@ -309,14 +313,19 @@ export function WithdrawConfirmationPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <Text className="text-sm font-mono truncate">
-                              {shortenAddress(withdrawResult.withdrawOperation.destinationAddress)}
+                              {shortenAddress(
+                                withdrawResult.withdrawOperation
+                                  .destinationAddress,
+                              )}
                             </Text>
                             <Text className="text-xs text-muted-foreground">
                               Destination
                             </Text>
                           </div>
                           <Text className="text-sm font-medium whitespace-nowrap">
-                            {(parseFloat(withdrawResult.withdrawOperation.amount) / 1e7).toFixed(7)} XLM
+                            {(parseFloat(
+                              withdrawResult.withdrawOperation.amount,
+                            ) / 1e7).toFixed(7)} XLM
                           </Text>
                         </div>
                       </div>
@@ -328,7 +337,8 @@ export function WithdrawConfirmationPage() {
                     withdrawResult.changeOperations.length > 0 && (
                     <div className="space-y-1">
                       <Text className="text-xs font-semibold text-muted-foreground">
-                        CREATE Operations - Change ({withdrawResult.changeOperations.length})
+                        CREATE Operations - Change ({withdrawResult
+                          .changeOperations.length})
                       </Text>
                       {withdrawResult.changeOperations.map((op, idx) => (
                         <div
@@ -363,7 +373,8 @@ export function WithdrawConfirmationPage() {
                     withdrawResult.spendOperations.length > 0 && (
                     <div className="space-y-1">
                       <Text className="text-xs font-semibold text-muted-foreground">
-                        SPEND Operations ({withdrawResult.spendOperations.length})
+                        SPEND Operations ({withdrawResult.spendOperations
+                          .length})
                       </Text>
                       {withdrawResult.spendOperations.map((op, idx) => (
                         <div

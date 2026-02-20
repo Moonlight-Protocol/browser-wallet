@@ -21,8 +21,8 @@ import {
 import {
   Contract,
   type ContractId,
-  type Ed25519SecretKey,
   type Ed25519PublicKey,
+  type Ed25519SecretKey,
   fromDecimals,
   StrKey,
 } from "@colibri/core";
@@ -175,7 +175,9 @@ async function prepareWithdrawOperations(
 
   // 4. Validate destination address (G account)
   if (!StrKey.isValidEd25519PublicKey(destinationAddress)) {
-    throw new Error("Invalid destination address: Must be a valid Stellar public key");
+    throw new Error(
+      "Invalid destination address: Must be a valid Stellar public key",
+    );
   }
 
   // 5. Get account and secret key

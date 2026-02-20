@@ -399,7 +399,9 @@ export function WithdrawPage() {
                 </div>
               </div>
               <div className="flex-1 space-y-1">
-                <Text className="text-sm font-semibold">Withdraw to G Account</Text>
+                <Text className="text-sm font-semibold">
+                  Withdraw to G Account
+                </Text>
                 <Text className="text-xs text-muted-foreground">
                   Funds will be withdrawn from the Privacy Channel directly to
                   the specified Stellar address. Higher privacy levels add more

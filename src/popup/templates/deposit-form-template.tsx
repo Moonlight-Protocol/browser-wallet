@@ -52,7 +52,7 @@ export function DepositFormTemplate(props: DepositFormTemplateProps) {
   const entropyLevels: EntropyLevel[] = ["LOW", "MEDIUM", "HIGH", "V_HIGH"];
 
   return (
-    <SubpageShell title="Ramp" onBack={props.onBack}>
+    <SubpageShell title="Deposit Funds" onBack={props.onBack}>
       <div className="space-y-4">
         {/* Channel Name */}
         <div className="text-sm text-muted-foreground mb-2">

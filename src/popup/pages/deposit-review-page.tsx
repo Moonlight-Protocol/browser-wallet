@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { deposit } from "@/popup/api/deposit.ts";
@@ -45,7 +45,7 @@ export function DepositReviewPage() {
   const formData = state.depositFormData;
 
   // Load private channels to get channel name
-  useMemo(() => {
+  useEffect(() => {
     if (!formData) return;
     getPrivateChannels({ network })
       .then((res) => {
@@ -71,11 +71,17 @@ export function DepositReviewPage() {
     return getUtxoCountFromEntropyLevel(formData.entropyLevel);
   }, [formData]);
 
-  // Calculate estimated fee (simplified - in production this should come from the backend)
+  // Fee table matching backend getFeeForEntropyLevel
   const estimatedFee = useMemo(() => {
-    // Rough estimate: 0.00001 XLM per UTXO
-    return (utxoCount * 0.00001).toFixed(7);
-  }, [utxoCount]);
+    if (!formData) return "0.0000000";
+    const feeTable: Record<string, number> = {
+      LOW: 0.05,
+      MEDIUM: 0.25,
+      HIGH: 0.5,
+      V_HIGH: 0.75,
+    };
+    return (feeTable[formData.entropyLevel] ?? 0.25).toFixed(7);
+  }, [formData]);
 
   const totalAmount = useMemo(() => {
     if (!formData) return undefined;

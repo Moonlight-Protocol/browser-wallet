@@ -661,8 +661,8 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                             },
                                             {
                                               icon: IconCoinFilled,
-                                              label: "Ramp",
-                                              key: "ramp",
+                                              label: "Deposit",
+                                              key: "deposit",
                                               onClick: () => {
                                                 if (!canStartDeposit) return;
                                                 if (

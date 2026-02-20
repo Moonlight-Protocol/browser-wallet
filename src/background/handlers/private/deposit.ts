@@ -93,18 +93,18 @@ function getUtxoCountFromEntropyLevel(level: EntropyLevel): number {
   }
 }
 
-function getFeeForEntropyLevel(level: EntropyLevel): number {
+function getFeeForEntropyLevel(level: EntropyLevel): bigint {
   switch (level) {
     case "LOW":
-      return 0.05;
+      return 500_000n; // 0.05 XLM in stroops
     case "MEDIUM":
-      return 0.25;
+      return 2_500_000n; // 0.25 XLM in stroops
     case "HIGH":
-      return 0.5;
+      return 5_000_000n; // 0.5 XLM in stroops
     case "V_HIGH":
-      return 0.75;
+      return 7_500_000n; // 0.75 XLM in stroops
     default:
-      return 0.25;
+      return 2_500_000n; // 0.25 XLM in stroops
   }
 }
 
@@ -114,6 +114,7 @@ export const handleDeposit: Handler<MessageType.Deposit> = async (message) => {
     channelId,
     providerId,
     accountId,
+    method,
     amount,
     entropyLevel,
   } = message as DepositRequest & { type: MessageType.Deposit };
@@ -125,6 +126,18 @@ export const handleDeposit: Handler<MessageType.Deposit> = async (message) => {
         type: MessageType.Deposit,
         ok: false,
         error: { code: "LOCKED", message: "Wallet is locked" },
+      };
+    }
+
+    // 1.1 Validate deposit method
+    if (method !== "DIRECT") {
+      return {
+        type: MessageType.Deposit,
+        ok: false,
+        error: {
+          code: "UNSUPPORTED_METHOD",
+          message: `Deposit method "${method}" is not supported. Only DIRECT is supported.`,
+        },
       };
     }
 
@@ -234,16 +247,15 @@ export const handleDeposit: Handler<MessageType.Deposit> = async (message) => {
     })) as ContractId;
 
     // TODO: Evolve the fee engine to have move flexibility in the future.
-    // Convert human-readable amount and fee to BigInt
-    const parsedAmount = Number.parseFloat(amount);
-    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+    // Convert human-readable amount and fee to BigInt, doing all math in integer space
+    const amountBigInt = fromDecimals(amount, 7);
+    if (amountBigInt <= 0n) {
       throw new Error("Invalid deposit amount");
     }
 
-    const feeAmount = getFeeForEntropyLevel(entropyLevel);
-    const totalAmount = fromDecimals(parsedAmount + feeAmount, 7);
+    const feeBigInt = getFeeForEntropyLevel(entropyLevel);
+    const totalAmount = amountBigInt + feeBigInt;
 
-    const amountBigInt = fromDecimals(parsedAmount, 7);
     const utxoCount = getUtxoCountFromEntropyLevel(entropyLevel);
 
     // 5.1. Calculate expiration using RPC ledger, same as topup flow
@@ -359,8 +371,6 @@ export const handleDeposit: Handler<MessageType.Deposit> = async (message) => {
       depositOp.toMLXDR(),
       ...createOps.map((op) => op.toMLXDR()),
     ];
-
-    console.log("operationsMLXDR", operationsMLXDR);
 
     // 12. Submit bundle to provider
     const client = new PrivacyProviderClient(provider.url);

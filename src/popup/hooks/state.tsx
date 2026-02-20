@@ -23,7 +23,9 @@ export type PopupRoute =
   | "receive"
   | "receive-confirmation"
   | "send"
-  | "send-confirmation";
+  | "send-confirmation"
+  | "withdraw"
+  | "withdraw-confirmation";
 
 type PopupState = {
   loading: boolean;
@@ -88,6 +90,36 @@ type PopupState = {
     numSpends: number;
     numCreates: number;
   };
+  /** Temporary withdraw form data */
+  withdrawFormData?: {
+    channelId: string;
+    providerId: string;
+    destinationAddress: string;
+    amount: string;
+    entropyLevel: "LOW" | "MEDIUM" | "HIGH" | "V_HIGH";
+  };
+  /** Withdraw result data (prepared operations) */
+  withdrawResult?: {
+    withdrawOperation: {
+      destinationAddress: string;
+      amount: string;
+    };
+    changeOperations: Array<{
+      publicKey: string;
+      amount: string;
+      type: "change";
+    }>;
+    spendOperations: Array<{
+      utxoPublicKey: string;
+      conditionsCount: number;
+    }>;
+    operationsMLXDR: string[];
+    totalSpendAmount: string;
+    changeAmount: string;
+    withdrawAmount: string;
+    numSpends: number;
+    numCreates: number;
+  };
 };
 
 type PopupActions = {
@@ -111,6 +143,11 @@ type PopupActions = {
   setSendFormData: (data: PopupState["sendFormData"]) => void;
   setSendResult: (data: PopupState["sendResult"]) => void;
   clearSendData: () => void;
+  goWithdraw: (channelId?: string, providerId?: string) => void;
+  goWithdrawConfirmation: () => void;
+  setWithdrawFormData: (data: PopupState["withdrawFormData"]) => void;
+  setWithdrawResult: (data: PopupState["withdrawResult"]) => void;
+  clearWithdrawData: () => void;
 };
 
 type PopupContextValue = {
@@ -143,6 +180,8 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       receiveResult: undefined,
       sendFormData: undefined,
       sendResult: undefined,
+      withdrawFormData: undefined,
+      withdrawResult: undefined,
     };
   });
 
@@ -272,6 +311,40 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       ...prev,
       sendFormData: undefined,
       sendResult: undefined,
+    }));
+  const goWithdraw = (channelId?: string, providerId?: string) =>
+    setState((prev) => ({
+      ...prev,
+      route: "withdraw",
+      withdrawFormData: channelId && providerId
+        ? {
+          channelId,
+          providerId,
+          destinationAddress: "",
+          amount: "",
+          entropyLevel: "MEDIUM",
+        }
+        : prev.withdrawFormData,
+    }));
+  const goWithdrawConfirmation = () =>
+    setState((prev) => {
+      if (!prev.withdrawFormData) {
+        console.warn(
+          "Cannot navigate to withdraw confirmation without form data",
+        );
+        return prev;
+      }
+      return { ...prev, route: "withdraw-confirmation" };
+    });
+  const setWithdrawFormData = (data: PopupState["withdrawFormData"]) =>
+    setState((prev) => ({ ...prev, withdrawFormData: data }));
+  const setWithdrawResult = (data: PopupState["withdrawResult"]) =>
+    setState((prev) => ({ ...prev, withdrawResult: data }));
+  const clearWithdrawData = () =>
+    setState((prev) => ({
+      ...prev,
+      withdrawFormData: undefined,
+      withdrawResult: undefined,
     }));
 
   const refreshStatus = async () => {
@@ -436,6 +509,11 @@ export function PopupProvider(props: { children: React.ReactNode }) {
         setSendFormData,
         setSendResult,
         clearSendData,
+        goWithdraw,
+        goWithdrawConfirmation,
+        setWithdrawFormData,
+        setWithdrawResult,
+        clearWithdrawData,
       },
     }),
     [state],

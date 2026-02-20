@@ -46,6 +46,10 @@ import {
   handlePrepareSend,
   handleSend,
 } from "@/background/handlers/private/send.ts";
+import {
+  handlePrepareWithdraw,
+  handleWithdraw,
+} from "@/background/handlers/private/withdraw.ts";
 import { ensureSessionHydrated } from "@/background/session.ts";
 
 // Background service worker
@@ -90,6 +94,8 @@ const handlers: HandlerMap = {
   [MessageType.Receive]: handleReceive,
   [MessageType.Send]: handleSend,
   [MessageType.PrepareSend]: handlePrepareSend,
+  [MessageType.Withdraw]: handleWithdraw,
+  [MessageType.PrepareWithdraw]: handlePrepareWithdraw,
 };
 
 browser.runtime.onMessage.addListener(

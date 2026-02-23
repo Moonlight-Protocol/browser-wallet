@@ -85,16 +85,36 @@ export function HomeAccountPicker(props: HomeAccountPickerProps) {
               actionOpen={props.rowMenuOpenFor ===
                 props.keyGroups.main.accountId}
               actionContent={
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    props.startRename(props.keyGroups.main!);
-                  }}
-                  className="px-2 py-1 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm w-full text-left whitespace-nowrap"
-                >
-                  Rename
-                </button>
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      props.startRename(props.keyGroups.main!);
+                    }}
+                    className="px-2 py-1 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm w-full text-left whitespace-nowrap"
+                  >
+                    Rename
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        await navigator.clipboard.writeText(
+                          props.keyGroups.main!.publicKey,
+                        );
+                      } catch (err) {
+                        console.error("Failed to copy account ID", err);
+                      } finally {
+                        props.setRowMenuOpenFor(undefined);
+                      }
+                    }}
+                    className="px-2 py-1 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm w-full text-left whitespace-nowrap"
+                  >
+                    Copy ID
+                  </button>
+                </div>
               }
               editing={props.editingAccountId ===
                 props.keyGroups.main.accountId}
@@ -139,16 +159,36 @@ export function HomeAccountPicker(props: HomeAccountPickerProps) {
                   }}
                   actionOpen={props.rowMenuOpenFor === account.accountId}
                   actionContent={
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        props.startRename(account);
-                      }}
-                      className="px-2 py-1 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm w-full text-left whitespace-nowrap"
-                    >
-                      Rename
-                    </button>
+                    <div className="flex flex-col">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.startRename(account);
+                        }}
+                        className="px-2 py-1 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm w-full text-left whitespace-nowrap"
+                      >
+                        Rename
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            await navigator.clipboard.writeText(
+                              account.publicKey,
+                            );
+                          } catch (err) {
+                            console.error("Failed to copy account ID", err);
+                          } finally {
+                            props.setRowMenuOpenFor(undefined);
+                          }
+                        }}
+                        className="px-2 py-1 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm w-full text-left whitespace-nowrap"
+                      >
+                        Copy ID
+                      </button>
+                    </div>
                   }
                   editing={props.editingAccountId === account.accountId}
                   editingContent={
@@ -192,16 +232,36 @@ export function HomeAccountPicker(props: HomeAccountPickerProps) {
                   }}
                   actionOpen={props.rowMenuOpenFor === account.accountId}
                   actionContent={
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        props.startRename(account);
-                      }}
-                      className="px-2 py-1 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm w-full text-left whitespace-nowrap"
-                    >
-                      Rename
-                    </button>
+                    <div className="flex flex-col">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.startRename(account);
+                        }}
+                        className="px-2 py-1 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm w-full text-left whitespace-nowrap"
+                      >
+                        Rename
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            await navigator.clipboard.writeText(
+                              account.publicKey,
+                            );
+                          } catch (err) {
+                            console.error("Failed to copy account ID", err);
+                          } finally {
+                            props.setRowMenuOpenFor(undefined);
+                          }
+                        }}
+                        className="px-2 py-1 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground rounded-sm w-full text-left whitespace-nowrap"
+                      >
+                        Copy ID
+                      </button>
+                    </div>
                   }
                   editing={props.editingAccountId === account.accountId}
                   editingContent={

@@ -161,10 +161,6 @@ export type HomeTemplateProps = {
     channelId: string,
     providerId: string,
   ) => void | Promise<void>;
-  onStartWithdraw?: (
-    channelId: string,
-    providerId: string,
-  ) => void | Promise<void>;
 };
 
 export function HomeTemplate(props: HomeTemplateProps) {
@@ -692,26 +688,6 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                                   return;
                                                 }
                                                 props.onStartSend?.(
-                                                  selectedPrivateChannel.id,
-                                                  selectedPrivateChannel
-                                                    .selectedProviderId!,
-                                                );
-                                              },
-                                            },
-                                            {
-                                              icon: IconDownload,
-                                              label: "Withdraw",
-                                              key: "withdraw",
-                                              onClick: () => {
-                                                if (
-                                                  !selectedPrivateChannel
-                                                    ?.id ||
-                                                  !selectedPrivateChannel
-                                                    ?.selectedProviderId
-                                                ) {
-                                                  return;
-                                                }
-                                                props.onStartWithdraw?.(
                                                   selectedPrivateChannel.id,
                                                   selectedPrivateChannel
                                                     .selectedProviderId!,

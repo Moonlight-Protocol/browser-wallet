@@ -929,6 +929,7 @@ export function HomePage() {
     if (!selectedProvider) return false;
 
     const session = selectedProvider.sessions?.[selectedAccount.accountId];
+    console.log("accountId", selectedAccount.accountId);
     if (!session) return false;
 
     return session.expiresAt > Date.now();
@@ -978,13 +979,11 @@ export function HomePage() {
       goImport={() => actions.goImport()}
       goSettings={() => actions.goSettings()}
       onStartDeposit={(channelId, providerId) =>
-        actions.goDeposit(channelId, providerId)}
+        actions.goRamp(channelId, providerId)}
       onStartReceive={(channelId, providerId) =>
         actions.goReceive(channelId, providerId)}
       onStartSend={(channelId, providerId) =>
         actions.goSend(channelId, providerId)}
-      onStartWithdraw={(channelId: string, providerId: string) =>
-        actions.goWithdraw(channelId, providerId)}
     />
   );
 }

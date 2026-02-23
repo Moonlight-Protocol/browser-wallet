@@ -18,6 +18,7 @@ export type PopupRoute =
   | "settings"
   | "private-add-channel"
   | "sign-request"
+  | "ramp"
   | "deposit"
   | "deposit-review"
   | "receive"
@@ -129,6 +130,7 @@ type PopupActions = {
   goSettings: () => void;
   goPrivateAddChannel: () => void;
   goSignRequest: (requestId: string) => void;
+  goRamp: (channelId?: string, providerId?: string) => void;
   goDeposit: (channelId?: string, providerId?: string) => void;
   goDepositReview: () => void;
   setDepositFormData: (data: PopupState["depositFormData"]) => void;
@@ -219,6 +221,20 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       route: "sign-request",
       signingRequestId: requestId,
       inPopupSigningFlow: true,
+    }));
+  const goRamp = (channelId?: string, providerId?: string) =>
+    setState((prev) => ({
+      ...prev,
+      route: "ramp",
+      depositFormData: channelId && providerId
+        ? {
+          channelId,
+          providerId,
+          method: "DIRECT",
+          amount: "",
+          entropyLevel: "MEDIUM",
+        }
+        : prev.depositFormData,
     }));
   const goDeposit = (channelId?: string, providerId?: string) =>
     setState((prev) => ({
@@ -495,6 +511,7 @@ export function PopupProvider(props: { children: React.ReactNode }) {
         goSettings,
         goPrivateAddChannel,
         goSignRequest,
+        goRamp,
         goDeposit,
         goDepositReview,
         setDepositFormData,

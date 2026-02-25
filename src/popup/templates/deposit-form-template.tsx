@@ -34,6 +34,9 @@ export type DepositFormTemplateProps = {
   setEntropyLevel: (level: EntropyLevel) => void;
   availableBalance?: string;
   maxAmount?: string;
+  estimatedFee?: number;
+  totalAmount?: number;
+  assetCode?: string;
   busy: boolean;
   error?: string;
   canSubmit: boolean;
@@ -211,6 +214,29 @@ export function DepositFormTemplate(props: DepositFormTemplateProps) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Fee and Total */}
+        {props.estimatedFee !== undefined && props.totalAmount !== undefined &&
+          props.assetCode && (
+          <Card>
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex justify-between items-center">
+                <Text className="text-xs font-medium uppercase text-muted-foreground">
+                  Estimated Fee
+                </Text>
+                <Text className="text-sm font-semibold">
+                  {props.estimatedFee.toFixed(2)} {props.assetCode}
+                </Text>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t">
+                <Text className="text-sm font-semibold">Total</Text>
+                <Text className="text-lg font-bold">
+                  {props.totalAmount.toFixed(2)} {props.assetCode}
+                </Text>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {props.error
           ? (

@@ -23,6 +23,23 @@ function getUtxoCountFromEntropyLevel(
   }
 }
 
+function getFeeForEntropyLevel(
+  level: "LOW" | "MEDIUM" | "HIGH" | "V_HIGH",
+): number {
+  switch (level) {
+    case "LOW":
+      return 0.05;
+    case "MEDIUM":
+      return 0.25;
+    case "HIGH":
+      return 0.5;
+    case "V_HIGH":
+      return 0.75;
+    default:
+      return 0.25;
+  }
+}
+
 export function DepositReviewPage() {
   const { state, actions } = usePopup();
   const status = state.status;
@@ -71,11 +88,12 @@ export function DepositReviewPage() {
     return getUtxoCountFromEntropyLevel(formData.entropyLevel);
   }, [formData]);
 
-  // Calculate estimated fee (simplified - in production this should come from the backend)
+  // Calculate estimated fee using the same function as deposit.ts
   const estimatedFee = useMemo(() => {
-    // Rough estimate: 0.00001 XLM per UTXO
-    return (utxoCount * 0.00001).toFixed(7);
-  }, [utxoCount]);
+    if (!formData) return "0";
+    const fee = getFeeForEntropyLevel(formData.entropyLevel);
+    return fee.toFixed(7);
+  }, [formData]);
 
   const totalAmount = useMemo(() => {
     if (!formData) return undefined;

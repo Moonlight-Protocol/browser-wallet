@@ -140,7 +140,7 @@ export function HomeHeader(props: HomeHeaderProps) {
                     )}
                   />
                   <span className="text-xs font-semibold text-secondary">
-                    {props.channelName || "No Channel"}
+                    {props.channelName || "No Provider"}
                   </span>
                   <ChevronDownIcon className="h-3 w-3 text-secondary/50" />
                 </button>

@@ -200,6 +200,17 @@ export function HomeTemplate(props: HomeTemplateProps) {
       )
       : undefined;
 
+  const selectedProvider = selectedPrivateChannel?.selectedProviderId
+    ? selectedPrivateChannel.providers.find(
+      (p) => p.id === selectedPrivateChannel.selectedProviderId,
+    )
+    : undefined;
+
+  // Label to show in the header pill when in private mode.
+  // Always reflect the provider (when one is selected); otherwise let the header
+  // fall back to the generic "No Provider" copy instead of showing the channel.
+  const privateConnectionLabel = selectedProvider?.name;
+
   const canStartDeposit = Boolean(selectedPrivateChannel?.id) &&
     Boolean(selectedPrivateChannel?.selectedProviderId) &&
     Boolean(props.isConnected) &&
@@ -341,7 +352,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
             }
             accountPickerOpen={props.accountPickerOpen}
             onToggleAccountPicker={(open) => props.setAccountPickerOpen(open)}
-            channelName={selectedPrivateChannel?.name}
+            channelName={privateConnectionLabel}
             isConnected={props.isConnected}
             channelPickerOpen={props.channelPickerOpen}
             onToggleChannelPicker={(open) => props.setChannelPickerOpen?.(open)}

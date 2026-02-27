@@ -40,7 +40,10 @@ import { handleRequestSigning } from "@/background/handlers/signing/request-sign
 import { handleGetSigningRequest } from "@/background/handlers/signing/get-signing-request.ts";
 import { handleApproveSigningRequest } from "@/background/handlers/signing/approve-signing-request.ts";
 import { handleRejectSigningRequest } from "@/background/handlers/signing/reject-signing-request.ts";
-import { handleDeposit } from "@/background/handlers/private/deposit.ts";
+import {
+  handleDeposit,
+  handlePrepareDeposit,
+} from "@/background/handlers/private/deposit.ts";
 import { handleReceive } from "@/background/handlers/private/receive.ts";
 import {
   handlePrepareSend,
@@ -91,6 +94,7 @@ const handlers: HandlerMap = {
   [MessageType.ApproveSigningRequest]: handleApproveSigningRequest,
   [MessageType.RejectSigningRequest]: handleRejectSigningRequest,
   [MessageType.Deposit]: handleDeposit,
+  [MessageType.PrepareDeposit]: handlePrepareDeposit,
   [MessageType.Receive]: handleReceive,
   [MessageType.Send]: handleSend,
   [MessageType.PrepareSend]: handlePrepareSend,

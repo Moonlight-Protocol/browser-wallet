@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
-import { deposit } from "@/popup/api/deposit.ts";
+import { deposit, prepareDeposit } from "@/popup/api/deposit.ts";
 import { DepositReviewTemplate } from "@/popup/templates/deposit-review-template.tsx";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
+import type { PrepareDepositResponse } from "@/background/handlers/private/deposit.types.ts";
 
 function getUtxoCountFromEntropyLevel(
   level: "LOW" | "MEDIUM" | "HIGH" | "V_HIGH",
@@ -60,9 +61,10 @@ export function DepositReviewPage() {
   const [error, setError] = useState<string | undefined>();
 
   const formData = state.depositFormData;
+  const depositResult = state.depositResult;
 
   // Load private channels to get channel name
-  useMemo(() => {
+  useEffect(() => {
     if (!formData) return;
     getPrivateChannels({ network })
       .then((res) => {
@@ -77,6 +79,38 @@ export function DepositReviewPage() {
         console.error("Failed to load private channels", err);
       });
   }, [network, formData]);
+
+  // Prepare deposit operations when page loads
+  useEffect(() => {
+    if (!formData || !selectedAccount || depositResult) return;
+
+    prepareDeposit({
+      network,
+      channelId: formData.channelId,
+      providerId: formData.providerId,
+      accountId: selectedAccount.accountId,
+      amount: formData.amount,
+      entropyLevel: formData.entropyLevel,
+    })
+      .then((res: PrepareDepositResponse) => {
+        if (res.ok) {
+          // Cast to relax type coupling if PopupState changes shape slightly
+          actions.setDepositResult({
+            createOperations: res.createOperations ?? [],
+            operationsMLXDR: res.operationsMLXDR ?? [],
+            numUtxos: res.numUtxos ?? 0,
+            depositAmount: res.depositAmount ?? "0",
+            feeAmount: res.feeAmount ?? "0",
+            depositOperation: res.depositOperation,
+          });
+        } else {
+          console.error("Failed to prepare deposit:", res.error);
+        }
+      })
+      .catch((err: unknown) => {
+        console.error("Failed to prepare deposit", err);
+      });
+  }, [formData, selectedAccount, network, depositResult, actions]);
 
   const selectedChannel = useMemo(() => {
     if (!formData || !privateChannels) return undefined;
@@ -120,6 +154,8 @@ export function DepositReviewPage() {
         method: formData.method,
         amount: formData.amount,
         entropyLevel: formData.entropyLevel,
+        // Use prepared operations if available
+        preparedOperationsMLXDR: depositResult?.operationsMLXDR,
       });
 
       if (!result.ok) {
@@ -128,7 +164,7 @@ export function DepositReviewPage() {
       }
 
       // Clear form data and go home
-      actions.clearDepositFormData();
+      actions.clearDepositData();
       actions.goHome();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -147,6 +183,8 @@ export function DepositReviewPage() {
         amount="0"
         entropyLevel="MEDIUM"
         utxoCount={0}
+        estimatedFee={undefined}
+        totalAmount={undefined}
         busy={false}
         error="Missing form data. Please start over."
         onBack={() => actions.goHome()}
@@ -165,6 +203,8 @@ export function DepositReviewPage() {
       utxoCount={utxoCount}
       estimatedFee={estimatedFee}
       totalAmount={totalAmount}
+      createOperations={depositResult?.createOperations}
+      depositOperation={depositResult?.depositOperation}
       busy={busy}
       error={error}
       onBack={() => actions.goDeposit()}

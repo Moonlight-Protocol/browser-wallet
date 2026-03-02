@@ -144,8 +144,8 @@ export function ReceiveConfirmationPage() {
                   : <IconCopy className="h-4 w-4" />}
               </button>
             </div>
-            <div className="p-3 rounded-md bg-muted/50 font-mono text-xs break-all">
-              {mlxdrString.substring(0, 100)}...
+            <div className="p-3 rounded-md bg-muted/50 font-mono text-xs truncate">
+              {mlxdrString}
             </div>
           </CardContent>
         </Card>

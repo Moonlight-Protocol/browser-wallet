@@ -628,18 +628,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
 
                                     {/* Stats */}
                                     <div className="h-px bg-gradient-to-r from-transparent via-secondary/20 to-transparent my-3" />
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div className="text-center">
-                                        <p className="text-[10px] uppercase tracking-widest font-bold text-foreground/40 mb-1">
-                                          Derived UTXOs
-                                        </p>
-                                        <p className="text-sm font-bold text-foreground/80">
-                                          {props.isConnected &&
-                                              props.privateStats?.stats
-                                            ? `${props.privateStats.stats.derivedCount} / ${props.privateStats.stats.targetCount}`
-                                            : "0 / 0"}
-                                        </p>
-                                      </div>
+                                    <div className="grid grid-cols-1 gap-4 mb-3">
                                       <div className="text-center">
                                         <p className="text-[10px] uppercase tracking-widest font-bold text-foreground/40 mb-1">
                                           Non-zero UTXOs
@@ -654,7 +643,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                       </div>
                                     </div>
                                     {!props.isConnected && (
-                                      <p className="mt-2 text-xs text-foreground/50 text-center">
+                                      <p className="mt-1 mb-3 text-xs text-foreground/50 text-center">
                                         Connect provider to view private
                                         balances and UTXO details.
                                       </p>

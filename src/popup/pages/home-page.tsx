@@ -14,11 +14,7 @@ import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { setSelectedPrivateChannel } from "@/popup/api/set-selected-private-channel.ts";
 import { ensurePrivateChannelTracking } from "@/popup/api/ensure-private-channel-tracking.ts";
 import { getPrivateStats } from "@/popup/api/get-private-stats.ts";
-import {
-  showAsyncSubmitted,
-  showError,
-  showSuccess,
-} from "@/popup/utils/toast.tsx";
+import { showError, showSuccess } from "@/popup/utils/toast.tsx";
 import { addPrivacyProvider } from "@/popup/api/add-privacy-provider.ts";
 import { removePrivacyProvider } from "@/popup/api/remove-privacy-provider.ts";
 import { connectPrivacyProvider } from "@/popup/api/connect-privacy-provider.ts";
@@ -30,6 +26,8 @@ import type { PrivateChannelStats } from "@/persistence/stores/private-utxos.typ
 import type { Ed25519PublicKey } from "@colibri/core";
 
 export function HomePage() {
+  const homeRefreshIntervalMs = 15_000;
+
   const { state, actions } = usePopup();
   const [accountPickerOpen, setAccountPickerOpen] = useState(false);
   const [channelPickerOpen, setChannelPickerOpen] = useState(false);
@@ -295,7 +293,6 @@ export function HomePage() {
 
           // Navigate to signing page within this popup
           actions.goSignRequest(result.signingRequestId);
-          showAsyncSubmitted("connect-provider");
         }
       }
 
@@ -949,6 +946,140 @@ export function HomePage() {
 
     return session.expiresAt > Date.now();
   }, [selectedPrivateChannel, selectedAccount?.accountId]);
+
+  // Auto-refresh Home data periodically using the same APIs we already use
+  // when switching between public/private views.
+  useEffect(() => {
+    const unlocked = status?.unlocked ?? false;
+    const accountId = selectedAccount?.accountId;
+    const publicKey = selectedAccount?.publicKey as
+      | Ed25519PublicKey
+      | undefined;
+
+    if (!unlocked || !accountId) {
+      return;
+    }
+
+    let cancelled = false;
+    let isRefreshing = false;
+
+    const network = selectedNetwork as ChainNetwork;
+
+    const tick = async () => {
+      if (cancelled || isRefreshing) return;
+      isRefreshing = true;
+      try {
+        if (viewMode === "public") {
+          if (!publicKey) return;
+
+          // Lightweight refresh of the selected chain state.
+          const res = await readSelectedChain({ network, publicKey });
+          if (cancelled) return;
+
+          // If we still don't have a confirmed account, re-check activation.
+          if (res.state.createdConfirmed !== true) {
+            try {
+              await refreshActivation({ network, publicKey });
+            } catch {
+              // Non-fatal for periodic refresh.
+            }
+          }
+
+          // Best-effort background sync if the cache is stale.
+          try {
+            await syncChainState({
+              items: [{ network, publicKey, priority: true }],
+              onlyIfStale: true,
+            });
+          } catch {
+            // Ignore periodic sync errors.
+          }
+        } else if (viewMode === "private") {
+          // Refresh private channels while keeping existing data visible.
+          await refreshPrivateChannels();
+
+          const channelId = privateChannels?.selectedChannelId ??
+            selectedPrivateChannel?.id;
+          if (!channelId) return;
+
+          // Refresh private stats for the current account/channel pair.
+          try {
+            const cachedStats = await getPrivateStats({
+              network,
+              accountId,
+              channelId,
+            });
+            if (cancelled) return;
+            setPrivateStats((prev) => ({
+              loading: true,
+              error: prev?.error,
+              stats: cachedStats,
+            }));
+          } catch {
+            if (cancelled) return;
+            setPrivateStats((prev) => ({
+              loading: true,
+              error: prev?.error,
+              stats: prev?.stats,
+            }));
+          }
+
+          try {
+            const ensured = await ensurePrivateChannelTracking({
+              network,
+              accountId,
+              channelId,
+              targetUtxos: 300,
+            });
+            if (cancelled) return;
+
+            if (ensured.ok) {
+              setPrivateStats({
+                loading: false,
+                error: undefined,
+                stats: ensured.stats,
+              });
+            } else {
+              setPrivateStats({
+                loading: false,
+                error: ensured.error.message ??
+                  "Failed to prepare private tracking",
+                stats: undefined,
+              });
+            }
+          } catch (err) {
+            if (cancelled) return;
+            const message = err instanceof Error ? err.message : String(err);
+            setPrivateStats({
+              loading: false,
+              error: message || "Failed to prepare private tracking",
+              stats: undefined,
+            });
+          }
+        }
+      } finally {
+        isRefreshing = false;
+      }
+    };
+
+    const timer = setInterval(() => {
+      // Fire-and-forget to keep UI responsive.
+      tick().catch(() => undefined);
+    }, homeRefreshIntervalMs);
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [
+    status?.unlocked,
+    viewMode,
+    selectedNetwork,
+    selectedAccount?.accountId,
+    selectedAccount?.publicKey,
+    privateChannels?.selectedChannelId,
+    selectedPrivateChannel?.id,
+  ]);
 
   return (
     <HomeTemplate

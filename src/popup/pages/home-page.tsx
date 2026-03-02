@@ -14,6 +14,11 @@ import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { setSelectedPrivateChannel } from "@/popup/api/set-selected-private-channel.ts";
 import { ensurePrivateChannelTracking } from "@/popup/api/ensure-private-channel-tracking.ts";
 import { getPrivateStats } from "@/popup/api/get-private-stats.ts";
+import {
+  showAsyncSubmitted,
+  showError,
+  showSuccess,
+} from "@/popup/utils/toast.tsx";
 import { addPrivacyProvider } from "@/popup/api/add-privacy-provider.ts";
 import { removePrivacyProvider } from "@/popup/api/remove-privacy-provider.ts";
 import { connectPrivacyProvider } from "@/popup/api/connect-privacy-provider.ts";
@@ -211,8 +216,11 @@ export function HomePage() {
         url,
       });
       await refreshPrivateChannels();
+      showSuccess("Provider added successfully");
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error(err);
+      showError(msg || "Failed to add provider");
     }
   };
 
@@ -227,8 +235,11 @@ export function HomePage() {
         providerId,
       });
       await refreshPrivateChannels();
+      showSuccess("Provider removed successfully");
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error(err);
+      showError(msg || "Failed to remove provider");
     }
   };
 
@@ -263,6 +274,7 @@ export function HomePage() {
         // The connection status is per-account based on sessions
         // Just refresh to update the UI
         await refreshPrivateChannels();
+        showSuccess("Provider disconnected successfully");
       } else {
         // Connecting to a provider
         const provider = channel.providers.find((p) => p.id === providerId);
@@ -283,12 +295,15 @@ export function HomePage() {
 
           // Navigate to signing page within this popup
           actions.goSignRequest(result.signingRequestId);
+          showAsyncSubmitted("connect-provider");
         }
       }
 
       await refreshPrivateChannels();
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error(err);
+      showError(msg || "Failed to update provider connection");
     }
   };
 

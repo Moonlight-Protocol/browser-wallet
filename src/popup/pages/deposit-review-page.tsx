@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { deposit, prepareDeposit } from "@/popup/api/deposit.ts";
+import { showAsyncSubmitted, showError } from "@/popup/utils/toast.tsx";
 import { DepositReviewTemplate } from "@/popup/templates/deposit-review-template.tsx";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
@@ -138,7 +139,9 @@ export function DepositReviewPage() {
 
   const handleSubmit = async () => {
     if (!formData || !selectedAccount) {
-      setError("Missing form data or account");
+      const msg = "Missing form data or account";
+      setError(msg);
+      showError(msg);
       return;
     }
 
@@ -159,16 +162,20 @@ export function DepositReviewPage() {
       });
 
       if (!result.ok) {
-        setError(result.error?.message ?? "Deposit failed");
+        const msg = result.error?.message ?? "Deposit failed";
+        setError(msg);
+        showError(msg);
         return;
       }
 
+      showAsyncSubmitted("deposit");
       // Clear form data and go home
       actions.clearDepositData();
       actions.goHome();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
+      showError(msg || "Failed to submit deposit");
     } finally {
       setBusy(false);
     }

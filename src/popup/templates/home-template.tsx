@@ -216,6 +216,16 @@ export function HomeTemplate(props: HomeTemplateProps) {
     Boolean(props.isConnected) &&
     Boolean(props.onStartDeposit);
 
+  const canStartReceive = Boolean(selectedPrivateChannel?.id) &&
+    Boolean(selectedPrivateChannel?.selectedProviderId) &&
+    Boolean(props.isConnected) &&
+    Boolean(props.onStartReceive);
+
+  const canStartSend = Boolean(selectedPrivateChannel?.id) &&
+    Boolean(selectedPrivateChannel?.selectedProviderId) &&
+    Boolean(props.isConnected) &&
+    Boolean(props.onStartSend);
+
   return (
     <SidebarProvider defaultOpen={false}>
       <Sidebar collapsible="offcanvas" variant="floating">
@@ -657,8 +667,9 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               icon: IconArrowDownLeft,
                                               label: "Receive",
                                               key: "receive",
+                                              canStart: canStartReceive,
                                               onClick: () => {
-                                                if (!canStartDeposit) return;
+                                                if (!canStartReceive) return;
                                                 if (
                                                   !selectedPrivateChannel
                                                     ?.id ||
@@ -678,7 +689,9 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               icon: IconArrowUpRight,
                                               label: "Send",
                                               key: "send",
+                                              canStart: canStartSend,
                                               onClick: () => {
+                                                if (!canStartSend) return;
                                                 if (
                                                   !selectedPrivateChannel
                                                     ?.id ||
@@ -698,6 +711,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               icon: IconCoinFilled,
                                               label: "Ramp",
                                               key: "ramp",
+                                              canStart: canStartDeposit,
                                               onClick: () => {
                                                 if (!canStartDeposit) return;
                                                 if (
@@ -720,7 +734,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               <TooltipTrigger asChild>
                                                 <button
                                                   type="button"
-                                                  disabled={!canStartDeposit}
+                                                  disabled={!action.canStart}
                                                   onClick={action.onClick}
                                                   className="group flex flex-col items-center gap-2 py-4 px-2 rounded-xl transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
                                                   style={{
@@ -746,7 +760,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                                   </span>
                                                 </button>
                                               </TooltipTrigger>
-                                              {!canStartDeposit && (
+                                              {!action.canStart && (
                                                 <TooltipContent side="top">
                                                   Connect provider to use this
                                                   action

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toDecimals } from "@colibri/core";
 import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
 import { Card, CardContent } from "@/popup/atoms/card.tsx";
@@ -161,8 +162,7 @@ export function DepositReviewTemplate(props: DepositReviewTemplateProps) {
                           </Text>
                         </div>
                         <Text className="text-sm font-medium whitespace-nowrap">
-                          {(parseFloat(props.depositOperation.amount) / 1e7)
-                            .toFixed(7)} XLM
+                          {toDecimals(BigInt(props.depositOperation.amount), 7)} XLM
                         </Text>
                       </div>
                     </div>
@@ -196,7 +196,7 @@ export function DepositReviewTemplate(props: DepositReviewTemplateProps) {
                               </Text>
                             </div>
                             <Text className="text-sm font-medium whitespace-nowrap">
-                              {parseFloat(utxo.amount) / 10_000_000} XLM
+                              {toDecimals(BigInt(utxo.amount), 7)} XLM
                             </Text>
                             <button
                               type="button"

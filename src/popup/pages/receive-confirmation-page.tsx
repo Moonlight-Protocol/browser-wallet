@@ -7,11 +7,11 @@ import { Text } from "@/popup/atoms/text.tsx";
 import { Label } from "@/popup/atoms/label.tsx";
 import {
   IconCopy,
-  IconExternalLink,
   IconInfoCircle,
 } from "@tabler/icons-react";
 import { shortenAddress } from "@/popup/utils/common.ts";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
+import { toDecimals } from "@colibri/core";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 
@@ -198,7 +198,7 @@ export function ReceiveConfirmationPage() {
                       </Text>
                     </div>
                     <Text className="text-sm font-medium whitespace-nowrap">
-                      {parseFloat(utxo.amount) / 10_000_000} XLM
+                      {toDecimals(BigInt(utxo.amount), 7)} XLM
                     </Text>
                     <button
                       type="button"
@@ -208,7 +208,7 @@ export function ReceiveConfirmationPage() {
                     >
                       {copiedIndex === index
                         ? <IconInfoCircle className="h-4 w-4 text-green-400" />
-                        : <IconExternalLink className="h-4 w-4" />}
+                        : <IconCopy className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>

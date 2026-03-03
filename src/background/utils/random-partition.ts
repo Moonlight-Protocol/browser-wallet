@@ -95,7 +95,7 @@ export function partitionAmountRandom(
     sumWeights += weight;
   }
 
-  // Distribuir o remaining proporcionalmente aos pesos
+  // Distribute the remaining amount proportionally to the weights
   const amounts: bigint[] = [];
   let assignedExtra = 0n;
 

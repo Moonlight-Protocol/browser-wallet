@@ -161,7 +161,7 @@ export const handleReceive: Handler<MessageType.Receive> = async (message) => {
       return {
         type: MessageType.Receive,
         ok: false,
-        error: { code: "INVALID_AMOUNT", message: "Invalid deposit amount" },
+        error: { code: "INVALID_AMOUNT", message: "Invalid receive amount" },
       };
     }
 

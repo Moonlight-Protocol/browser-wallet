@@ -24,9 +24,9 @@ import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 import type { PrivateChannelStats } from "@/persistence/stores/private-utxos.types.ts";
 import type { Ed25519PublicKey } from "@colibri/core";
+import { HOME_AUTO_REFRESH_INTERVAL_MS } from "@/popup/utils/home-refresh.ts";
 
 export function HomePage() {
-  const homeRefreshIntervalMs = 15_000;
 
   const { state, actions } = usePopup();
   const [accountPickerOpen, setAccountPickerOpen] = useState(false);
@@ -941,7 +941,6 @@ export function HomePage() {
     if (!selectedProvider) return false;
 
     const session = selectedProvider.sessions?.[selectedAccount.accountId];
-    console.log("accountId", selectedAccount.accountId);
     if (!session) return false;
 
     return session.expiresAt > Date.now();
@@ -1065,7 +1064,7 @@ export function HomePage() {
     const timer = setInterval(() => {
       // Fire-and-forget to keep UI responsive.
       tick().catch(() => undefined);
-    }, homeRefreshIntervalMs);
+    }, HOME_AUTO_REFRESH_INTERVAL_MS);
 
     return () => {
       cancelled = true;

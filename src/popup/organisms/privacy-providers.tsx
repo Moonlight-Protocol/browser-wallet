@@ -21,6 +21,9 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
   const [processingProviderId, setProcessingProviderId] = useState<
     string | null
   >(null);
+  const [providerError, setProviderError] = useState<
+    { id: string; message: string } | null
+  >(null);
 
   const handleAdd = async () => {
     if (!name.trim() || !url.trim()) return;
@@ -44,8 +47,13 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
   const handleToggleConnection = async (id: string, isSelected: boolean) => {
     if (processingProviderId) return;
     setProcessingProviderId(id);
+    setProviderError(null);
     try {
       await props.onSelectProvider(isSelected ? undefined : id);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("[PrivacyProviders] Connection failed:", message);
+      setProviderError({ id, message });
     } finally {
       setProcessingProviderId(null);
     }
@@ -168,8 +176,8 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
         const connected = !!(isSelectedProvider && hasValidSession);
 
         return (
+          <div key={p.id} className="flex flex-col gap-1">
           <div
-            key={p.id}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
             style={{
               background: connected
@@ -235,6 +243,12 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
             >
               <IconTrash className="h-3.5 w-3.5" />
             </button>
+          </div>
+          {providerError?.id === p.id && (
+            <div className="px-3 py-2 rounded-lg text-xs text-red-400 bg-red-500/10 border border-red-500/20">
+              Connection failed: {providerError.message}
+            </div>
+          )}
           </div>
         );
       })}

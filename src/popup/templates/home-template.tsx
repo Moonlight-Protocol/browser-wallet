@@ -7,6 +7,12 @@ import { Button } from "@/popup/atoms/button.tsx";
 import { Spinner } from "@/popup/atoms/spinner.tsx";
 import { LoadingSpinner } from "@/popup/atoms/loading-spinner.tsx";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/popup/atoms/tooltip.tsx";
+import {
   Card,
   CardContent,
   CardFooter,
@@ -142,6 +148,11 @@ export type HomeTemplateProps = {
 
   goImport: () => void;
   goSettings: () => void;
+
+  onStartDeposit?: (
+    channelId: string,
+    providerId: string,
+  ) => void | Promise<void>;
 };
 
 export function HomeTemplate(props: HomeTemplateProps) {
@@ -180,6 +191,11 @@ export function HomeTemplate(props: HomeTemplateProps) {
         (c) => c.id === props.privateChannels?.selectedChannelId,
       )
       : undefined;
+
+  const canStartDeposit = Boolean(selectedPrivateChannel?.id) &&
+    Boolean(selectedPrivateChannel?.selectedProviderId) &&
+    Boolean(props.isConnected) &&
+    Boolean(props.onStartDeposit);
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -431,65 +447,6 @@ export function HomeTemplate(props: HomeTemplateProps) {
                   </div>
                 </div>
               </div>
-
-              {/* Main Action Buttons */}
-              <div
-                className="grid grid-cols-3 gap-2 animate-fade-in-up mb-4"
-                style={{ animationDelay: "0.15s" }}
-              >
-                {[
-                  { icon: IconArrowDownLeft, label: "Receive" },
-                  { icon: IconArrowUpRight, label: "Send" },
-                  { icon: IconCoinFilled, label: "Ramp" },
-                ].map((action) => (
-                  <button
-                    key={action.label}
-                    type="button"
-                    className="group flex flex-col items-center gap-2 py-4 px-2 rounded-xl transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
-                    style={{
-                      background: "oklch(0.18 0.03 265 / 0.6)",
-                      border: "1px solid oklch(1 0 0 / 0.06)",
-                    }}
-                    onClick={() => {}}
-                  >
-                    <div
-                      className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, oklch(0.75 0.18 45) 0%, oklch(0.65 0.16 40) 100%)",
-                        boxShadow: "0 4px 12px oklch(0.75 0.18 45 / 0.3)",
-                      }}
-                    >
-                      <action.icon className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-xs font-bold text-foreground/70 group-hover:text-foreground/90 transition-colors">
-                      {action.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Deposit Button */}
-              <div
-                className="animate-fade-in-up mt-auto"
-                style={{ animationDelay: "0.2s" }}
-              >
-                <button
-                  type="button"
-                  className="w-full py-3.5 px-5 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, oklch(0.55 0.20 300 / 0.15) 0%, oklch(0.45 0.18 280 / 0.08) 100%)",
-                    border: "1px solid oklch(0.55 0.20 300 / 0.25)",
-                  }}
-                  onClick={() => {}}
-                >
-                  <IconDownload className="h-4 w-4 text-secondary" />
-                  <span className="text-sm font-bold text-secondary">
-                    Deposit Funds
-                  </span>
-                </button>
-              </div>
             </div>
           )}
 
@@ -632,15 +589,17 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                             backgroundClip: "text",
                                           }}
                                         >
-                                          {props.privateStats?.stats
-                                            ? toDecimals(
-                                              BigInt(
-                                                props.privateStats.stats
-                                                  .totalBalance || "0",
-                                              ),
-                                              7,
-                                            )
-                                            : "-"}
+                                          {props.isConnected
+                                            ? props.privateStats?.stats
+                                              ? toDecimals(
+                                                BigInt(
+                                                  props.privateStats.stats
+                                                    .totalBalance || "0",
+                                                ),
+                                                7,
+                                              )
+                                              : "-"
+                                            : "0.00"}
                                         </span>
                                         <span className="text-sm font-bold text-foreground/40">
                                           XLM
@@ -656,9 +615,10 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                           Derived UTXOs
                                         </p>
                                         <p className="text-sm font-bold text-foreground/80">
-                                          {props.privateStats?.stats
+                                          {props.isConnected &&
+                                              props.privateStats?.stats
                                             ? `${props.privateStats.stats.derivedCount} / ${props.privateStats.stats.targetCount}`
-                                            : "-"}
+                                            : "0 / 0"}
                                         </p>
                                       </div>
                                       <div className="text-center">
@@ -666,12 +626,101 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                           Non-zero UTXOs
                                         </p>
                                         <p className="text-sm font-bold text-foreground/80">
-                                          {props.privateStats?.stats
+                                          {props.isConnected &&
+                                              props.privateStats?.stats
                                             ? props.privateStats.stats
                                               .nonZeroCount
-                                            : "-"}
+                                            : "0"}
                                         </p>
                                       </div>
+                                    </div>
+                                    {!props.isConnected && (
+                                      <p className="mt-2 text-xs text-foreground/50 text-center">
+                                        Connect provider to view private
+                                        balances and UTXO details.
+                                      </p>
+                                    )}
+                                    {/* Main Action Buttons (Private view) */}
+                                    <div className="pt-4 border-t border-primary/10">
+                                      <TooltipProvider>
+                                        <div className="grid grid-cols-3 gap-2">
+                                          {[
+                                            {
+                                              icon: IconArrowDownLeft,
+                                              label: "Receive",
+                                              key: "receive",
+                                              // TODO: Wire real private receive flow
+                                              onClick: () => {},
+                                            },
+                                            {
+                                              icon: IconArrowUpRight,
+                                              label: "Send",
+                                              key: "send",
+                                              // TODO: Wire real private send flow
+                                              onClick: () => {},
+                                            },
+                                            {
+                                              icon: IconCoinFilled,
+                                              label: "Ramp",
+                                              key: "ramp",
+                                              onClick: () => {
+                                                if (!canStartDeposit) return;
+                                                if (
+                                                  !selectedPrivateChannel
+                                                    ?.id ||
+                                                  !selectedPrivateChannel
+                                                    ?.selectedProviderId
+                                                ) {
+                                                  return;
+                                                }
+                                                props.onStartDeposit?.(
+                                                  selectedPrivateChannel.id,
+                                                  selectedPrivateChannel
+                                                    .selectedProviderId!,
+                                                );
+                                              },
+                                            },
+                                          ].map((action) => (
+                                            <Tooltip key={action.key}>
+                                              <TooltipTrigger asChild>
+                                                <button
+                                                  type="button"
+                                                  disabled={!canStartDeposit}
+                                                  onClick={action.onClick}
+                                                  className="group flex flex-col items-center gap-2 py-4 px-2 rounded-xl transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+                                                  style={{
+                                                    background:
+                                                      "oklch(0.18 0.03 265 / 0.6)",
+                                                    border:
+                                                      "1px solid oklch(1 0 0 / 0.06)",
+                                                  }}
+                                                >
+                                                  <div
+                                                    className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110"
+                                                    style={{
+                                                      background:
+                                                        "linear-gradient(135deg, oklch(0.75 0.18 45) 0%, oklch(0.65 0.16 40) 100%)",
+                                                      boxShadow:
+                                                        "0 4px 12px oklch(0.75 0.18 45 / 0.3)",
+                                                    }}
+                                                  >
+                                                    <action.icon className="h-5 w-5 text-white" />
+                                                  </div>
+                                                  <span className="text-xs font-bold text-foreground/70 group-hover:text-foreground/90 transition-colors">
+                                                    {action.label}
+                                                  </span>
+                                                </button>
+                                              </TooltipTrigger>
+                                              {!canStartDeposit && (
+                                                <TooltipContent side="top">
+                                                  Connect provider to use this
+                                                  action
+                                                </TooltipContent>
+                                              )}
+                                            </Tooltip>
+                                          ))}
+                                        </div>
+                                      </TooltipProvider>
                                     </div>
                                   </>
                                 )}

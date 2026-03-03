@@ -30,6 +30,15 @@ export const handleConnectPrivacyProvider: Handler<
       // 4. Submit Signed Challenge to Provider
       const authResponse = await client.postAuth(signedXdr);
 
+      // Validate token was received
+      if (!authResponse.token || typeof authResponse.token !== "string") {
+        throw new Error(
+          `Invalid token received from provider: ${
+            JSON.stringify(authResponse)
+          }`,
+        );
+      }
+
       // 5. Save Session
       const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
 
@@ -43,6 +52,14 @@ export const handleConnectPrivacyProvider: Handler<
           expiresAt,
         },
       );
+
+      console.log("[ConnectPrivacyProvider] Session saved successfully", {
+        network,
+        channelId,
+        providerId,
+        accountId,
+        hasToken: !!authResponse.token,
+      });
 
       // 6. Auto-select the provider
       await privateChannels.setSelectedProvider(network, channelId, providerId);

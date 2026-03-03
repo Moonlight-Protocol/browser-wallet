@@ -977,6 +977,8 @@ export function HomePage() {
       onLockFromMenu={onLockFromMenu}
       goImport={() => actions.goImport()}
       goSettings={() => actions.goSettings()}
+      onStartDeposit={(channelId, providerId) =>
+        actions.goDeposit(channelId, providerId)}
     />
   );
 }

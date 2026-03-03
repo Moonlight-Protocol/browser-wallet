@@ -5,7 +5,7 @@ import tailwindcss from "@tailwindcss/postcss";
 import autoprefixer from "autoprefixer";
 import postcss from "postcss";
 
-const buildDir = "dist";
+const buildDir = Deno.env.get("BUILD_DIR") || "dist";
 
 function envFlag(name: string, defaultValue = false): boolean {
   const raw = Deno.env.get(name);
@@ -26,7 +26,10 @@ function loadSeedDefines(): Record<string, string> {
   ];
 
   const defines: Record<string, string> = {};
-  const envSeedPath = new URL("../.env.seed", import.meta.url).pathname;
+  const customSeedFile = Deno.env.get("SEED_FILE");
+  const envSeedPath = customSeedFile
+    ? (customSeedFile.startsWith("/") ? customSeedFile : new URL(`../${customSeedFile}`, import.meta.url).pathname)
+    : new URL("../.env.seed", import.meta.url).pathname;
 
   // Try to load .env.seed file
   try {
@@ -48,7 +51,7 @@ function loadSeedDefines(): Record<string, string> {
 
     const nonEmpty = Object.values(parsed).filter(Boolean).length;
     if (nonEmpty > 0) {
-      console.log(`🌱 Loaded ${nonEmpty} seed values from .env.seed`);
+      console.log(`🌱 Loaded ${nonEmpty} seed values from ${envSeedPath}`);
     }
   } catch {
     // No .env.seed file — set all to empty string

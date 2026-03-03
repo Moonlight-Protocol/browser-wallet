@@ -141,6 +141,12 @@ import type {
   SendRequest,
   SendResponse,
 } from "@/background/handlers/private/send.types.ts";
+import type {
+  PrepareWithdrawRequest,
+  PrepareWithdrawResponse,
+  WithdrawRequest,
+  WithdrawResponse,
+} from "@/background/handlers/private/withdraw.types.ts";
 
 // Helper types and mapped types for messages and responses
 // ==============================================================================
@@ -203,6 +209,8 @@ export enum MessageType {
   Receive = "RECEIVE",
   Send = "SEND",
   PrepareSend = "PREPARE_SEND",
+  Withdraw = "WITHDRAW",
+  PrepareWithdraw = "PREPARE_WITHDRAW",
 }
 
 export type MessagePayloadMap = {
@@ -244,6 +252,8 @@ export type MessagePayloadMap = {
   [MessageType.Receive]: ReceiveRequest;
   [MessageType.Send]: SendRequest;
   [MessageType.PrepareSend]: PrepareSendRequest;
+  [MessageType.Withdraw]: WithdrawRequest;
+  [MessageType.PrepareWithdraw]: PrepareWithdrawRequest;
 };
 
 export type ResponsePayloadMap = {
@@ -285,4 +295,6 @@ export type ResponsePayloadMap = {
   [MessageType.Receive]: ReceiveResponse;
   [MessageType.Send]: SendResponse;
   [MessageType.PrepareSend]: PrepareSendResponse;
+  [MessageType.Withdraw]: WithdrawResponse;
+  [MessageType.PrepareWithdraw]: PrepareWithdrawResponse;
 };

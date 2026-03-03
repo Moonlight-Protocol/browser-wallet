@@ -14,6 +14,8 @@ import { ReceivePage } from "@/popup/pages/receive-page.tsx";
 import { ReceiveConfirmationPage } from "@/popup/pages/receive-confirmation-page.tsx";
 import { SendPage } from "@/popup/pages/send-page.tsx";
 import { SendConfirmationPage } from "@/popup/pages/send-confirmation-page.tsx";
+import { WithdrawPage } from "@/popup/pages/withdraw-page.tsx";
+import { WithdrawConfirmationPage } from "@/popup/pages/withdraw-confirmation-page.tsx";
 
 function AppRouter() {
   const { state } = usePopup();
@@ -78,6 +80,14 @@ function AppRouter() {
 
   if (state.route === "send-confirmation") {
     return <SendConfirmationPage />;
+  }
+
+  if (state.route === "withdraw") {
+    return <WithdrawPage />;
+  }
+
+  if (state.route === "withdraw-confirmation") {
+    return <WithdrawConfirmationPage />;
   }
 
   return <HomePage />;

@@ -983,6 +983,8 @@ export function HomePage() {
         actions.goReceive(channelId, providerId)}
       onStartSend={(channelId, providerId) =>
         actions.goSend(channelId, providerId)}
+      onStartWithdraw={(channelId: string, providerId: string) =>
+        actions.goWithdraw(channelId, providerId)}
     />
   );
 }

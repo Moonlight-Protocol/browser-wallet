@@ -153,6 +153,10 @@ export type HomeTemplateProps = {
     channelId: string,
     providerId: string,
   ) => void | Promise<void>;
+  onStartReceive?: (
+    channelId: string,
+    providerId: string,
+  ) => void | Promise<void>;
 };
 
 export function HomeTemplate(props: HomeTemplateProps) {
@@ -649,8 +653,22 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               icon: IconArrowDownLeft,
                                               label: "Receive",
                                               key: "receive",
-                                              // TODO: Wire real private receive flow
-                                              onClick: () => {},
+                                              onClick: () => {
+                                                if (!canStartDeposit) return;
+                                                if (
+                                                  !selectedPrivateChannel
+                                                    ?.id ||
+                                                  !selectedPrivateChannel
+                                                    ?.selectedProviderId
+                                                ) {
+                                                  return;
+                                                }
+                                                props.onStartReceive?.(
+                                                  selectedPrivateChannel.id,
+                                                  selectedPrivateChannel
+                                                    .selectedProviderId!,
+                                                );
+                                              },
                                             },
                                             {
                                               icon: IconArrowUpRight,

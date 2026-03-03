@@ -1,16 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
-import { getChainState } from "@/popup/api/get-chain-state.ts";
-import { DepositFormTemplate } from "@/popup/templates/deposit-form-template.tsx";
-import type {
-  DepositMethod,
-  EntropyLevel,
-} from "@/background/handlers/private/deposit.types.ts";
+import { ReceiveFormTemplate } from "@/popup/templates/receive-form-template.tsx";
+import { receive } from "@/popup/api/receive.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 
-export function DepositPage() {
+export function ReceivePage() {
   const { state, actions } = usePopup();
   const status = state.status;
   const selectedAccount = state.accounts?.find(
@@ -26,19 +22,8 @@ export function DepositPage() {
       selectedChannelId?: string;
     } | null
   >(null);
-  const [availableBalance, setAvailableBalance] = useState<
-    string | undefined
-  >();
-
-  // Initialize form data from route params or use existing
-  const [method, setMethod] = useState<DepositMethod>(
-    state.depositFormData?.method ?? "DIRECT",
-  );
-  const [amount, setAmount] = useState(state.depositFormData?.amount ?? "");
-  const [entropyLevel, setEntropyLevel] = useState<EntropyLevel>(
-    state.depositFormData?.entropyLevel ?? "MEDIUM",
-  );
-
+  const [amount, setAmount] = useState(state.receiveFormData?.amount ?? "");
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
   // Load private channels
@@ -57,36 +42,29 @@ export function DepositPage() {
       });
   }, [network]);
 
-  // Load available balance
-  useEffect(() => {
-    if (!selectedAccount) return;
-    getChainState({
-      network,
-      publicKey: selectedAccount.publicKey,
-    })
-      .then((res) => {
-        if (res.state?.balanceXlm) {
-          setAvailableBalance(res.state.balanceXlm);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load balance", err);
-      });
-  }, [selectedAccount, network]);
-
   const selectedChannel = useMemo(() => {
+    if (state.receiveFormData?.channelId) {
+      return privateChannels?.channels.find(
+        (c) => c.id === state.receiveFormData?.channelId,
+      );
+    }
     if (!privateChannels?.selectedChannelId) return undefined;
     return privateChannels.channels.find(
       (c) => c.id === privateChannels.selectedChannelId,
     );
-  }, [privateChannels]);
+  }, [privateChannels, state.receiveFormData?.channelId]);
 
   const selectedProvider = useMemo(() => {
+    if (state.receiveFormData?.providerId) {
+      return selectedChannel?.providers.find(
+        (p) => p.id === state.receiveFormData?.providerId,
+      );
+    }
     if (!selectedChannel?.selectedProviderId) return undefined;
     return selectedChannel.providers.find(
       (p) => p.id === selectedChannel.selectedProviderId,
     );
-  }, [selectedChannel]);
+  }, [selectedChannel, state.receiveFormData?.providerId]);
 
   const hasValidSession = useMemo(() => {
     if (!selectedProvider || !selectedAccount) return false;
@@ -97,60 +75,85 @@ export function DepositPage() {
   const canSubmit = useMemo(() => {
     if (!selectedChannel || !selectedProvider || !hasValidSession) return false;
     if (!amount || parseFloat(amount) <= 0) return false;
-    if (availableBalance && parseFloat(amount) > parseFloat(availableBalance)) {
-      return false;
-    }
     return true;
   }, [
     selectedChannel,
     selectedProvider,
     hasValidSession,
     amount,
-    availableBalance,
   ]);
 
-  const handleSubmit = () => {
-    if (!canSubmit || !selectedChannel || !selectedProvider) return;
+  const handleSubmit = async () => {
+    if (
+      !canSubmit || !selectedChannel || !selectedProvider || !selectedAccount
+    ) {
+      return;
+    }
 
     setError(undefined);
+    setBusy(true);
 
-    // Validate amount
-    const amountNum = parseFloat(amount);
-    if (isNaN(amountNum) || amountNum <= 0) {
-      setError("Amount must be greater than 0");
-      return;
+    try {
+      // Validate amount
+      const amountNum = parseFloat(amount);
+      if (isNaN(amountNum) || amountNum <= 0) {
+        setError("Amount must be greater than 0");
+        setBusy(false);
+        return;
+      }
+
+      // Save form data
+      actions.setReceiveFormData({
+        channelId: selectedChannel.id,
+        providerId: selectedProvider.id,
+        amount,
+      });
+
+      // Call receive API
+      const result = await receive({
+        network,
+        channelId: selectedChannel.id,
+        providerId: selectedProvider.id,
+        accountId: selectedAccount.accountId,
+        amount,
+      });
+
+      if (!result.ok) {
+        setError(result.error?.message ?? "Failed to generate receive address");
+        setBusy(false);
+        return;
+      }
+
+      // Save result and navigate to confirmation
+      if (result.operationsMLXDR && result.utxos) {
+        actions.setReceiveResult({
+          operationsMLXDR: result.operationsMLXDR,
+          utxos: result.utxos,
+          requestedAmount: result.requestedAmount ?? amount,
+          numUtxos: result.numUtxos ?? 5,
+        });
+        actions.goReceiveConfirmation();
+      } else {
+        setError("Invalid response from receive API");
+        setBusy(false);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Failed to generate receive address: ${msg}`);
+      setBusy(false);
     }
-
-    if (availableBalance && amountNum > parseFloat(availableBalance)) {
-      setError("Amount exceeds available balance");
-      return;
-    }
-
-    // Save form data and navigate to review
-    actions.setDepositFormData({
-      channelId: selectedChannel.id,
-      providerId: selectedProvider.id,
-      method,
-      amount,
-      entropyLevel,
-    });
-
-    actions.goDepositReview();
   };
 
   if (!selectedChannel) {
     return (
-      <DepositFormTemplate
+      <ReceiveFormTemplate
         channelName=""
+        assetCode="XLM"
+        accountName={selectedAccount?.name}
         provider={undefined}
-        method={method}
-        setMethod={setMethod}
         amount={amount}
         setAmount={setAmount}
-        entropyLevel={entropyLevel}
-        setEntropyLevel={setEntropyLevel}
-        availableBalance={availableBalance}
-        busy={false}
+        busy={busy}
         error="Please select a private channel first"
         canSubmit={false}
         onBack={() => actions.goHome()}
@@ -161,17 +164,14 @@ export function DepositPage() {
 
   if (!selectedProvider || !hasValidSession) {
     return (
-      <DepositFormTemplate
+      <ReceiveFormTemplate
         channelName={selectedChannel.name}
+        assetCode={selectedChannel.asset.code}
+        accountName={selectedAccount?.name}
         provider={undefined}
-        method={method}
-        setMethod={setMethod}
         amount={amount}
         setAmount={setAmount}
-        entropyLevel={entropyLevel}
-        setEntropyLevel={setEntropyLevel}
-        availableBalance={availableBalance}
-        busy={false}
+        busy={busy}
         error="Please connect to a privacy provider first"
         canSubmit={false}
         onBack={() => actions.goHome()}
@@ -181,17 +181,15 @@ export function DepositPage() {
   }
 
   return (
-    <DepositFormTemplate
+    <ReceiveFormTemplate
       channelName={selectedChannel.name}
+      assetCode={selectedChannel.asset.code}
+      accountName={selectedAccount?.name}
       provider={selectedProvider}
-      method={method}
-      setMethod={setMethod}
       amount={amount}
       setAmount={setAmount}
-      entropyLevel={entropyLevel}
-      setEntropyLevel={setEntropyLevel}
-      availableBalance={availableBalance}
-      busy={false}
+      maxAmount="1,000"
+      busy={busy}
       error={error}
       canSubmit={canSubmit}
       onBack={() => actions.goHome()}

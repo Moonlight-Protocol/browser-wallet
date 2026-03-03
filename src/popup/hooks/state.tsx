@@ -19,7 +19,9 @@ export type PopupRoute =
   | "private-add-channel"
   | "sign-request"
   | "deposit"
-  | "deposit-review";
+  | "deposit-review"
+  | "receive"
+  | "receive-confirmation";
 
 type PopupState = {
   loading: boolean;
@@ -42,6 +44,22 @@ type PopupState = {
     amount: string;
     entropyLevel: "LOW" | "MEDIUM" | "HIGH" | "V_HIGH";
   };
+  /** Temporary receive form data */
+  receiveFormData?: {
+    channelId: string;
+    providerId: string;
+    amount: string;
+  };
+  /** Receive result data */
+  receiveResult?: {
+    operationsMLXDR: string[];
+    utxos: Array<{
+      publicKey: string;
+      amount: string;
+    }>;
+    requestedAmount: string;
+    numUtxos: number;
+  };
 };
 
 type PopupActions = {
@@ -55,6 +73,11 @@ type PopupActions = {
   goDepositReview: () => void;
   setDepositFormData: (data: PopupState["depositFormData"]) => void;
   clearDepositFormData: () => void;
+  goReceive: (channelId?: string, providerId?: string) => void;
+  goReceiveConfirmation: () => void;
+  setReceiveFormData: (data: PopupState["receiveFormData"]) => void;
+  setReceiveResult: (data: PopupState["receiveResult"]) => void;
+  clearReceiveData: () => void;
 };
 
 type PopupContextValue = {
@@ -83,6 +106,8 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       inPopupSigningFlow: false,
       privateChannelsRefreshKey: 0,
       depositFormData: undefined,
+      receiveFormData: undefined,
+      receiveResult: undefined,
     };
   });
 
@@ -147,6 +172,38 @@ export function PopupProvider(props: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, depositFormData: data }));
   const clearDepositFormData = () =>
     setState((prev) => ({ ...prev, depositFormData: undefined }));
+  const goReceive = (channelId?: string, providerId?: string) =>
+    setState((prev) => ({
+      ...prev,
+      route: "receive",
+      receiveFormData: channelId && providerId
+        ? {
+          channelId,
+          providerId,
+          amount: "",
+        }
+        : prev.receiveFormData,
+    }));
+  const goReceiveConfirmation = () =>
+    setState((prev) => {
+      if (!prev.receiveResult) {
+        console.warn(
+          "Cannot navigate to receive confirmation without result data",
+        );
+        return prev;
+      }
+      return { ...prev, route: "receive-confirmation" };
+    });
+  const setReceiveFormData = (data: PopupState["receiveFormData"]) =>
+    setState((prev) => ({ ...prev, receiveFormData: data }));
+  const setReceiveResult = (data: PopupState["receiveResult"]) =>
+    setState((prev) => ({ ...prev, receiveResult: data }));
+  const clearReceiveData = () =>
+    setState((prev) => ({
+      ...prev,
+      receiveFormData: undefined,
+      receiveResult: undefined,
+    }));
 
   const refreshStatus = async () => {
     const startedAt = Date.now();
@@ -300,6 +357,11 @@ export function PopupProvider(props: { children: React.ReactNode }) {
         goDepositReview,
         setDepositFormData,
         clearDepositFormData,
+        goReceive,
+        goReceiveConfirmation,
+        setReceiveFormData,
+        setReceiveResult,
+        clearReceiveData,
       },
     }),
     [state],

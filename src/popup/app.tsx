@@ -10,6 +10,8 @@ import { PrivateAddChannelPage } from "@/popup/pages/private-add-channel-page.ts
 import { SignRequestPage } from "@/popup/pages/sign-request-page.tsx";
 import { DepositPage } from "@/popup/pages/deposit-page.tsx";
 import { DepositReviewPage } from "@/popup/pages/deposit-review-page.tsx";
+import { ReceivePage } from "@/popup/pages/receive-page.tsx";
+import { ReceiveConfirmationPage } from "@/popup/pages/receive-confirmation-page.tsx";
 
 function AppRouter() {
   const { state } = usePopup();
@@ -58,6 +60,14 @@ function AppRouter() {
 
   if (state.route === "deposit-review") {
     return <DepositReviewPage />;
+  }
+
+  if (state.route === "receive") {
+    return <ReceivePage />;
+  }
+
+  if (state.route === "receive-confirmation") {
+    return <ReceiveConfirmationPage />;
   }
 
   return <HomePage />;

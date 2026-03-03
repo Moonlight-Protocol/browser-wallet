@@ -12,6 +12,7 @@ import { Contract, type ContractId } from "@colibri/core";
 import { ChannelReadMethods, ChannelSpec } from "@moonlight/moonlight-sdk";
 import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
 import { PrivacyProviderClient } from "@/background/services/privacy-provider-client.ts";
+import { requestFriendbotFunding } from "@/background/contexts/chain/friendbot.ts";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
 import type { Ed25519PublicKey } from "@colibri/core";
 import type {
@@ -101,6 +102,20 @@ export async function applyDevSeed(): Promise<void> {
     await meta.flush();
 
     console.log("[dev-seed] Wallet imported, publicKey:", publicKey);
+
+    // Fund account via Friendbot (testnet/futurenet only)
+    try {
+      const networkConfig = getNetworkConfig(network);
+      if (networkConfig.friendbotUrl) {
+        await requestFriendbotFunding({
+          networkConfig,
+          publicKey: publicKey as Ed25519PublicKey,
+        });
+        console.log("[dev-seed] Account funded via Friendbot");
+      }
+    } catch (err) {
+      console.warn("[dev-seed] Friendbot funding failed (may already be funded):", err);
+    }
   } else {
     // Use existing first account
     const firstWallet = vaultState.wallets[0];

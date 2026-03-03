@@ -53,8 +53,10 @@ import {
   handlePrepareWithdraw,
   handleWithdraw,
 } from "@/background/handlers/private/withdraw.ts";
-import { ensureSessionHydrated } from "@/background/session.ts";
+import { ensureSessionHydrated, isUnlocked, unlockVault } from "@/background/session.ts";
 import { applyDevSeed } from "@/background/dev-seed.ts";
+
+declare const __SEED_PASSWORD__: string;
 
 // Background service worker
 console.log("Stellar Wallet Background Script Initialized");
@@ -123,6 +125,16 @@ browser.runtime.onMessage.addListener(
           ms: Date.now() - startedAt,
         });
         throw err;
+      }
+
+      // Dev: auto-unlock vault if seed password is available and vault is locked
+      // (MV3 service workers lose in-memory state when they go idle)
+      if (__SEED_PASSWORD__ && !isUnlocked()) {
+        try {
+          await unlockVault({ password: __SEED_PASSWORD__, ttlMs: 60 * 60 * 1000 });
+        } catch {
+          // Fall through — user can unlock manually
+        }
       }
     }
 

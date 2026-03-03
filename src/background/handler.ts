@@ -54,9 +54,15 @@ import {
   handleWithdraw,
 } from "@/background/handlers/private/withdraw.ts";
 import { ensureSessionHydrated } from "@/background/session.ts";
+import { applyDevSeed } from "@/background/dev-seed.ts";
 
 // Background service worker
 console.log("Stellar Wallet Background Script Initialized");
+
+// Apply dev seed on startup (no-op if no seed config or already applied)
+applyDevSeed().catch((err) =>
+  console.error("[dev-seed] Failed to apply:", err)
+);
 
 const handlers: HandlerMap = {
   [MessageType.GetAccounts]: handleGetAccounts,

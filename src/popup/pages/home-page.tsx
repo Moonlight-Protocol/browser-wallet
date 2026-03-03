@@ -981,6 +981,8 @@ export function HomePage() {
         actions.goDeposit(channelId, providerId)}
       onStartReceive={(channelId, providerId) =>
         actions.goReceive(channelId, providerId)}
+      onStartSend={(channelId, providerId) =>
+        actions.goSend(channelId, providerId)}
     />
   );
 }

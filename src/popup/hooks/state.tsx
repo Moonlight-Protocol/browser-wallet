@@ -21,7 +21,9 @@ export type PopupRoute =
   | "deposit"
   | "deposit-review"
   | "receive"
-  | "receive-confirmation";
+  | "receive-confirmation"
+  | "send"
+  | "send-confirmation";
 
 type PopupState = {
   loading: boolean;
@@ -60,6 +62,32 @@ type PopupState = {
     requestedAmount: string;
     numUtxos: number;
   };
+  /** Temporary send form data */
+  sendFormData?: {
+    channelId: string;
+    providerId: string;
+    receiverOperationsMLXDR: string;
+    amount: string;
+    entropyLevel: "LOW" | "MEDIUM" | "HIGH" | "V_HIGH";
+  };
+  /** Send result data (prepared operations) */
+  sendResult?: {
+    createOperations: Array<{
+      publicKey: string;
+      amount: string;
+      type: "receiver" | "change";
+    }>;
+    spendOperations: Array<{
+      utxoPublicKey: string;
+      conditionsCount: number;
+    }>;
+    operationsMLXDR: string[];
+    totalSpendAmount: string;
+    changeAmount: string;
+    receiverAmount: string;
+    numSpends: number;
+    numCreates: number;
+  };
 };
 
 type PopupActions = {
@@ -78,6 +106,11 @@ type PopupActions = {
   setReceiveFormData: (data: PopupState["receiveFormData"]) => void;
   setReceiveResult: (data: PopupState["receiveResult"]) => void;
   clearReceiveData: () => void;
+  goSend: (channelId?: string, providerId?: string) => void;
+  goSendConfirmation: () => void;
+  setSendFormData: (data: PopupState["sendFormData"]) => void;
+  setSendResult: (data: PopupState["sendResult"]) => void;
+  clearSendData: () => void;
 };
 
 type PopupContextValue = {
@@ -108,6 +141,8 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       depositFormData: undefined,
       receiveFormData: undefined,
       receiveResult: undefined,
+      sendFormData: undefined,
+      sendResult: undefined,
     };
   });
 
@@ -203,6 +238,40 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       ...prev,
       receiveFormData: undefined,
       receiveResult: undefined,
+    }));
+  const goSend = (channelId?: string, providerId?: string) =>
+    setState((prev) => ({
+      ...prev,
+      route: "send",
+      sendFormData: channelId && providerId
+        ? {
+          channelId,
+          providerId,
+          receiverOperationsMLXDR: "",
+          amount: "",
+          entropyLevel: "MEDIUM",
+        }
+        : prev.sendFormData,
+    }));
+  const goSendConfirmation = () =>
+    setState((prev) => {
+      if (!prev.sendFormData) {
+        console.warn(
+          "Cannot navigate to send confirmation without form data",
+        );
+        return prev;
+      }
+      return { ...prev, route: "send-confirmation" };
+    });
+  const setSendFormData = (data: PopupState["sendFormData"]) =>
+    setState((prev) => ({ ...prev, sendFormData: data }));
+  const setSendResult = (data: PopupState["sendResult"]) =>
+    setState((prev) => ({ ...prev, sendResult: data }));
+  const clearSendData = () =>
+    setState((prev) => ({
+      ...prev,
+      sendFormData: undefined,
+      sendResult: undefined,
     }));
 
   const refreshStatus = async () => {
@@ -362,6 +431,11 @@ export function PopupProvider(props: { children: React.ReactNode }) {
         setReceiveFormData,
         setReceiveResult,
         clearReceiveData,
+        goSend,
+        goSendConfirmation,
+        setSendFormData,
+        setSendResult,
+        clearSendData,
       },
     }),
     [state],

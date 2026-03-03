@@ -5,10 +5,7 @@ import { Button } from "@/popup/atoms/button.tsx";
 import { Card, CardContent } from "@/popup/atoms/card.tsx";
 import { Text } from "@/popup/atoms/text.tsx";
 import { Label } from "@/popup/atoms/label.tsx";
-import {
-  IconCopy,
-  IconInfoCircle,
-} from "@tabler/icons-react";
+import { IconCopy, IconInfoCircle } from "@tabler/icons-react";
 import { shortenAddress } from "@/popup/utils/common.ts";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { toDecimals } from "@colibri/core";

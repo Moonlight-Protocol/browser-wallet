@@ -27,7 +27,6 @@ import type { Ed25519PublicKey } from "@colibri/core";
 import { HOME_AUTO_REFRESH_INTERVAL_MS } from "@/popup/utils/home-refresh.ts";
 
 export function HomePage() {
-
   const { state, actions } = usePopup();
   const [accountPickerOpen, setAccountPickerOpen] = useState(false);
   const [channelPickerOpen, setChannelPickerOpen] = useState(false);

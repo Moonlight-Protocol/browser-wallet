@@ -162,7 +162,9 @@ export function DepositReviewTemplate(props: DepositReviewTemplateProps) {
                           </Text>
                         </div>
                         <Text className="text-sm font-medium whitespace-nowrap">
-                          {toDecimals(BigInt(props.depositOperation.amount), 7)} XLM
+                          {toDecimals(BigInt(props.depositOperation.amount), 7)}
+                          {" "}
+                          XLM
                         </Text>
                       </div>
                     </div>

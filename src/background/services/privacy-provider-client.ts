@@ -20,8 +20,12 @@ export class PrivacyProviderClient {
   private baseUrl: string;
 
   constructor(url: string) {
-    // Ensure no trailing slash
-    this.baseUrl = url.replace(/\/$/, "");
+    // Ensure protocol and no trailing slash
+    let normalized = url.replace(/\/$/, "");
+    if (!/^https?:\/\//i.test(normalized)) {
+      normalized = `https://${normalized}`;
+    }
+    this.baseUrl = normalized;
   }
 
   /**

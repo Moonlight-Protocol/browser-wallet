@@ -198,7 +198,6 @@ export function ReceivePage() {
       provider={selectedProvider}
       amount={amount}
       setAmount={setAmount}
-      maxAmount="1,000"
       busy={busy}
       error={error}
       canSubmit={canSubmit}

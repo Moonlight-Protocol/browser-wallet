@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { withdraw } from "@/popup/api/withdraw.ts";
@@ -57,7 +57,7 @@ export function WithdrawConfirmationPage() {
   const withdrawResult = state.withdrawResult;
 
   // Load private channels to get channel name
-  useMemo(() => {
+  useEffect(() => {
     if (!formData) return;
     getPrivateChannels({ network })
       .then((res) => {

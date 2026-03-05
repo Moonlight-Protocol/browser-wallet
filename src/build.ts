@@ -5,12 +5,62 @@ import tailwindcss from "@tailwindcss/postcss";
 import autoprefixer from "autoprefixer";
 import postcss from "postcss";
 
-const buildDir = "dist";
+const buildDir = Deno.env.get("BUILD_DIR") || "dist";
 
 function envFlag(name: string, defaultValue = false): boolean {
   const raw = Deno.env.get(name);
   if (raw === undefined) return defaultValue;
   return raw === "1" || raw.toLowerCase() === "true";
+}
+
+function loadSeedDefines(): Record<string, string> {
+  const seedKeys = [
+    "SEED_PASSWORD",
+    "SEED_MNEMONIC",
+    "SEED_NETWORK",
+    "SEED_CHANNEL_CONTRACT_ID",
+    "SEED_CHANNEL_NAME",
+    "SEED_ASSET_CODE",
+    "SEED_ASSET_ISSUER",
+    "SEED_PROVIDERS",
+  ];
+
+  const defines: Record<string, string> = {};
+  const customSeedFile = Deno.env.get("SEED_FILE");
+  const envSeedPath = customSeedFile
+    ? (customSeedFile.startsWith("/") ? customSeedFile : new URL(`../${customSeedFile}`, import.meta.url).pathname)
+    : new URL("../.env.seed", import.meta.url).pathname;
+
+  // Try to load .env.seed file
+  try {
+    const content = Deno.readTextFileSync(envSeedPath);
+    const parsed: Record<string, string> = {};
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx === -1) continue;
+      const key = trimmed.slice(0, eqIdx).trim();
+      const value = trimmed.slice(eqIdx + 1).trim();
+      parsed[key] = value;
+    }
+
+    for (const key of seedKeys) {
+      defines[`__${key}__`] = JSON.stringify(parsed[key] ?? "");
+    }
+
+    const nonEmpty = Object.values(parsed).filter(Boolean).length;
+    if (nonEmpty > 0) {
+      console.log(`🌱 Loaded ${nonEmpty} seed values from ${envSeedPath}`);
+    }
+  } catch {
+    // No .env.seed file — set all to empty string
+    for (const key of seedKeys) {
+      defines[`__${key}__`] = JSON.stringify("");
+    }
+  }
+
+  return defines;
 }
 
 async function preBuildChecks() {
@@ -39,6 +89,7 @@ async function preBuildChecks() {
 async function build() {
   const DEV = envFlag("DEV", false);
   const MINIFY = envFlag("MINIFY", false);
+  const seedDefines = loadSeedDefines();
 
   if (Deno.env.get("DEV") == "1") {
     await preBuildChecks();
@@ -165,7 +216,7 @@ async function build() {
     splitting: false,
     mainFields: ["module", "main"],
     conditions: ["worker", "default"],
-    define: { __DEV__: DEV ? "true" : "false", global: "globalThis" },
+    define: { __DEV__: DEV ? "true" : "false", global: "globalThis", ...seedDefines },
     minify: MINIFY,
     sourcemap: DEV,
   });
@@ -215,7 +266,7 @@ async function build() {
     platform: "browser",
     jsx: "automatic",
     jsxImportSource: "react",
-    define: { __DEV__: DEV ? "true" : "false", global: "globalThis" },
+    define: { __DEV__: DEV ? "true" : "false", global: "globalThis", __SEED_PASSWORD__: seedDefines.__SEED_PASSWORD__ ?? JSON.stringify("") },
     minify: MINIFY,
     sourcemap: DEV,
   });

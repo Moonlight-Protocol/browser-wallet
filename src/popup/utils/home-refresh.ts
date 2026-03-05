@@ -1,0 +1,1 @@
+export const HOME_AUTO_REFRESH_INTERVAL_MS = 15_000;

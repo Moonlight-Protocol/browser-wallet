@@ -130,6 +130,8 @@ import type {
 import type {
   DepositRequest,
   DepositResponse,
+  PrepareDepositRequest,
+  PrepareDepositResponse,
 } from "@/background/handlers/private/deposit.types.ts";
 import type {
   ReceiveRequest,
@@ -206,6 +208,7 @@ export enum MessageType {
   ApproveSigningRequest = "APPROVE_SIGNING_REQUEST",
   RejectSigningRequest = "REJECT_SIGNING_REQUEST",
   Deposit = "DEPOSIT",
+  PrepareDeposit = "PREPARE_DEPOSIT",
   Receive = "RECEIVE",
   Send = "SEND",
   PrepareSend = "PREPARE_SEND",
@@ -249,6 +252,7 @@ export type MessagePayloadMap = {
   [MessageType.ApproveSigningRequest]: ApproveSigningRequestRequest;
   [MessageType.RejectSigningRequest]: RejectSigningRequestRequest;
   [MessageType.Deposit]: DepositRequest;
+  [MessageType.PrepareDeposit]: PrepareDepositRequest;
   [MessageType.Receive]: ReceiveRequest;
   [MessageType.Send]: SendRequest;
   [MessageType.PrepareSend]: PrepareSendRequest;
@@ -292,6 +296,7 @@ export type ResponsePayloadMap = {
   [MessageType.ApproveSigningRequest]: ApproveSigningRequestResponse;
   [MessageType.RejectSigningRequest]: RejectSigningRequestResponse;
   [MessageType.Deposit]: DepositResponse;
+  [MessageType.PrepareDeposit]: PrepareDepositResponse;
   [MessageType.Receive]: ReceiveResponse;
   [MessageType.Send]: SendResponse;
   [MessageType.PrepareSend]: PrepareSendResponse;

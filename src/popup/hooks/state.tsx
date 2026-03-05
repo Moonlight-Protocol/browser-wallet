@@ -18,6 +18,7 @@ export type PopupRoute =
   | "settings"
   | "private-add-channel"
   | "sign-request"
+  | "ramp"
   | "deposit"
   | "deposit-review"
   | "receive"
@@ -47,6 +48,21 @@ type PopupState = {
     method: "DIRECT" | "3RD-PARTY RAMP";
     amount: string;
     entropyLevel: "LOW" | "MEDIUM" | "HIGH" | "V_HIGH";
+  };
+  /** Deposit result data (prepared operations) */
+  depositResult?: {
+    createOperations: Array<{
+      publicKey: string;
+      amount: string;
+    }>;
+    operationsMLXDR: string[];
+    numUtxos: number;
+    depositAmount: string;
+    feeAmount: string;
+    depositOperation?: {
+      destinationAddress: string;
+      amount: string;
+    };
   };
   /** Temporary receive form data */
   receiveFormData?: {
@@ -129,10 +145,13 @@ type PopupActions = {
   goSettings: () => void;
   goPrivateAddChannel: () => void;
   goSignRequest: (requestId: string) => void;
+  goRamp: (channelId?: string, providerId?: string) => void;
   goDeposit: (channelId?: string, providerId?: string) => void;
   goDepositReview: () => void;
   setDepositFormData: (data: PopupState["depositFormData"]) => void;
+  setDepositResult: (data: PopupState["depositResult"]) => void;
   clearDepositFormData: () => void;
+  clearDepositData: () => void;
   goReceive: (channelId?: string, providerId?: string) => void;
   goReceiveConfirmation: () => void;
   setReceiveFormData: (data: PopupState["receiveFormData"]) => void;
@@ -176,6 +195,7 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       inPopupSigningFlow: false,
       privateChannelsRefreshKey: 0,
       depositFormData: undefined,
+      depositResult: undefined,
       receiveFormData: undefined,
       receiveResult: undefined,
       sendFormData: undefined,
@@ -220,6 +240,20 @@ export function PopupProvider(props: { children: React.ReactNode }) {
       signingRequestId: requestId,
       inPopupSigningFlow: true,
     }));
+  const goRamp = (channelId?: string, providerId?: string) =>
+    setState((prev) => ({
+      ...prev,
+      route: "ramp",
+      depositFormData: channelId && providerId
+        ? {
+          channelId,
+          providerId,
+          method: "DIRECT",
+          amount: "",
+          entropyLevel: "MEDIUM",
+        }
+        : prev.depositFormData,
+    }));
   const goDeposit = (channelId?: string, providerId?: string) =>
     setState((prev) => ({
       ...prev,
@@ -244,8 +278,16 @@ export function PopupProvider(props: { children: React.ReactNode }) {
     });
   const setDepositFormData = (data: PopupState["depositFormData"]) =>
     setState((prev) => ({ ...prev, depositFormData: data }));
+  const setDepositResult = (data: PopupState["depositResult"]) =>
+    setState((prev) => ({ ...prev, depositResult: data }));
   const clearDepositFormData = () =>
     setState((prev) => ({ ...prev, depositFormData: undefined }));
+  const clearDepositData = () =>
+    setState((prev) => ({
+      ...prev,
+      depositFormData: undefined,
+      depositResult: undefined,
+    }));
   const goReceive = (channelId?: string, providerId?: string) =>
     setState((prev) => ({
       ...prev,
@@ -495,10 +537,13 @@ export function PopupProvider(props: { children: React.ReactNode }) {
         goSettings,
         goPrivateAddChannel,
         goSignRequest,
+        goRamp,
         goDeposit,
         goDepositReview,
         setDepositFormData,
+        setDepositResult,
         clearDepositFormData,
+        clearDepositData,
         goReceive,
         goReceiveConfirmation,
         setReceiveFormData,

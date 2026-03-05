@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { prepareSend } from "@/popup/api/send.ts";
+import { showError } from "@/popup/utils/toast.tsx";
 import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Input } from "@/popup/atoms/input.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
@@ -171,7 +172,9 @@ export function SendPage() {
       // Validate amount
       const amountNum = parseFloat(amount);
       if (isNaN(amountNum) || amountNum <= 0) {
-        setError("Amount must be greater than 0");
+        const msg = "Amount must be greater than 0";
+        setError(msg);
+        showError(msg);
         setBusy(false);
         return;
       }
@@ -197,7 +200,9 @@ export function SendPage() {
       });
 
       if (!result.ok) {
-        setError(result.error?.message ?? "Failed to prepare transaction");
+        const msg = result.error?.message ?? "Failed to prepare transaction";
+        setError(msg);
+        showError(msg);
         setBusy(false);
         return;
       }
@@ -225,6 +230,7 @@ export function SendPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(`Failed to prepare transaction: ${msg}`);
+      showError("Failed to prepare transaction. Please try again.");
       setBusy(false);
     }
   };

@@ -161,10 +161,6 @@ export type HomeTemplateProps = {
     channelId: string,
     providerId: string,
   ) => void | Promise<void>;
-  onStartWithdraw?: (
-    channelId: string,
-    providerId: string,
-  ) => void | Promise<void>;
 };
 
 export function HomeTemplate(props: HomeTemplateProps) {
@@ -204,10 +200,31 @@ export function HomeTemplate(props: HomeTemplateProps) {
       )
       : undefined;
 
+  const selectedProvider = selectedPrivateChannel?.selectedProviderId
+    ? selectedPrivateChannel.providers.find(
+      (p) => p.id === selectedPrivateChannel.selectedProviderId,
+    )
+    : undefined;
+
+  // Label to show in the header pill when in private mode.
+  // Always reflect the provider (when one is selected); otherwise let the header
+  // fall back to the generic "No Provider" copy instead of showing the channel.
+  const privateConnectionLabel = selectedProvider?.name;
+
   const canStartDeposit = Boolean(selectedPrivateChannel?.id) &&
     Boolean(selectedPrivateChannel?.selectedProviderId) &&
     Boolean(props.isConnected) &&
     Boolean(props.onStartDeposit);
+
+  const canStartReceive = Boolean(selectedPrivateChannel?.id) &&
+    Boolean(selectedPrivateChannel?.selectedProviderId) &&
+    Boolean(props.isConnected) &&
+    Boolean(props.onStartReceive);
+
+  const canStartSend = Boolean(selectedPrivateChannel?.id) &&
+    Boolean(selectedPrivateChannel?.selectedProviderId) &&
+    Boolean(props.isConnected) &&
+    Boolean(props.onStartSend);
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -345,7 +362,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
             }
             accountPickerOpen={props.accountPickerOpen}
             onToggleAccountPicker={(open) => props.setAccountPickerOpen(open)}
-            channelName={selectedPrivateChannel?.name}
+            channelName={privateConnectionLabel}
             isConnected={props.isConnected}
             channelPickerOpen={props.channelPickerOpen}
             onToggleChannelPicker={(open) => props.setChannelPickerOpen?.(open)}
@@ -621,18 +638,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
 
                                     {/* Stats */}
                                     <div className="h-px bg-gradient-to-r from-transparent via-secondary/20 to-transparent my-3" />
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div className="text-center">
-                                        <p className="text-[10px] uppercase tracking-widest font-bold text-foreground/40 mb-1">
-                                          Derived UTXOs
-                                        </p>
-                                        <p className="text-sm font-bold text-foreground/80">
-                                          {props.isConnected &&
-                                              props.privateStats?.stats
-                                            ? `${props.privateStats.stats.derivedCount} / ${props.privateStats.stats.targetCount}`
-                                            : "0 / 0"}
-                                        </p>
-                                      </div>
+                                    <div className="grid grid-cols-1 gap-4 mb-3">
                                       <div className="text-center">
                                         <p className="text-[10px] uppercase tracking-widest font-bold text-foreground/40 mb-1">
                                           Non-zero UTXOs
@@ -647,7 +653,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                       </div>
                                     </div>
                                     {!props.isConnected && (
-                                      <p className="mt-2 text-xs text-foreground/50 text-center">
+                                      <p className="mt-1 mb-3 text-xs text-foreground/50 text-center">
                                         Connect provider to view private
                                         balances and UTXO details.
                                       </p>
@@ -661,8 +667,9 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               icon: IconArrowDownLeft,
                                               label: "Receive",
                                               key: "receive",
+                                              canStart: canStartReceive,
                                               onClick: () => {
-                                                if (!canStartDeposit) return;
+                                                if (!canStartReceive) return;
                                                 if (
                                                   !selectedPrivateChannel
                                                     ?.id ||
@@ -682,7 +689,9 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               icon: IconArrowUpRight,
                                               label: "Send",
                                               key: "send",
+                                              canStart: canStartSend,
                                               onClick: () => {
+                                                if (!canStartSend) return;
                                                 if (
                                                   !selectedPrivateChannel
                                                     ?.id ||
@@ -699,29 +708,10 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               },
                                             },
                                             {
-                                              icon: IconDownload,
-                                              label: "Withdraw",
-                                              key: "withdraw",
-                                              onClick: () => {
-                                                if (
-                                                  !selectedPrivateChannel
-                                                    ?.id ||
-                                                  !selectedPrivateChannel
-                                                    ?.selectedProviderId
-                                                ) {
-                                                  return;
-                                                }
-                                                props.onStartWithdraw?.(
-                                                  selectedPrivateChannel.id,
-                                                  selectedPrivateChannel
-                                                    .selectedProviderId!,
-                                                );
-                                              },
-                                            },
-                                            {
                                               icon: IconCoinFilled,
                                               label: "Ramp",
                                               key: "ramp",
+                                              canStart: canStartDeposit,
                                               onClick: () => {
                                                 if (!canStartDeposit) return;
                                                 if (
@@ -744,7 +734,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                               <TooltipTrigger asChild>
                                                 <button
                                                   type="button"
-                                                  disabled={!canStartDeposit}
+                                                  disabled={!action.canStart}
                                                   onClick={action.onClick}
                                                   className="group flex flex-col items-center gap-2 py-4 px-2 rounded-xl transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
                                                   style={{
@@ -770,7 +760,7 @@ export function HomeTemplate(props: HomeTemplateProps) {
                                                   </span>
                                                 </button>
                                               </TooltipTrigger>
-                                              {!canStartDeposit && (
+                                              {!action.canStart && (
                                                 <TooltipContent side="top">
                                                   Connect provider to use this
                                                   action

@@ -25,6 +25,7 @@
     "react/jsx-dev-runtime": "npm:react@^18.2.0/jsx-dev-runtime",
     "react-dom": "npm:react-dom@^18.2.0",
     "react-dom/client": "npm:react-dom@^18.2.0/client",
+    "react-hot-toast": "npm:react-hot-toast@^2.4.1",
     "@ngneat/elf": "npm:@ngneat/elf@^2.5.1",
     "@ngneat/elf-persist-state": "npm:@ngneat/elf-persist-state@^1.2.1",
     "shadcn": "npm:shadcn@^3.6.2",

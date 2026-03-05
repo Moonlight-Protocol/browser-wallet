@@ -3,6 +3,7 @@ import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { ReceiveFormTemplate } from "@/popup/templates/receive-form-template.tsx";
 import { receive } from "@/popup/api/receive.ts";
+import { showAsyncSubmitted, showError } from "@/popup/utils/toast.tsx";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 
@@ -97,7 +98,9 @@ export function ReceivePage() {
       // Validate amount
       const amountNum = parseFloat(amount);
       if (isNaN(amountNum) || amountNum <= 0) {
-        setError("Amount must be greater than 0");
+        const msg = "Amount must be greater than 0";
+        setError(msg);
+        showError(msg);
         setBusy(false);
         return;
       }
@@ -119,7 +122,10 @@ export function ReceivePage() {
       });
 
       if (!result.ok) {
-        setError(result.error?.message ?? "Failed to generate receive address");
+        const msg = result.error?.message ??
+          "Failed to generate receive address";
+        setError(msg);
+        showError(msg);
         setBusy(false);
         return;
       }
@@ -132,14 +138,18 @@ export function ReceivePage() {
           requestedAmount: result.requestedAmount ?? amount,
           numUtxos: result.numUtxos ?? 5,
         });
+        showAsyncSubmitted("receive");
         actions.goReceiveConfirmation();
       } else {
-        setError("Invalid response from receive API");
+        const msg = "Invalid response from receive API";
+        setError(msg);
+        showError(msg);
         setBusy(false);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(`Failed to generate receive address: ${msg}`);
+      showError("Failed to generate receive address. Please try again.");
       setBusy(false);
     }
   };
@@ -188,7 +198,6 @@ export function ReceivePage() {
       provider={selectedProvider}
       amount={amount}
       setAmount={setAmount}
-      maxAmount="1,000"
       busy={busy}
       error={error}
       canSubmit={canSubmit}

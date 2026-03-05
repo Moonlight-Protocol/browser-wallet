@@ -10,6 +10,21 @@ import type {
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 
+function getFeeForEntropyLevel(level: EntropyLevel): number {
+  switch (level) {
+    case "LOW":
+      return 0.05;
+    case "MEDIUM":
+      return 0.25;
+    case "HIGH":
+      return 0.5;
+    case "V_HIGH":
+      return 0.75;
+    default:
+      return 0.25;
+  }
+}
+
 export function DepositPage() {
   const { state, actions } = usePopup();
   const status = state.status;
@@ -94,10 +109,21 @@ export function DepositPage() {
     return session && session.expiresAt > Date.now();
   }, [selectedProvider, selectedAccount]);
 
+  const estimatedFee = useMemo(() => {
+    return getFeeForEntropyLevel(entropyLevel);
+  }, [entropyLevel]);
+
+  const totalAmount = useMemo(() => {
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0) return 0;
+    return amountNum + estimatedFee;
+  }, [amount, estimatedFee]);
+
   const canSubmit = useMemo(() => {
     if (!selectedChannel || !selectedProvider || !hasValidSession) return false;
     if (!amount || parseFloat(amount) <= 0) return false;
-    if (availableBalance && parseFloat(amount) > parseFloat(availableBalance)) {
+    // Check if total (amount + fee) exceeds available balance
+    if (availableBalance && totalAmount > parseFloat(availableBalance)) {
       return false;
     }
     return true;
@@ -107,6 +133,7 @@ export function DepositPage() {
     hasValidSession,
     amount,
     availableBalance,
+    totalAmount,
   ]);
 
   const handleSubmit = () => {
@@ -121,8 +148,10 @@ export function DepositPage() {
       return;
     }
 
-    if (availableBalance && amountNum > parseFloat(availableBalance)) {
-      setError("Amount exceeds available balance");
+    const feeAmount = getFeeForEntropyLevel(entropyLevel);
+    const totalAmountNum = amountNum + feeAmount;
+    if (availableBalance && totalAmountNum > parseFloat(availableBalance)) {
+      setError("Total amount (including fee) exceeds available balance");
       return;
     }
 
@@ -150,6 +179,9 @@ export function DepositPage() {
         entropyLevel={entropyLevel}
         setEntropyLevel={setEntropyLevel}
         availableBalance={availableBalance}
+        estimatedFee={estimatedFee}
+        totalAmount={totalAmount}
+        assetCode={undefined}
         busy={false}
         error="Please select a private channel first"
         canSubmit={false}
@@ -171,6 +203,9 @@ export function DepositPage() {
         entropyLevel={entropyLevel}
         setEntropyLevel={setEntropyLevel}
         availableBalance={availableBalance}
+        estimatedFee={estimatedFee}
+        totalAmount={totalAmount}
+        assetCode={selectedChannel.asset.code}
         busy={false}
         error="Please connect to a privacy provider first"
         canSubmit={false}
@@ -191,6 +226,9 @@ export function DepositPage() {
       entropyLevel={entropyLevel}
       setEntropyLevel={setEntropyLevel}
       availableBalance={availableBalance}
+      estimatedFee={estimatedFee}
+      totalAmount={totalAmount}
+      assetCode={selectedChannel.asset.code}
       busy={false}
       error={error}
       canSubmit={canSubmit}

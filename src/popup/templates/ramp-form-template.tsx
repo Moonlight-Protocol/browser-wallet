@@ -23,20 +23,23 @@ import type {
 } from "@/background/handlers/private/deposit.types.ts";
 import type { PrivacyProvider } from "@/persistence/stores/private-channels.types.ts";
 
-export type DepositFormTemplateProps = {
+export type RampFormTemplateProps = {
   channelName: string;
   provider: PrivacyProvider | undefined;
+  rampMode: "deposit" | "withdraw";
+  onRampModeChange: (mode: "deposit" | "withdraw") => void;
   method: DepositMethod;
   setMethod: (method: DepositMethod) => void;
   amount: string;
   setAmount: (amount: string) => void;
   entropyLevel: EntropyLevel;
   setEntropyLevel: (level: EntropyLevel) => void;
+  destinationAddress?: string;
+  setDestinationAddress?: (address: string) => void;
+  addressError?: string;
   availableBalance?: string;
+  privateBalance?: string;
   maxAmount?: string;
-  estimatedFee?: number;
-  totalAmount?: number;
-  assetCode?: string;
   busy: boolean;
   error?: string;
   canSubmit: boolean;
@@ -51,7 +54,7 @@ const ENTROPY_LABELS: Record<EntropyLevel, string> = {
   V_HIGH: "V.High",
 };
 
-export function DepositFormTemplate(props: DepositFormTemplateProps) {
+export function RampFormTemplate(props: RampFormTemplateProps) {
   const entropyLevels: EntropyLevel[] = ["LOW", "MEDIUM", "HIGH", "V_HIGH"];
 
   return (
@@ -89,51 +92,85 @@ export function DepositFormTemplate(props: DepositFormTemplateProps) {
         {/* Action Buttons - Deposit/Withdraw */}
         <div className="flex gap-2">
           <Button
-            variant="default"
+            variant={props.rampMode === "deposit" ? "default" : "outline"}
             className="flex-1"
             disabled={props.busy}
+            onClick={() => props.onRampModeChange("deposit")}
           >
             <IconArrowDownToArc className="h-4 w-4 mr-2" />
             Deposit
           </Button>
           <Button
-            variant="outline"
+            variant={props.rampMode === "withdraw" ? "default" : "outline"}
             className="flex-1"
-            disabled
+            disabled={props.busy}
+            onClick={() => props.onRampModeChange("withdraw")}
           >
             <IconArrowRampRight2 className="h-4 w-4 mr-2" />
             Withdraw
           </Button>
         </div>
 
-        {/* Method Selection */}
         <Card>
           <CardContent className="pt-6 space-y-4">
-            <div className="space-y-2">
-              <Label className="text-xs uppercase text-muted-foreground">
-                Method
-              </Label>
-              <div className="flex gap-2">
-                <Button
-                  variant={props.method === "DIRECT" ? "default" : "outline"}
-                  className="flex-1"
-                  onClick={() => props.setMethod("DIRECT")}
-                  disabled={props.busy}
-                >
-                  Direct
-                </Button>
-                <Button
-                  variant={props.method === "3RD-PARTY RAMP"
-                    ? "default"
-                    : "outline"}
-                  className="flex-1"
-                  onClick={() => props.setMethod("3RD-PARTY RAMP")}
-                  disabled
-                >
-                  3rd-party Ramp
-                </Button>
+            {/* Method Selection - Only for Deposit */}
+            {props.rampMode === "deposit" && (
+              <div className="space-y-2">
+                <Label className="text-xs uppercase text-muted-foreground">
+                  Method
+                </Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={props.method === "DIRECT" ? "default" : "outline"}
+                    className="flex-1"
+                    onClick={() => props.setMethod("DIRECT")}
+                    disabled={props.busy}
+                  >
+                    Direct
+                  </Button>
+                  <Button
+                    variant={props.method === "3RD-PARTY RAMP"
+                      ? "default"
+                      : "outline"}
+                    className="flex-1"
+                    onClick={() => props.setMethod("3RD-PARTY RAMP")}
+                    disabled
+                  >
+                    3rd-party Ramp
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Destination Address - Only for Withdraw */}
+            {props.rampMode === "withdraw" && props.setDestinationAddress && (
+              <div className="space-y-2">
+                <Label
+                  htmlFor="destination-address"
+                  className="text-xs uppercase text-muted-foreground"
+                >
+                  Destination Address
+                </Label>
+                <Input
+                  id="destination-address"
+                  type="text"
+                  value={props.destinationAddress ?? ""}
+                  onChange={(e) =>
+                    props.setDestinationAddress?.(e.target.value)}
+                  placeholder="G..."
+                  disabled={props.busy}
+                  className="font-mono text-sm"
+                />
+                {props.addressError && (
+                  <Text className="text-xs text-destructive">
+                    {props.addressError}
+                  </Text>
+                )}
+                <Text className="text-xs text-muted-foreground">
+                  Stellar public key (G account)
+                </Text>
+              </div>
+            )}
 
             {/* Amount Input */}
             <div className="space-y-2">
@@ -164,9 +201,14 @@ export function DepositFormTemplate(props: DepositFormTemplateProps) {
                   Maximum: {props.maxAmount} XLM
                 </Text>
               )}
-              {props.availableBalance && (
+              {props.rampMode === "deposit" && props.availableBalance && (
                 <Text className="text-xs text-muted-foreground">
                   Available public balance: {props.availableBalance} XLM
+                </Text>
+              )}
+              {props.rampMode === "withdraw" && props.privateBalance && (
+                <Text className="text-xs text-muted-foreground">
+                  Available private balance: {props.privateBalance} XLM
                 </Text>
               )}
             </div>
@@ -215,29 +257,6 @@ export function DepositFormTemplate(props: DepositFormTemplateProps) {
           </CardContent>
         </Card>
 
-        {/* Fee and Total */}
-        {props.estimatedFee !== undefined && props.totalAmount !== undefined &&
-          props.assetCode && (
-          <Card>
-            <CardContent className="pt-6 space-y-3">
-              <div className="flex justify-between items-center">
-                <Text className="text-xs font-medium uppercase text-muted-foreground">
-                  Estimated Fee
-                </Text>
-                <Text className="text-sm font-semibold">
-                  {props.estimatedFee.toFixed(2)} {props.assetCode}
-                </Text>
-              </div>
-              <div className="flex justify-between items-center pt-2 border-t">
-                <Text className="text-sm font-semibold">Total</Text>
-                <Text className="text-lg font-bold">
-                  {props.totalAmount.toFixed(2)} {props.assetCode}
-                </Text>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {props.error
           ? (
             <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
@@ -253,7 +272,9 @@ export function DepositFormTemplate(props: DepositFormTemplateProps) {
             onClick={() => props.onSubmit()}
             loading={props.busy}
           >
-            Review Transaction
+            {props.rampMode === "deposit"
+              ? "Review Deposit"
+              : "Review Withdraw"}
           </Button>
         </CardFooter>
       </div>

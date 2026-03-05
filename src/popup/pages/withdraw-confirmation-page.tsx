@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { withdraw } from "@/popup/api/withdraw.ts";
+import { showAsyncSubmitted, showError } from "@/popup/utils/toast.tsx";
 import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
 import { Card, CardContent, CardFooter } from "@/popup/atoms/card.tsx";
@@ -56,7 +57,7 @@ export function WithdrawConfirmationPage() {
   const withdrawResult = state.withdrawResult;
 
   // Load private channels to get channel name
-  useMemo(() => {
+  useEffect(() => {
     if (!formData) return;
     getPrivateChannels({ network })
       .then((res) => {
@@ -103,7 +104,9 @@ export function WithdrawConfirmationPage() {
 
   const handleExecute = async () => {
     if (!formData || !selectedAccount || !withdrawResult) {
-      setError("Missing form data, account, or prepared operations");
+      const msg = "Missing form data, account, or prepared operations";
+      setError(msg);
+      showError(msg);
       return;
     }
 
@@ -124,17 +127,21 @@ export function WithdrawConfirmationPage() {
       });
 
       if (!result.ok) {
-        setError(result.error?.message ?? "Failed to execute transaction");
+        const msg = result.error?.message ?? "Failed to execute transaction";
+        setError(msg);
+        showError(msg);
         setBusy(false);
         return;
       }
 
+      showAsyncSubmitted("withdraw");
       // Clear form data and go home on success
       actions.clearWithdrawData();
       actions.goHome();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(`Failed to execute transaction: ${msg}`);
+      showError("Failed to execute transaction. Please try again.");
       setBusy(false);
     }
   };

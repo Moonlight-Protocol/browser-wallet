@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { prepareWithdraw } from "@/popup/api/withdraw.ts";
+import { showError } from "@/popup/utils/toast.tsx";
 import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Input } from "@/popup/atoms/input.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
@@ -156,7 +157,9 @@ export function WithdrawPage() {
       // Validate amount
       const amountNum = parseFloat(amount);
       if (isNaN(amountNum) || amountNum <= 0) {
-        setError("Amount must be greater than 0");
+        const msg = "Amount must be greater than 0";
+        setError(msg);
+        showError(msg);
         setBusy(false);
         return;
       }
@@ -164,7 +167,9 @@ export function WithdrawPage() {
       // Validate address
       const trimmedAddress = destinationAddress.trim();
       if (!StrKey.isValidEd25519PublicKey(trimmedAddress)) {
-        setError("Invalid destination address");
+        const msg = "Invalid destination address";
+        setError(msg);
+        showError(msg);
         setBusy(false);
         return;
       }
@@ -190,7 +195,9 @@ export function WithdrawPage() {
       });
 
       if (!result.ok) {
-        setError(result.error?.message ?? "Failed to prepare transaction");
+        const msg = result.error?.message ?? "Failed to prepare transaction";
+        setError(msg);
+        showError(msg);
         setBusy(false);
         return;
       }
@@ -213,12 +220,15 @@ export function WithdrawPage() {
         });
         actions.goWithdrawConfirmation();
       } else {
-        setError("Invalid response from prepare withdraw");
+        const msg = "Invalid response from prepare withdraw";
+        setError(msg);
+        showError(msg);
         setBusy(false);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(`Failed to prepare transaction: ${msg}`);
+      showError("Failed to prepare transaction. Please try again.");
       setBusy(false);
     }
   };

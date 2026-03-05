@@ -5,13 +5,10 @@ import { Button } from "@/popup/atoms/button.tsx";
 import { Card, CardContent } from "@/popup/atoms/card.tsx";
 import { Text } from "@/popup/atoms/text.tsx";
 import { Label } from "@/popup/atoms/label.tsx";
-import {
-  IconCopy,
-  IconExternalLink,
-  IconInfoCircle,
-} from "@tabler/icons-react";
+import { IconCopy, IconInfoCircle } from "@tabler/icons-react";
 import { shortenAddress } from "@/popup/utils/common.ts";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
+import { toDecimals } from "@colibri/core";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
 
@@ -128,24 +125,24 @@ export function ReceiveConfirmationPage() {
 
         {/* Receiving Address (MLXDR) */}
         <Card>
-          <CardContent className="pt-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium uppercase text-muted-foreground">
-                Receiving Address (MLXDR)
-              </Label>
+          <CardContent className="pt-6 space-y-2">
+            <Label className="text-xs font-medium uppercase text-muted-foreground">
+              Receiving Address (MLXDR)
+            </Label>
+            <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
+              <span className="font-mono text-xs truncate flex-1 min-w-0">
+                {mlxdrString}
+              </span>
               <button
                 type="button"
                 onClick={handleCopyMlxdr}
-                className="h-7 w-7 flex items-center justify-center rounded-md text-primary hover:bg-primary/10 transition-colors"
+                className="h-7 w-7 flex items-center justify-center rounded-md text-primary hover:bg-primary/10 transition-colors flex-shrink-0"
                 title="Copy MLXDR"
               >
                 {mlxdrCopied
                   ? <IconInfoCircle className="h-4 w-4 text-green-400" />
                   : <IconCopy className="h-4 w-4" />}
               </button>
-            </div>
-            <div className="p-3 rounded-md bg-muted/50 font-mono text-xs break-all">
-              {mlxdrString.substring(0, 100)}...
             </div>
           </CardContent>
         </Card>
@@ -198,7 +195,7 @@ export function ReceiveConfirmationPage() {
                       </Text>
                     </div>
                     <Text className="text-sm font-medium whitespace-nowrap">
-                      {parseFloat(utxo.amount) / 10_000_000} XLM
+                      {toDecimals(BigInt(utxo.amount), 7)} XLM
                     </Text>
                     <button
                       type="button"
@@ -208,7 +205,7 @@ export function ReceiveConfirmationPage() {
                     >
                       {copiedIndex === index
                         ? <IconInfoCircle className="h-4 w-4 text-green-400" />
-                        : <IconExternalLink className="h-4 w-4" />}
+                        : <IconCopy className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>

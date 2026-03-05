@@ -40,7 +40,10 @@ import { handleRequestSigning } from "@/background/handlers/signing/request-sign
 import { handleGetSigningRequest } from "@/background/handlers/signing/get-signing-request.ts";
 import { handleApproveSigningRequest } from "@/background/handlers/signing/approve-signing-request.ts";
 import { handleRejectSigningRequest } from "@/background/handlers/signing/reject-signing-request.ts";
-import { handleDeposit } from "@/background/handlers/private/deposit.ts";
+import {
+  handleDeposit,
+  handlePrepareDeposit,
+} from "@/background/handlers/private/deposit.ts";
 import { handleReceive } from "@/background/handlers/private/receive.ts";
 import {
   handlePrepareSend,
@@ -50,10 +53,18 @@ import {
   handlePrepareWithdraw,
   handleWithdraw,
 } from "@/background/handlers/private/withdraw.ts";
-import { ensureSessionHydrated } from "@/background/session.ts";
+import { ensureSessionHydrated, isUnlocked, unlockVault } from "@/background/session.ts";
+import { applyDevSeed } from "@/background/dev-seed.ts";
+
+declare const __SEED_PASSWORD__: string;
 
 // Background service worker
 console.log("Stellar Wallet Background Script Initialized");
+
+// Apply dev seed on startup (no-op if no seed config or already applied)
+applyDevSeed().catch((err) =>
+  console.error("[dev-seed] Failed to apply:", err)
+);
 
 const handlers: HandlerMap = {
   [MessageType.GetAccounts]: handleGetAccounts,
@@ -91,6 +102,7 @@ const handlers: HandlerMap = {
   [MessageType.ApproveSigningRequest]: handleApproveSigningRequest,
   [MessageType.RejectSigningRequest]: handleRejectSigningRequest,
   [MessageType.Deposit]: handleDeposit,
+  [MessageType.PrepareDeposit]: handlePrepareDeposit,
   [MessageType.Receive]: handleReceive,
   [MessageType.Send]: handleSend,
   [MessageType.PrepareSend]: handlePrepareSend,
@@ -113,6 +125,16 @@ browser.runtime.onMessage.addListener(
           ms: Date.now() - startedAt,
         });
         throw err;
+      }
+
+      // Dev: auto-unlock vault if seed password is available and vault is locked
+      // (MV3 service workers lose in-memory state when they go idle)
+      if (__SEED_PASSWORD__ && !isUnlocked()) {
+        try {
+          await unlockVault({ password: __SEED_PASSWORD__, ttlMs: 60 * 60 * 1000 });
+        } catch {
+          // Fall through — user can unlock manually
+        }
       }
     }
 

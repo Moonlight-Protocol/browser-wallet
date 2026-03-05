@@ -395,9 +395,9 @@ async function prepareWithdrawOperations(
   // 16. Convert all operations to MLXDR
   // Order: WITHDRAW first, then CREATE (change), then SPEND
   const operationsMLXDR: string[] = [
+    withdrawOp.toMLXDR(),
     ...createOperations.map((op) => op.toMLXDR()),
     ...spendOperations.map((op) => op.toMLXDR()),
-    withdrawOp.toMLXDR(),
   ];
 
   return {

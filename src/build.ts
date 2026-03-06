@@ -27,9 +27,15 @@ function loadSeedDefines(): Record<string, string> {
 
   const defines: Record<string, string> = {};
   const customSeedFile = Deno.env.get("SEED_FILE");
-  const envSeedPath = customSeedFile
-    ? (customSeedFile.startsWith("/") ? customSeedFile : new URL(`../${customSeedFile}`, import.meta.url).pathname)
-    : new URL("../.env.seed", import.meta.url).pathname;
+  let envSeedPath: string;
+  if (customSeedFile) {
+    envSeedPath = customSeedFile.startsWith("/") ? customSeedFile : new URL(`../${customSeedFile}`, import.meta.url).pathname;
+  } else {
+    // Prefer .env.seed.local when it exists, fall back to .env.seed.
+    const localPath = new URL("../.env.seed.local", import.meta.url).pathname;
+    const defaultPath = new URL("../.env.seed", import.meta.url).pathname;
+    try { envSeedPath = Deno.statSync(localPath).isFile ? localPath : defaultPath; } catch { envSeedPath = defaultPath; }
+  }
 
   // Try to load .env.seed file
   try {
@@ -205,7 +211,8 @@ async function build() {
     plugins: [
       nodeCryptoShimPlugin,
       cspSafeDepsPlugin,
-      ...denoPlugins({ configPath }),
+      // deno-lint-ignore no-explicit-any
+      ...denoPlugins({ configPath }) as any[],
     ],
     entryPoints: ["./src/background/handler.ts"],
     bundle: true,
@@ -219,6 +226,7 @@ async function build() {
     define: { __DEV__: DEV ? "true" : "false", global: "globalThis", ...seedDefines },
     minify: MINIFY,
     sourcemap: DEV,
+    supported: { decorators: false },
   });
 
   // Build Private Tracking bundle (loaded lazily by the background SW).
@@ -227,7 +235,8 @@ async function build() {
     plugins: [
       nodeCryptoShimPlugin,
       cspSafeDepsPlugin,
-      ...denoPlugins({ configPath }),
+      // deno-lint-ignore no-explicit-any
+      ...denoPlugins({ configPath }) as any[],
     ],
     entryPoints: ["./src/background/private-tracking-entry.ts"],
     bundle: true,
@@ -250,6 +259,7 @@ async function build() {
     define: { __DEV__: DEV ? "true" : "false", global: "globalThis" },
     minify: MINIFY,
     sourcemap: DEV,
+    supported: { decorators: false },
   });
 
   // Build Popup Script
@@ -257,7 +267,8 @@ async function build() {
     plugins: [
       nodeCryptoShimPlugin,
       cspSafeDepsPlugin,
-      ...denoPlugins({ configPath }),
+      // deno-lint-ignore no-explicit-any
+      ...denoPlugins({ configPath }) as any[],
     ],
     entryPoints: ["./src/popup/main.tsx"],
     bundle: true,
@@ -269,6 +280,7 @@ async function build() {
     define: { __DEV__: DEV ? "true" : "false", global: "globalThis", __SEED_PASSWORD__: seedDefines.__SEED_PASSWORD__ ?? JSON.stringify("") },
     minify: MINIFY,
     sourcemap: DEV,
+    supported: { decorators: false },
   });
 
   console.log("Build complete! Load the 'dist' folder in your browser.");

@@ -6,13 +6,14 @@
  */
 
 import { ensureSessionHydrated, unlockVault } from "@/background/session.ts";
-import { meta, vault, privateChannels } from "@/background/session.ts";
+import { meta, vault, privateChannels, chain } from "@/background/session.ts";
 import { Keys } from "@/keys/keys.ts";
 import { Contract, type ContractId } from "@colibri/core";
 import { ChannelReadMethods, ChannelSpec } from "@moonlight/moonlight-sdk";
-import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
+import { getNetworkConfig, getRpcServer } from "@/background/contexts/chain/network.ts";
 import { PrivacyProviderClient } from "@/background/services/privacy-provider-client.ts";
-import { requestFriendbotFunding } from "@/background/contexts/chain/friendbot.ts";
+
+import { checkAccountActivationStatus } from "@/background/contexts/chain/account-activation.ts";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
 import type { Ed25519PublicKey } from "@colibri/core";
 import type {
@@ -47,11 +48,20 @@ export async function applyDevSeed(): Promise<void> {
     return;
   }
 
-  console.log("[dev-seed] Applying seed configuration...");
-
   const password = __SEED_PASSWORD__;
   const mnemonic = __SEED_MNEMONIC__;
   const network = (__SEED_NETWORK__ || "testnet") as ChainNetwork;
+
+  const seedNetworkConfig = getNetworkConfig(network);
+  console.log("[dev-seed] Applying seed configuration...", {
+    network,
+    rpcUrl: String(seedNetworkConfig.rpcUrl),
+    friendbotUrl: String(seedNetworkConfig.friendbotUrl ?? "none"),
+    allowHttp: seedNetworkConfig.allowHttp,
+    channelContractId: __SEED_CHANNEL_CONTRACT_ID__ || "none",
+    providers: __SEED_PROVIDERS__ || "none",
+    mnemonicPrefix: mnemonic.split(" ").slice(0, 3).join(" ") + "...",
+  });
 
   // 1. Unlock vault (creates encryption salt on first run)
   await unlockVault({ password, ttlMs: 60 * 60 * 1000 });
@@ -103,25 +113,63 @@ export async function applyDevSeed(): Promise<void> {
 
     console.log("[dev-seed] Wallet imported, publicKey:", publicKey);
 
-    // Fund account via Friendbot (testnet/futurenet only)
-    try {
-      const networkConfig = getNetworkConfig(network);
-      if (networkConfig.friendbotUrl) {
-        await requestFriendbotFunding({
-          networkConfig,
-          publicKey: publicKey as Ed25519PublicKey,
-        });
-        console.log("[dev-seed] Account funded via Friendbot");
-      }
-    } catch (err) {
-      console.warn("[dev-seed] Friendbot funding failed (may already be funded):", err);
-    }
   } else {
     // Use existing first account
     const firstWallet = vaultState.wallets[0];
     const firstAccount = firstWallet.accounts[0];
     accountId = firstAccount.id;
     publicKey = firstAccount.publicKey;
+  }
+
+  // Ensure the account is funded and chain state is persisted.
+  const fundingNetworkConfig = getNetworkConfig(network);
+  const chainKey = `${network}:${publicKey}`;
+  const existingChain = chain.store.getValue().accounts[chainKey];
+  if (!existingChain?.createdConfirmed) {
+    // Try Friendbot.
+    let friendbotOk = false;
+    const friendbotUrl = fundingNetworkConfig.friendbotUrl;
+    if (friendbotUrl) {
+      const url = `${friendbotUrl}?addr=${encodeURIComponent(publicKey!)}`;
+      console.log(`[dev-seed] Friendbot request: ${url}`);
+      try {
+        const raw = await fetch(url);
+        const body = await raw.text();
+        console.log(`[dev-seed] Friendbot response: HTTP ${raw.status}, body: ${body.slice(0, 500)}`);
+        // 200 = funded, 400 "already funded" = already exists on-chain
+        friendbotOk = raw.status === 200 ||
+          (raw.status === 400 && body.includes("already funded"));
+      } catch (err) {
+        console.warn("[dev-seed] Friendbot fetch failed:", err);
+      }
+    }
+
+    if (friendbotOk) {
+      // Trust Friendbot — account is funded. Persist immediately.
+      chain.setAccountPartial(
+        { network, publicKey },
+        { created: true, createdConfirmed: true, initialized: true },
+      );
+      await chain.flush();
+      console.log("[dev-seed] Account confirmed via Friendbot response");
+    } else {
+      // Friendbot failed or unavailable — fall back to RPC verification.
+      const status = await checkAccountActivationStatus({
+        networkConfig: fundingNetworkConfig,
+        publicKey: publicKey as Ed25519PublicKey,
+      });
+      console.log(`[dev-seed] Activation check result: ${status}`);
+      if (status === "created") {
+        chain.setAccountPartial(
+          { network, publicKey },
+          { created: true, createdConfirmed: true, initialized: true },
+        );
+        await chain.flush();
+        console.log("[dev-seed] Account confirmed on-chain");
+      } else {
+        console.warn("[dev-seed] Account not confirmed on-chain, status:", status);
+      }
+    }
   }
 
   // 3. Add privacy channel (if none exist for this network)
@@ -138,6 +186,7 @@ export async function applyDevSeed(): Promise<void> {
       const networkConfig = getNetworkConfig(network);
       const channelContract = new Contract({
         networkConfig,
+        rpc: getRpcServer(networkConfig),
         contractConfig: {
           contractId: __SEED_CHANNEL_CONTRACT_ID__ as ContractId,
           spec: ChannelSpec,

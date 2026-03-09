@@ -53,11 +53,13 @@ async function runOne(params: { network: ChainNetwork; publicKey: string }) {
       throw new Error("Invalid public key");
     }
 
+    console.log(`[chain-sync] Fetching balance for ${params.network}:${params.publicKey}, rpcUrl=${String(networkConfig.rpcUrl)}`);
     const balance = await fetchStellarAssetBalance(
       networkConfig,
       { code: "XLM", issuer: undefined as never },
       params.publicKey as Ed25519PublicKey,
     );
+    console.log(`[chain-sync] Balance fetched: ${balance.toString()}`);
 
     // NOTE: Previously sourced from Horizon. We intentionally avoid Horizon now.
     const sequence = undefined;
@@ -73,6 +75,7 @@ async function runOne(params: { network: ChainNetwork; publicKey: string }) {
     await chain.flush();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    console.error(`[chain-sync] Balance fetch failed for ${params.network}:${params.publicKey}:`, message, err);
     // Keep last good value; just mark error.
     chain.setAccountPartial(params, { error: message, updatedAt: now });
     await chain.flush();
@@ -116,11 +119,7 @@ export function enqueueSync(
 
     if (onlyIfStale && !isStale(state)) continue;
 
-    // If custom, mark error and skip.
-    if (item.network === "custom") {
-      chain.setAccountPartial(item, { error: "Custom network not supported" });
-      continue;
-    }
+    // Custom network is now supported via allowHttp in getRpcServer.
 
     queue.enqueue(key, item.priority);
   }

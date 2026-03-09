@@ -2,7 +2,7 @@ import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { privateChannels } from "@/background/session.ts";
 import { Contract, type ContractId } from "@colibri/core";
 import { ChannelReadMethods, ChannelSpec } from "@moonlight/moonlight-sdk";
-import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
+import { getNetworkConfig, getRpcServer } from "@/background/contexts/chain/network.ts";
 
 export const handleAddPrivateChannel = async (
   message: MessageFor<MessageType.AddPrivateChannel>,
@@ -32,6 +32,7 @@ export const handleAddPrivateChannel = async (
         const networkConfig = getNetworkConfig(message.network);
         const channelContract = new Contract({
           networkConfig,
+          rpc: getRpcServer(networkConfig),
           contractConfig: {
             contractId: contractId as ContractId,
             spec: ChannelSpec,

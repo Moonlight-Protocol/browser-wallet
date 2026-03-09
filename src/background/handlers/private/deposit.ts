@@ -5,7 +5,7 @@ import {
   PrivacyProviderAuthError,
   PrivacyProviderClient,
 } from "@/background/services/privacy-provider-client.ts";
-import { getNetworkConfig } from "@/background/contexts/chain/network.ts";
+import { getNetworkConfig, getRpcServer } from "@/background/contexts/chain/network.ts";
 import { Keys } from "@/keys/keys.ts";
 import {
   ChannelReadMethods,
@@ -201,6 +201,7 @@ async function prepareDepositOperations(
   const networkConfig = getNetworkConfig(network);
   const channelContract = new Contract({
     networkConfig,
+    rpc: getRpcServer(networkConfig),
     contractConfig: {
       contractId: channel.contractId as ContractId,
       spec: ChannelSpec,

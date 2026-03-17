@@ -1,4 +1,12 @@
 import axios from "@/common/polyfills/axios.ts";
+import {
+  isEnabled,
+  startTrace,
+  createSpan,
+  endSpan,
+  traceparent,
+  type Span,
+} from "@/background/services/telemetry.ts";
 
 export type AuthChallengeResponse = {
   status: number;
@@ -18,6 +26,8 @@ export class PrivacyProviderAuthError extends Error {
 
 export class PrivacyProviderClient {
   private baseUrl: string;
+  private traceId?: string;
+  private rootSpanId?: string;
 
   constructor(url: string) {
     // Ensure protocol and no trailing slash
@@ -26,6 +36,27 @@ export class PrivacyProviderClient {
       normalized = `https://${normalized}`;
     }
     this.baseUrl = normalized;
+
+    if (isEnabled()) {
+      const trace = startTrace();
+      this.traceId = trace.traceId;
+      this.rootSpanId = trace.rootSpanId;
+    }
+  }
+
+  private traceHeaders(spanId: string): Record<string, string> {
+    if (!this.traceId) return {};
+    return { traceparent: traceparent(this.traceId, spanId) };
+  }
+
+  private startSpan(name: string, attrs?: Record<string, string>): Span | undefined {
+    if (!this.traceId) return undefined;
+    return createSpan({
+      traceId: this.traceId,
+      parentSpanId: this.rootSpanId,
+      name,
+      attributes: { "peer.service": "provider-platform", ...attrs },
+    });
   }
 
   /**
@@ -68,43 +99,55 @@ export class PrivacyProviderClient {
   async getAuthChallenge(
     accountPublicKey: string,
   ): Promise<AuthChallengeResponse> {
-    const response = await axios.get<AuthChallengeResponse>(
-      `${this.baseUrl}/api/v1/stellar/auth`,
-      {
-        params: {
-          account: accountPublicKey,
+    const span = this.startSpan("GET /api/v1/stellar/auth", { "stellar.account": accountPublicKey });
+    try {
+      const response = await axios.get<AuthChallengeResponse>(
+        `${this.baseUrl}/api/v1/stellar/auth`,
+        {
+          params: { account: accountPublicKey },
+          headers: span ? this.traceHeaders(span.spanId) : {},
         },
-      },
-    );
-    return response.data;
+      );
+      if (span) endSpan(span, { code: 0 });
+      return response.data;
+    } catch (error) {
+      if (span) endSpan(span, { code: 2, message: String(error) });
+      throw error;
+    }
   }
 
   async postAuth(signedChallenge: string): Promise<{ token: string }> {
     // TODO: This endpoint implementation is specific to the current provider API
     // and might not fully conform to SEP-10 standard yet. Move to standard SEP-10
     // once stellar.toml is hosted.
-    const response = await axios.post<{
-      status: number;
-      message: string;
-      data: { jwt: string };
-    }>(
-      `${this.baseUrl}/api/v1/stellar/auth`,
-      {
-        signedChallenge,
-      },
-    );
-
-    // Extract token from response.data.data.jwt
-    const token = response.data.data?.jwt;
-    if (!token || typeof token !== "string") {
-      throw new Error(
-        `Invalid auth response: token not found in ${
-          JSON.stringify(response.data)
-        }`,
+    const span = this.startSpan("POST /api/v1/stellar/auth");
+    try {
+      const response = await axios.post<{
+        status: number;
+        message: string;
+        data: { jwt: string };
+      }>(
+        `${this.baseUrl}/api/v1/stellar/auth`,
+        { signedChallenge },
+        { headers: span ? this.traceHeaders(span.spanId) : {} },
       );
-    }
 
-    return { token };
+      // Extract token from response.data.data.jwt
+      const token = response.data.data?.jwt;
+      if (!token || typeof token !== "string") {
+        throw new Error(
+          `Invalid auth response: token not found in ${
+            JSON.stringify(response.data)
+          }`,
+        );
+      }
+
+      if (span) endSpan(span, { code: 0 });
+      return { token };
+    } catch (error) {
+      if (span) endSpan(span, { code: 2, message: String(error) });
+      throw error;
+    }
   }
 
   async submitBundle(params: {
@@ -115,6 +158,9 @@ export class PrivacyProviderClient {
     // This will throw PrivacyProviderAuthError if token is invalid
     const token = this.validateToken(params.token);
 
+    const span = this.startSpan("POST /api/v1/bundle", {
+      "bundle.operations_count": String(params.operationsMLXDR.length),
+    });
     try {
       const response = await axios.post<{ id: string; hash: string }>(
         `${this.baseUrl}/api/v1/bundle`,
@@ -124,11 +170,14 @@ export class PrivacyProviderClient {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            ...(span ? this.traceHeaders(span.spanId) : {}),
           },
         },
       );
+      if (span) endSpan(span, { code: 0 });
       return response.data;
     } catch (error: unknown) {
+      if (span) endSpan(span, { code: 2, message: String(error) });
       // Check if it's an authentication error
       if (this.isAuthError(error)) {
         throw new PrivacyProviderAuthError(

@@ -23,6 +23,9 @@ function loadSeedDefines(): Record<string, string> {
     "SEED_ASSET_CODE",
     "SEED_ASSET_ISSUER",
     "SEED_PROVIDERS",
+    "SEED_TELEMETRY",
+    "SEED_TELEMETRY_ENDPOINT",
+    "SEED_TELEMETRY_AUTH",
   ];
 
   const defines: Record<string, string> = {};

@@ -55,11 +55,15 @@ import {
 } from "@/background/handlers/private/withdraw.ts";
 import { ensureSessionHydrated, isUnlocked, unlockVault } from "@/background/session.ts";
 import { applyDevSeed } from "@/background/dev-seed.ts";
+import { initTelemetry } from "@/background/services/telemetry.ts";
 
 declare const __SEED_PASSWORD__: string;
 
 // Background service worker
 console.log("Stellar Wallet Background Script Initialized");
+
+// Initialize telemetry (no-op if SEED_TELEMETRY !== "true")
+initTelemetry();
 
 // Apply dev seed on startup (no-op if no seed config or already applied)
 applyDevSeed().catch((err) =>

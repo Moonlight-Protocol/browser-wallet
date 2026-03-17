@@ -30,6 +30,8 @@ declare const __SEED_CHANNEL_NAME__: string;
 declare const __SEED_ASSET_CODE__: string;
 declare const __SEED_ASSET_ISSUER__: string;
 declare const __SEED_PROVIDERS__: string;
+declare const __SEED_TELEMETRY__: string;
+declare const __SEED_TELEMETRY_ENDPOINT__: string;
 
 const SEED_MARKER_KEY = "dev-seed.applied";
 

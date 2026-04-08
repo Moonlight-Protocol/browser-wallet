@@ -501,7 +501,6 @@ async function submitPreparedOperations(
   type: MessageType.Send;
   ok: boolean;
   id?: string;
-  hash?: string;
   error?: { code: string; message: string };
 }> {
   const { network, channelId, providerId, accountId } = params;
@@ -557,13 +556,13 @@ async function submitPreparedOperations(
     const result = await client.submitBundle({
       token: session.token,
       operationsMLXDR,
+      channelContractId: channel.contractId,
     });
 
     return {
       type: MessageType.Send,
       ok: true,
       id: result.id,
-      hash: result.hash,
     };
   } catch (bundleError: unknown) {
     // Handle authentication errors

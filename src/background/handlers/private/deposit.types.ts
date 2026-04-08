@@ -18,7 +18,6 @@ export type DepositRequest = {
 export type DepositResponse = {
   ok: boolean;
   id?: string;
-  hash?: string;
   error?: { code: string; message: string };
 };
 

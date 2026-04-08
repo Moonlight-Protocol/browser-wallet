@@ -176,8 +176,10 @@ async function build() {
   // Keep the extension root folder stable.
   // Removing the loaded extension directory during rebuild can cause browsers
   // to treat it as removed and wipe/lose extension storage.
+  // `recursive: true` lets BUILD_DIR be a nested path like `dist/chrome` so
+  // multi-browser builds can share the gitignored `dist/` parent.
   if (!(await exists(buildDir))) {
-    await Deno.mkdir(buildDir);
+    await Deno.mkdir(buildDir, { recursive: true });
   }
 
   // Copy static assets
@@ -286,7 +288,7 @@ async function build() {
     supported: { decorators: false },
   });
 
-  console.log("Build complete! Load the 'dist' folder in your browser.");
+  console.log(`Build complete! Load the '${buildDir}' folder in your browser.`);
 
   // Stop esbuild if not in watch mode
   esbuild.stop();

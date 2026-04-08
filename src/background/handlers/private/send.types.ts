@@ -17,7 +17,6 @@ export type SendRequest = {
 export type SendResponse = {
   ok: boolean;
   id?: string;
-  hash?: string;
   error?: { code: string; message: string };
 };
 

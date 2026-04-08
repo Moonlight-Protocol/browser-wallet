@@ -17,7 +17,6 @@ export type WithdrawRequest = {
 export type WithdrawResponse = {
   ok: boolean;
   id?: string;
-  hash?: string;
   error?: { code: string; message: string };
 };
 

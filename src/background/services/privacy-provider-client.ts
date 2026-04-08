@@ -153,19 +153,26 @@ export class PrivacyProviderClient {
   async submitBundle(params: {
     token: string;
     operationsMLXDR: string[];
-  }): Promise<{ id: string; hash: string }> {
+    channelContractId: string;
+  }): Promise<{ id: string }> {
     // Validate and clean token
     // This will throw PrivacyProviderAuthError if token is invalid
     const token = this.validateToken(params.token);
 
     const span = this.startSpan("POST /api/v1/bundle", {
       "bundle.operations_count": String(params.operationsMLXDR.length),
+      "bundle.channel_contract_id": params.channelContractId,
     });
     try {
-      const response = await axios.post<{ id: string; hash: string }>(
+      const response = await axios.post<{
+        status: number;
+        message: string;
+        data: { operationsBundleId: string; status: string };
+      }>(
         `${this.baseUrl}/api/v1/bundle`,
         {
           operationsMLXDR: params.operationsMLXDR,
+          channelContractId: params.channelContractId,
         },
         {
           headers: {
@@ -174,8 +181,16 @@ export class PrivacyProviderClient {
           },
         },
       );
+      const operationsBundleId = response.data.data?.operationsBundleId;
+      if (!operationsBundleId || typeof operationsBundleId !== "string") {
+        throw new Error(
+          `Invalid bundle response: operationsBundleId not found in ${
+            JSON.stringify(response.data)
+          }`,
+        );
+      }
       if (span) endSpan(span, { code: 0 });
-      return response.data;
+      return { id: operationsBundleId };
     } catch (error: unknown) {
       if (span) endSpan(span, { code: 2, message: String(error) });
       // Check if it's an authentication error

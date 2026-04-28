@@ -28,7 +28,9 @@ export function UnlockWalletPage() {
         if (!cancelled) setSubmitting(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const passwordError = (() => {

@@ -177,78 +177,80 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
 
         return (
           <div key={p.id} className="flex flex-col gap-1">
-          <div
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
-            style={{
-              background: connected
-                ? "linear-gradient(135deg, oklch(0.6 0.2 145 / 0.1) 0%, oklch(0.5 0.15 145 / 0.05) 100%)"
-                : "oklch(0.18 0.03 265 / 0.4)",
-              border: connected
-                ? "1px solid oklch(0.6 0.2 145 / 0.3)"
-                : "1px solid oklch(1 0 0 / 0.05)",
-            }}
-          >
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
               style={{
                 background: connected
-                  ? "linear-gradient(135deg, oklch(0.6 0.2 145 / 0.2) 0%, oklch(0.5 0.15 145 / 0.1) 100%)"
-                  : "oklch(0.2 0.03 265 / 0.5)",
+                  ? "linear-gradient(135deg, oklch(0.6 0.2 145 / 0.1) 0%, oklch(0.5 0.15 145 / 0.05) 100%)"
+                  : "oklch(0.18 0.03 265 / 0.4)",
                 border: connected
-                  ? "1px solid oklch(0.6 0.2 145 / 0.2)"
+                  ? "1px solid oklch(0.6 0.2 145 / 0.3)"
                   : "1px solid oklch(1 0 0 / 0.05)",
               }}
             >
-              <IconServer
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                style={{
+                  background: connected
+                    ? "linear-gradient(135deg, oklch(0.6 0.2 145 / 0.2) 0%, oklch(0.5 0.15 145 / 0.1) 100%)"
+                    : "oklch(0.2 0.03 265 / 0.5)",
+                  border: connected
+                    ? "1px solid oklch(0.6 0.2 145 / 0.2)"
+                    : "1px solid oklch(1 0 0 / 0.05)",
+                }}
+              >
+                <IconServer
+                  className={cn(
+                    "h-4 w-4",
+                    connected ? "text-green-400" : "text-foreground/40",
+                  )}
+                />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground/80 truncate">
+                  {p.name}
+                </p>
+                <p className="text-[10px] text-foreground/40 truncate">
+                  {p.url}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                disabled={!!processingProviderId}
+                onClick={() => handleToggleConnection(p.id, connected)}
                 className={cn(
-                  "h-4 w-4",
-                  connected ? "text-green-400" : "text-foreground/40",
+                  "px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer disabled:opacity-50",
+                  connected
+                    ? "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
+                    : "bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20",
                 )}
-              />
-            </div>
+              >
+                {processingProviderId === p.id
+                  ? <Spinner className="h-3 w-3" />
+                  : connected
+                  ? (
+                    "Disconnect"
+                  )
+                  : (
+                    "Connect"
+                  )}
+              </button>
 
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-foreground/80 truncate">
-                {p.name}
-              </p>
-              <p className="text-[10px] text-foreground/40 truncate">{p.url}</p>
+              <button
+                type="button"
+                onClick={() => props.onRemoveProvider(p.id)}
+                className="h-7 w-7 rounded-lg flex items-center justify-center text-foreground/30 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+              >
+                <IconTrash className="h-3.5 w-3.5" />
+              </button>
             </div>
-
-            <button
-              type="button"
-              disabled={!!processingProviderId}
-              onClick={() => handleToggleConnection(p.id, connected)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer disabled:opacity-50",
-                connected
-                  ? "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
-                  : "bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20",
-              )}
-            >
-              {processingProviderId === p.id
-                ? <Spinner className="h-3 w-3" />
-                : connected
-                ? (
-                  "Disconnect"
-                )
-                : (
-                  "Connect"
-                )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => props.onRemoveProvider(p.id)}
-              className="h-7 w-7 rounded-lg flex items-center justify-center text-foreground/30 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-            >
-              <IconTrash className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          {providerError?.id === p.id && (
-            <div className="px-3 py-2 rounded-lg text-xs text-red-400 bg-red-500/10 border border-red-500/20">
-              Connection failed: {providerError.message}
-            </div>
-          )}
+            {providerError?.id === p.id && (
+              <div className="px-3 py-2 rounded-lg text-xs text-red-400 bg-red-500/10 border border-red-500/20">
+                Connection failed: {providerError.message}
+              </div>
+            )}
           </div>
         );
       })}

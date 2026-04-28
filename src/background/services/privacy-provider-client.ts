@@ -1,11 +1,11 @@
 import axios from "@/common/polyfills/axios.ts";
 import {
-  isEnabled,
-  startTrace,
   createSpan,
   endSpan,
-  traceparent,
+  isEnabled,
   type Span,
+  startTrace,
+  traceparent,
 } from "@/background/services/telemetry.ts";
 
 export type AuthChallengeResponse = {
@@ -49,7 +49,10 @@ export class PrivacyProviderClient {
     return { traceparent: traceparent(this.traceId, spanId) };
   }
 
-  private startSpan(name: string, attrs?: Record<string, string>): Span | undefined {
+  private startSpan(
+    name: string,
+    attrs?: Record<string, string>,
+  ): Span | undefined {
     if (!this.traceId) return undefined;
     return createSpan({
       traceId: this.traceId,
@@ -99,7 +102,9 @@ export class PrivacyProviderClient {
   async getAuthChallenge(
     accountPublicKey: string,
   ): Promise<AuthChallengeResponse> {
-    const span = this.startSpan("GET /api/v1/stellar/auth", { "stellar.account": accountPublicKey });
+    const span = this.startSpan("GET /api/v1/stellar/auth", {
+      "stellar.account": accountPublicKey,
+    });
     try {
       const response = await axios.get<AuthChallengeResponse>(
         `${this.baseUrl}/api/v1/stellar/auth`,

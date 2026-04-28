@@ -1,7 +1,10 @@
 import { MessageType } from "@/background/messages.ts";
 import type { Handler } from "@/background/messages.ts";
 import { privateChannels, vault } from "@/background/session.ts";
-import { getNetworkConfig, getRpcServer } from "@/background/contexts/chain/network.ts";
+import {
+  getNetworkConfig,
+  getRpcServer,
+} from "@/background/contexts/chain/network.ts";
 import { Keys } from "@/keys/keys.ts";
 import {
   ChannelReadMethods,

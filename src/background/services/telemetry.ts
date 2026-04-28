@@ -133,12 +133,11 @@ async function flush(): Promise<void> {
               endTimeUnixNano: s.endTimeUnixNano || s.startTimeUnixNano,
               attributes: Object.entries(s.attributes).map(([k, v]) => ({
                 key: k,
-                value:
-                  typeof v === "string"
-                    ? { stringValue: v }
-                    : typeof v === "number"
-                      ? { intValue: String(v) }
-                      : { boolValue: v },
+                value: typeof v === "string"
+                  ? { stringValue: v }
+                  : typeof v === "number"
+                  ? { intValue: String(v) }
+                  : { boolValue: v },
               })),
               status: s.status
                 ? { code: s.status.code, message: s.status.message || "" }

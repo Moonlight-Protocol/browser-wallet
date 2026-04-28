@@ -1,6 +1,9 @@
 import { MessageFor, MessageType, ResponseFor } from "@/background/messages.ts";
 import { privateChannels, privateUtxos, vault } from "@/background/session.ts";
-import { getNetworkConfig, getRpcServer } from "@/background/contexts/chain/network.ts";
+import {
+  getNetworkConfig,
+  getRpcServer,
+} from "@/background/contexts/chain/network.ts";
 import { Keys } from "@/keys/keys.ts";
 import { bytesToBase64 } from "@/common/utils/bytes-to-base64.ts";
 import {

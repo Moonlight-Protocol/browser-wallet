@@ -6,11 +6,14 @@
  */
 
 import { ensureSessionHydrated, unlockVault } from "@/background/session.ts";
-import { meta, vault, privateChannels, chain } from "@/background/session.ts";
+import { chain, meta, privateChannels, vault } from "@/background/session.ts";
 import { Keys } from "@/keys/keys.ts";
 import { Contract, type ContractId } from "@colibri/core";
 import { ChannelReadMethods, ChannelSpec } from "@moonlight/moonlight-sdk";
-import { getNetworkConfig, getRpcServer } from "@/background/contexts/chain/network.ts";
+import {
+  getNetworkConfig,
+  getRpcServer,
+} from "@/background/contexts/chain/network.ts";
 import { PrivacyProviderClient } from "@/background/services/privacy-provider-client.ts";
 
 import { checkAccountActivationStatus } from "@/background/contexts/chain/account-activation.ts";
@@ -114,7 +117,6 @@ export async function applyDevSeed(): Promise<void> {
     await meta.flush();
 
     console.log("[dev-seed] Wallet imported, publicKey:", publicKey);
-
   } else {
     // Use existing first account
     const firstWallet = vaultState.wallets[0];
@@ -137,7 +139,11 @@ export async function applyDevSeed(): Promise<void> {
       try {
         const raw = await fetch(url);
         const body = await raw.text();
-        console.log(`[dev-seed] Friendbot response: HTTP ${raw.status}, body: ${body.slice(0, 500)}`);
+        console.log(
+          `[dev-seed] Friendbot response: HTTP ${raw.status}, body: ${
+            body.slice(0, 500)
+          }`,
+        );
         // 200 = funded, 400 "already funded" = already exists on-chain
         friendbotOk = raw.status === 200 ||
           (raw.status === 400 && body.includes("already funded"));
@@ -169,14 +175,16 @@ export async function applyDevSeed(): Promise<void> {
         await chain.flush();
         console.log("[dev-seed] Account confirmed on-chain");
       } else {
-        console.warn("[dev-seed] Account not confirmed on-chain, status:", status);
+        console.warn(
+          "[dev-seed] Account not confirmed on-chain, status:",
+          status,
+        );
       }
     }
   }
 
   // 3. Add privacy channel (if none exist for this network)
-  const existingChannels =
-    privateChannels.getChannels(network) ?? [];
+  const existingChannels = privateChannels.getChannels(network) ?? [];
   let channelId: string;
 
   if (
@@ -274,7 +282,10 @@ export async function applyDevSeed(): Promise<void> {
         const challenge = await client.getAuthChallenge(publicKey);
 
         // Sign the challenge directly using the mnemonic
-        const keypair = await Keys.deriveStellarKeypairFromMnemonic(mnemonic, 0);
+        const keypair = await Keys.deriveStellarKeypairFromMnemonic(
+          mnemonic,
+          0,
+        );
         const networkConfig = getNetworkConfig(network);
         const transaction = TransactionBuilder.fromXDR(
           challenge.data.challenge,

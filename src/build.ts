@@ -32,12 +32,18 @@ function loadSeedDefines(): Record<string, string> {
   const customSeedFile = Deno.env.get("SEED_FILE");
   let envSeedPath: string;
   if (customSeedFile) {
-    envSeedPath = customSeedFile.startsWith("/") ? customSeedFile : new URL(`../${customSeedFile}`, import.meta.url).pathname;
+    envSeedPath = customSeedFile.startsWith("/")
+      ? customSeedFile
+      : new URL(`../${customSeedFile}`, import.meta.url).pathname;
   } else {
     // Prefer .env.seed.local when it exists, fall back to .env.seed.
     const localPath = new URL("../.env.seed.local", import.meta.url).pathname;
     const defaultPath = new URL("../.env.seed", import.meta.url).pathname;
-    try { envSeedPath = Deno.statSync(localPath).isFile ? localPath : defaultPath; } catch { envSeedPath = defaultPath; }
+    try {
+      envSeedPath = Deno.statSync(localPath).isFile ? localPath : defaultPath;
+    } catch {
+      envSeedPath = defaultPath;
+    }
   }
 
   // Try to load .env.seed file
@@ -228,7 +234,11 @@ async function build() {
     splitting: false,
     mainFields: ["module", "main"],
     conditions: ["worker", "default"],
-    define: { __DEV__: DEV ? "true" : "false", global: "globalThis", ...seedDefines },
+    define: {
+      __DEV__: DEV ? "true" : "false",
+      global: "globalThis",
+      ...seedDefines,
+    },
     minify: MINIFY,
     sourcemap: DEV,
     supported: { decorators: false },
@@ -282,7 +292,11 @@ async function build() {
     platform: "browser",
     jsx: "automatic",
     jsxImportSource: "react",
-    define: { __DEV__: DEV ? "true" : "false", global: "globalThis", __SEED_PASSWORD__: seedDefines.__SEED_PASSWORD__ ?? JSON.stringify("") },
+    define: {
+      __DEV__: DEV ? "true" : "false",
+      global: "globalThis",
+      __SEED_PASSWORD__: seedDefines.__SEED_PASSWORD__ ?? JSON.stringify(""),
+    },
     minify: MINIFY,
     sourcemap: DEV,
     supported: { decorators: false },

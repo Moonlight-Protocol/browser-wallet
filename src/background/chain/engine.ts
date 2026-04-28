@@ -53,7 +53,11 @@ async function runOne(params: { network: ChainNetwork; publicKey: string }) {
       throw new Error("Invalid public key");
     }
 
-    console.log(`[chain-sync] Fetching balance for ${params.network}:${params.publicKey}, rpcUrl=${String(networkConfig.rpcUrl)}`);
+    console.log(
+      `[chain-sync] Fetching balance for ${params.network}:${params.publicKey}, rpcUrl=${
+        String(networkConfig.rpcUrl)
+      }`,
+    );
     const balance = await fetchStellarAssetBalance(
       networkConfig,
       { code: "XLM", issuer: undefined as never },
@@ -75,7 +79,11 @@ async function runOne(params: { network: ChainNetwork; publicKey: string }) {
     await chain.flush();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`[chain-sync] Balance fetch failed for ${params.network}:${params.publicKey}:`, message, err);
+    console.error(
+      `[chain-sync] Balance fetch failed for ${params.network}:${params.publicKey}:`,
+      message,
+      err,
+    );
     // Keep last good value; just mark error.
     chain.setAccountPartial(params, { error: message, updatedAt: now });
     await chain.flush();

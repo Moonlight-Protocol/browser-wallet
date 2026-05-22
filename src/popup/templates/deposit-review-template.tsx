@@ -264,6 +264,7 @@ export function DepositReviewTemplate(props: DepositReviewTemplateProps) {
         {/* Action Buttons */}
         <div className="space-y-2">
           <Button
+            id="deposit-execute-btn"
             className="w-full"
             disabled={props.busy}
             onClick={() => props.onSubmit()}

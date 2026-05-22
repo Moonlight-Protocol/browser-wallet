@@ -13,7 +13,7 @@ export const prepareDeposit = async (
   return await callBackground<MessageType.PrepareDeposit>({
     type: MessageType.PrepareDeposit,
     ...params,
-  });
+  }, { timeoutMs: 240_000 });
 };
 
 export const deposit = async (
@@ -22,5 +22,5 @@ export const deposit = async (
   return await callBackground<MessageType.Deposit>({
     type: MessageType.Deposit,
     ...params,
-  });
+  }, { timeoutMs: 240_000 });
 };

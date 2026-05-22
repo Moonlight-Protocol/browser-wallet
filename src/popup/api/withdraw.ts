@@ -13,7 +13,7 @@ export const withdraw = async (
   return await callBackground<MessageType.Withdraw>({
     type: MessageType.Withdraw,
     ...params,
-  });
+  }, { timeoutMs: 240_000 });
 };
 
 export const prepareWithdraw = async (
@@ -22,5 +22,5 @@ export const prepareWithdraw = async (
   return await callBackground<MessageType.PrepareWithdraw>({
     type: MessageType.PrepareWithdraw,
     ...params,
-  });
+  }, { timeoutMs: 240_000 });
 };

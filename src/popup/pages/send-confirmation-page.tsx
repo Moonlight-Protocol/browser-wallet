@@ -403,6 +403,7 @@ export function SendConfirmationPage() {
 
         <CardFooter className="px-0 space-y-2">
           <Button
+            id="send-execute-btn"
             className="w-full"
             disabled={busy}
             onClick={handleExecute}

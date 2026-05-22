@@ -13,7 +13,7 @@ export const send = async (
   return await callBackground<MessageType.Send>({
     type: MessageType.Send,
     ...params,
-  });
+  }, { timeoutMs: 240_000 });
 };
 
 export const prepareSend = async (
@@ -22,5 +22,5 @@ export const prepareSend = async (
   return await callBackground<MessageType.PrepareSend>({
     type: MessageType.PrepareSend,
     ...params,
-  });
+  }, { timeoutMs: 240_000 });
 };

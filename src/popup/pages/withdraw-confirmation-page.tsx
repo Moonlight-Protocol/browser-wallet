@@ -443,6 +443,7 @@ export function WithdrawConfirmationPage() {
 
         <CardFooter className="px-0 space-y-2">
           <Button
+            id="withdraw-execute-btn"
             className="w-full"
             disabled={busy}
             onClick={handleExecute}

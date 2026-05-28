@@ -1,0 +1,51 @@
+name: Build extension + upload sourcemaps to PostHog
+
+# Runs on tag pushes to upload extension source maps to PostHog so server-side
+# error-tracking can resolve minified production stack traces back to .ts
+# sources. There is no extension-publish step here: that ships through the
+# Chrome Web Store / Mozilla Add-ons UIs and stays a manual operator action.
+# `posthog-cli sourcemap inject` rewrites the .js bundles in dist/ in place to
+# embed chunk IDs that match the uploaded maps, so the injected bundles are
+# the ones operators must package into the published .zip.
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      POSTHOG_KEY: ${{ secrets.POSTHOG_PROJECT_TOKEN }}
+      POSTHOG_HOST: https://us.i.posthog.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Build production extension
+        run: deno task build-prod
+
+      - name: Upload source maps to PostHog
+        env:
+          POSTHOG_CLI_API_KEY: ${{ secrets.POSTHOG_CLI_API_KEY }}
+          POSTHOG_CLI_PROJECT_ID: "345524"
+          POSTHOG_CLI_HOST: "https://us.posthog.com"
+        run: |
+          npx --yes @posthog/cli sourcemap inject --directory dist/
+          npx --yes @posthog/cli sourcemap upload --directory dist/
+
+      - name: Strip source maps from dist
+        run: rm -f dist/*.map
+
+      - name: Package extension
+        run: |
+          cd dist && zip -r ../browser-wallet-${{ github.ref_name }}.zip .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: browser-wallet-${{ github.ref_name }}
+          path: browser-wallet-${{ github.ref_name }}.zip
+          if-no-files-found: error

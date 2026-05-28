@@ -105,6 +105,13 @@ async function build() {
   const DEV = envFlag("DEV", false);
   const MINIFY = envFlag("MINIFY", false);
   const seedDefines = loadSeedDefines();
+  const posthogKey = Deno.env.get("POSTHOG_KEY") ?? "";
+  const posthogHost = Deno.env.get("POSTHOG_HOST") ??
+    "https://us.i.posthog.com";
+  const posthogDefines = {
+    __POSTHOG_KEY__: JSON.stringify(posthogKey),
+    __POSTHOG_HOST__: JSON.stringify(posthogHost),
+  };
 
   if (Deno.env.get("DEV") == "1") {
     await preBuildChecks();
@@ -240,7 +247,7 @@ async function build() {
       ...seedDefines,
     },
     minify: MINIFY,
-    sourcemap: DEV,
+    sourcemap: true,
     supported: { decorators: false },
   });
 
@@ -273,7 +280,7 @@ async function build() {
     conditions: ["worker", "default"],
     define: { __DEV__: DEV ? "true" : "false", global: "globalThis" },
     minify: MINIFY,
-    sourcemap: DEV,
+    sourcemap: true,
     supported: { decorators: false },
   });
 
@@ -296,9 +303,10 @@ async function build() {
       __DEV__: DEV ? "true" : "false",
       global: "globalThis",
       __SEED_PASSWORD__: seedDefines.__SEED_PASSWORD__ ?? JSON.stringify(""),
+      ...posthogDefines,
     },
     minify: MINIFY,
-    sourcemap: DEV,
+    sourcemap: true,
     supported: { decorators: false },
   });
 

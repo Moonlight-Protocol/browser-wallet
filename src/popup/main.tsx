@@ -3,6 +3,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app.tsx";
 import { ToastHost } from "@/popup/utils/toast.tsx";
+import { initAnalytics } from "@/popup/lib/analytics.ts";
+
+initAnalytics();
 
 const root = document.getElementById("root");
 if (root) {

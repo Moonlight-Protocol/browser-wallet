@@ -61,7 +61,8 @@
     "lucide-react": "npm:lucide-react@^0.358.0",
     "chrome-types": "npm:chrome-types@^0.1.242",
     "buffer": "npm:buffer@^6.0.3",
-    "process": "npm:process@^0.11.10"
+    "process": "npm:process@^0.11.10",
+    "posthog-js": "npm:posthog-js@^1.376.3"
   },
   "compilerOptions": {
     "jsx": "react-jsx",

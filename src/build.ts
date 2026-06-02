@@ -78,6 +78,30 @@ function loadSeedDefines(): Record<string, string> {
   return defines;
 }
 
+// Production manifest ships a tight `connect-src` (self + PostHog + https://*).
+// Local-dev's Soroban RPC at http://localhost:8000 falls outside that whitelist,
+// so dev builds widen connect-src with `http://localhost:*` and the shipped
+// production extension stays untouched.
+async function writeManifest(dir: string, dev: boolean): Promise<void> {
+  const src = await Deno.readTextFile("manifest.json");
+  if (!dev) {
+    await Deno.writeTextFile(`${dir}/manifest.json`, src);
+    return;
+  }
+  const manifest = JSON.parse(src);
+  const csp = manifest.content_security_policy?.extension_pages;
+  if (typeof csp === "string" && !csp.includes("http://localhost:*")) {
+    manifest.content_security_policy.extension_pages = csp.replace(
+      /connect-src ([^;]*);/,
+      "connect-src $1 http://localhost:*;",
+    );
+  }
+  await Deno.writeTextFile(
+    `${dir}/manifest.json`,
+    JSON.stringify(manifest, null, 2) + "\n",
+  );
+}
+
 async function preBuildChecks() {
   console.log("🔍 Running pre-build checks...");
 
@@ -196,7 +220,7 @@ async function build() {
   }
 
   // Copy static assets
-  await copy("manifest.json", `${buildDir}/manifest.json`, { overwrite: true });
+  await writeManifest(buildDir, DEV);
   await copy("src/popup/index.html", `${buildDir}/popup.html`, {
     overwrite: true,
   });

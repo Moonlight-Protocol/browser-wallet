@@ -7,6 +7,7 @@ import {
   startTrace,
   traceparent,
 } from "@/background/services/telemetry.ts";
+import type { EntityStatus } from "@/persistence/stores/private-channels.types.ts";
 
 export type AuthChallengeResponse = {
   status: number;
@@ -15,6 +16,10 @@ export type AuthChallengeResponse = {
     hash: string;
     challenge: string;
   };
+};
+
+export type EntityChallengeResponse = {
+  data: { nonce: string };
 };
 
 export class PrivacyProviderAuthError extends Error {
@@ -26,16 +31,18 @@ export class PrivacyProviderAuthError extends Error {
 
 export class PrivacyProviderClient {
   private baseUrl: string;
+  private ppPubkey: string;
   private traceId?: string;
   private rootSpanId?: string;
 
-  constructor(url: string) {
+  constructor(url: string, ppPubkey: string) {
     // Ensure protocol and no trailing slash
     let normalized = url.replace(/\/$/, "");
     if (!/^https?:\/\//i.test(normalized)) {
       normalized = `https://${normalized}`;
     }
     this.baseUrl = normalized;
+    this.ppPubkey = ppPubkey;
 
     if (isEnabled()) {
       const trace = startTrace();
@@ -121,7 +128,9 @@ export class PrivacyProviderClient {
     }
   }
 
-  async postAuth(signedChallenge: string): Promise<{ token: string }> {
+  async postAuth(
+    signedChallenge: string,
+  ): Promise<{ token: string; entityStatus: EntityStatus }> {
     // TODO: This endpoint implementation is specific to the current provider API
     // and might not fully conform to SEP-10 standard yet. Move to standard SEP-10
     // once stellar.toml is hosted.
@@ -130,7 +139,7 @@ export class PrivacyProviderClient {
       const response = await axios.post<{
         status: number;
         message: string;
-        data: { jwt: string };
+        data: { jwt: string; entityStatus?: EntityStatus };
       }>(
         `${this.baseUrl}/api/v1/stellar/auth`,
         { signedChallenge },
@@ -146,9 +155,66 @@ export class PrivacyProviderClient {
           }`,
         );
       }
+      // entityStatus defaults to UNVERIFIED if the provider hasn't deployed
+      // the 0.7+ response shape yet, so the wallet can still gate KYC.
+      const entityStatus: EntityStatus = response.data.data?.entityStatus ??
+        "UNVERIFIED";
 
       if (span) endSpan(span, { code: 0 });
-      return { token };
+      return { token, entityStatus };
+    } catch (error) {
+      if (span) endSpan(span, { code: 2, message: String(error) });
+      throw error;
+    }
+  }
+
+  // KYC challenge — wallet requests a nonce per-PP, signs it with the entity's
+  // Stellar key, and posts back to /providers/:pp/entities to register.
+  async getEntityChallenge(pubkey: string): Promise<{ nonce: string }> {
+    const span = this.startSpan(
+      "POST /api/v1/providers/:pp/entities/challenge",
+      { "stellar.account": pubkey },
+    );
+    try {
+      const response = await axios.post<{
+        data: { nonce: string };
+      }>(
+        `${this.baseUrl}/api/v1/providers/${this.ppPubkey}/entities/challenge`,
+        { pubkey },
+        { headers: span ? this.traceHeaders(span.spanId) : {} },
+      );
+      const nonce = response.data.data?.nonce;
+      if (!nonce) throw new Error("entity challenge missing nonce");
+      if (span) endSpan(span, { code: 0 });
+      return { nonce };
+    } catch (error) {
+      if (span) endSpan(span, { code: 2, message: String(error) });
+      throw error;
+    }
+  }
+
+  async submitEntity(params: {
+    pubkey: string;
+    name: string;
+    jurisdictions?: string[];
+    signedChallenge: { nonce: string; signature: string };
+  }): Promise<{ entityId: string; status: EntityStatus }> {
+    const span = this.startSpan("POST /api/v1/providers/:pp/entities");
+    try {
+      const response = await axios.post<{
+        data: { entityId: string; status: EntityStatus };
+      }>(
+        `${this.baseUrl}/api/v1/providers/${this.ppPubkey}/entities`,
+        {
+          pubkey: params.pubkey,
+          name: params.name,
+          jurisdictions: params.jurisdictions ?? [],
+          signedChallenge: params.signedChallenge,
+        },
+        { headers: span ? this.traceHeaders(span.spanId) : {} },
+      );
+      if (span) endSpan(span, { code: 0 });
+      return response.data.data;
     } catch (error) {
       if (span) endSpan(span, { code: 2, message: String(error) });
       throw error;
@@ -164,10 +230,13 @@ export class PrivacyProviderClient {
     // This will throw PrivacyProviderAuthError if token is invalid
     const token = this.validateToken(params.token);
 
-    const span = this.startSpan("POST /api/v1/bundle", {
-      "bundle.operations_count": String(params.operationsMLXDR.length),
-      "bundle.channel_contract_id": params.channelContractId,
-    });
+    const span = this.startSpan(
+      "POST /api/v1/providers/:pp/entity/bundles",
+      {
+        "bundle.operations_count": String(params.operationsMLXDR.length),
+        "bundle.channel_contract_id": params.channelContractId,
+      },
+    );
     let operationsBundleId: string;
     try {
       const response = await axios.post<{
@@ -175,7 +244,7 @@ export class PrivacyProviderClient {
         message: string;
         data: { operationsBundleId: string; status: string };
       }>(
-        `${this.baseUrl}/api/v1/bundle`,
+        `${this.baseUrl}/api/v1/providers/${this.ppPubkey}/entity/bundles`,
         {
           operationsMLXDR: params.operationsMLXDR,
           channelContractId: params.channelContractId,
@@ -223,9 +292,10 @@ export class PrivacyProviderClient {
     timeoutMs = 180_000,
     pollIntervalMs = 5_000,
   ): Promise<void> {
-    const span = this.startSpan("GET /api/v1/bundle/:id (poll)", {
-      "bundle.id": bundleId,
-    });
+    const span = this.startSpan(
+      "GET /api/v1/providers/:pp/entity/bundles/:id (poll)",
+      { "bundle.id": bundleId },
+    );
     const start = Date.now();
     try {
       while (Date.now() - start < timeoutMs) {
@@ -235,7 +305,7 @@ export class PrivacyProviderClient {
           message: string;
           data: { status: string };
         }>(
-          `${this.baseUrl}/api/v1/bundle/${bundleId}`,
+          `${this.baseUrl}/api/v1/providers/${this.ppPubkey}/entity/bundles/${bundleId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

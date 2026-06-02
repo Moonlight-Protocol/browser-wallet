@@ -14,11 +14,18 @@ export type PrivateChannelManagerProps = {
     channelId: string,
     name: string,
     url: string,
+    pubkey: string,
   ) => Promise<void>;
   onRemoveProvider: (channelId: string, providerId: string) => Promise<void>;
   onSelectProvider: (
     channelId: string,
     providerId: string | undefined,
+  ) => Promise<void>;
+  onSubmitKyc: (
+    channelId: string,
+    providerId: string,
+    name: string,
+    password: string,
   ) => Promise<void>;
 };
 
@@ -157,12 +164,14 @@ export function PrivateChannelManager(props: PrivateChannelManagerProps) {
             <PrivacyProviders
               channel={selectedChannel}
               accountId={props.accountId}
-              onAddProvider={(name, url) =>
-                props.onAddProvider(selectedChannel.id, name, url)}
+              onAddProvider={(name, url, pubkey) =>
+                props.onAddProvider(selectedChannel.id, name, url, pubkey)}
               onRemoveProvider={(pid) =>
                 props.onRemoveProvider(selectedChannel.id, pid)}
               onSelectProvider={(pid) =>
                 props.onSelectProvider(selectedChannel.id, pid)}
+              onSubmitKyc={(pid, name, password) =>
+                props.onSubmitKyc(selectedChannel.id, pid, name, password)}
             />
           )}
       </div>

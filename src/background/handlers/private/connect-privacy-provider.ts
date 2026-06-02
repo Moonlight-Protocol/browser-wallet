@@ -6,11 +6,18 @@ import { PrivacyProviderClient } from "@/background/services/privacy-provider-cl
 export const handleConnectPrivacyProvider: Handler<
   MessageType.ConnectPrivacyProvider
 > = async (message) => {
-  const { channelId, providerId, providerUrl, accountId, publicKey, network } =
-    message;
+  const {
+    channelId,
+    providerId,
+    providerUrl,
+    providerPubkey,
+    accountId,
+    publicKey,
+    network,
+  } = message;
 
   // 1. Get Authentication Challenge from Provider
-  const client = new PrivacyProviderClient(providerUrl);
+  const client = new PrivacyProviderClient(providerUrl, providerPubkey);
   const challenge = await client.getAuthChallenge(publicKey);
 
   // 2. Create Signing Request
@@ -50,6 +57,7 @@ export const handleConnectPrivacyProvider: Handler<
         {
           token: authResponse.token,
           expiresAt,
+          entityStatus: authResponse.entityStatus,
         },
       );
 

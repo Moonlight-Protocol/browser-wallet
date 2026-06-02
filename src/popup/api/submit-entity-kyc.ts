@@ -2,32 +2,30 @@ import { MessageType } from "@/background/messages.ts";
 import { ApiError, callBackground } from "@/popup/api/client.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 
-export async function addPrivacyProvider(params: {
+export async function submitEntityKyc(params: {
   network: ChainNetwork;
   channelId: string;
+  providerId: string;
+  accountId: string;
+  password: string;
   name: string;
-  url: string;
-  pubkey: string;
-}): Promise<{ providerId: string }> {
+  jurisdictions?: string[];
+}): Promise<void> {
   const res = await callBackground({
-    type: MessageType.AddPrivacyProvider,
+    type: MessageType.SubmitEntityKyc,
     network: params.network,
     channelId: params.channelId,
+    providerId: params.providerId,
+    accountId: params.accountId,
+    password: params.password,
     name: params.name,
-    url: params.url,
-    pubkey: params.pubkey,
+    jurisdictions: params.jurisdictions,
   });
 
   if ("ok" in res && res.ok === false) {
     throw new ApiError(
-      res.error.message ?? "Failed to add provider",
+      res.error.message ?? "Failed to submit KYC",
       res.error.code,
     );
   }
-
-  if ("providerId" in res) {
-    return { providerId: res.providerId };
-  }
-
-  throw new ApiError("Invalid response", "UNKNOWN");
 }

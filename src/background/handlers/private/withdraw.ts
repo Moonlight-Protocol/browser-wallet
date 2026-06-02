@@ -530,7 +530,7 @@ async function submitPreparedOperations(
   }
 
   // Submit bundle to provider
-  const client = new PrivacyProviderClient(provider.url);
+  const client = new PrivacyProviderClient(provider.url, provider.pubkey);
   try {
     const result = await client.submitBundle({
       token: session.token,

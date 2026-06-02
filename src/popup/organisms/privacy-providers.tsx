@@ -7,9 +7,14 @@ import type { PrivateChannel } from "@/persistence/stores/private-channels.types
 export type PrivacyProvidersProps = {
   channel: PrivateChannel;
   accountId?: string;
-  onAddProvider: (name: string, url: string) => Promise<void>;
+  onAddProvider: (name: string, url: string, pubkey: string) => Promise<void>;
   onRemoveProvider: (providerId: string) => Promise<void>;
   onSelectProvider: (providerId: string | undefined) => Promise<void>;
+  onSubmitKyc: (
+    providerId: string,
+    name: string,
+    password: string,
+  ) => Promise<void>;
 };
 
 export function PrivacyProviders(props: PrivacyProvidersProps) {
@@ -17,6 +22,7 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [port, setPort] = useState("");
+  const [pubkey, setPubkey] = useState("");
   const [busy, setBusy] = useState(false);
   const [processingProviderId, setProcessingProviderId] = useState<
     string | null
@@ -24,9 +30,14 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
   const [providerError, setProviderError] = useState<
     { id: string; message: string } | null
   >(null);
+  const [kycForProviderId, setKycForProviderId] = useState<string | null>(null);
+  const [kycName, setKycName] = useState("");
+  const [kycPassword, setKycPassword] = useState("");
+  const [kycBusy, setKycBusy] = useState(false);
+  const [kycError, setKycError] = useState<string | null>(null);
 
   const handleAdd = async () => {
-    if (!name.trim() || !url.trim()) return;
+    if (!name.trim() || !url.trim() || !pubkey.trim()) return;
     setBusy(true);
     try {
       let finalUrl = url.trim();
@@ -34,13 +45,30 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
         finalUrl = finalUrl.replace(/\/$/, "");
         finalUrl = `${finalUrl}:${port.trim()}`;
       }
-      await props.onAddProvider(name, finalUrl);
+      await props.onAddProvider(name, finalUrl, pubkey.trim());
       setIsAdding(false);
       setName("");
       setUrl("");
       setPort("");
+      setPubkey("");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleSubmitKyc = async (providerId: string) => {
+    if (!kycName.trim() || !kycPassword.trim()) return;
+    setKycBusy(true);
+    setKycError(null);
+    try {
+      await props.onSubmitKyc(providerId, kycName.trim(), kycPassword);
+      setKycForProviderId(null);
+      setKycName("");
+      setKycPassword("");
+    } catch (err) {
+      setKycError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setKycBusy(false);
     }
   };
 
@@ -132,12 +160,28 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
               className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors"
             />
           </div>
+          <div>
+            <label
+              htmlFor="provider-pubkey"
+              className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider mb-1.5"
+            >
+              Provider Public Key
+            </label>
+            <input
+              id="provider-pubkey"
+              type="text"
+              value={pubkey}
+              onChange={(e) => setPubkey(e.target.value)}
+              placeholder="G..."
+              className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors font-mono"
+            />
+          </div>
         </div>
 
         <button
           type="button"
           onClick={handleAdd}
-          disabled={busy || !name.trim() || !url.trim()}
+          disabled={busy || !name.trim() || !url.trim() || !pubkey.trim()}
           className="w-full py-2.5 rounded-lg text-sm font-bold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
           style={{
             background:
@@ -249,6 +293,77 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
             {providerError?.id === p.id && (
               <div className="px-3 py-2 rounded-lg text-xs text-red-400 bg-red-500/10 border border-red-500/20">
                 Connection failed: {providerError.message}
+              </div>
+            )}
+            {session && session.entityStatus !== "APPROVED" &&
+              kycForProviderId !== p.id && (
+              <div className="px-3 py-2 rounded-lg text-xs bg-amber-500/10 border border-amber-500/20 flex items-center justify-between gap-2">
+                <span className="text-amber-300">
+                  Connected — not authorized yet. Submit KYC to start sending.
+                </span>
+                <button
+                  type="button"
+                  id={`submit-kyc-btn-${p.id}`}
+                  onClick={() => {
+                    setKycForProviderId(p.id);
+                    setKycError(null);
+                  }}
+                  className="px-3 py-1 rounded-md text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 cursor-pointer"
+                >
+                  Submit KYC
+                </button>
+              </div>
+            )}
+            {kycForProviderId === p.id && (
+              <div
+                className="p-3 rounded-xl space-y-2"
+                id={`kyc-panel-${p.id}`}
+                style={{
+                  background: "oklch(0.18 0.03 265 / 0.6)",
+                  border: "1px solid oklch(0.7 0.18 90 / 0.25)",
+                }}
+              >
+                <p className="text-[11px] text-foreground/60">
+                  Provider {p.name} needs you to KYC before accepting bundles.
+                </p>
+                <input
+                  id="kyc-name"
+                  type="text"
+                  value={kycName}
+                  onChange={(e) => setKycName(e.target.value)}
+                  placeholder="Legal name"
+                  className="w-full px-3 py-2 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50"
+                />
+                <input
+                  id="kyc-password"
+                  type="password"
+                  value={kycPassword}
+                  onChange={(e) => setKycPassword(e.target.value)}
+                  placeholder="Wallet password"
+                  className="w-full px-3 py-2 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50"
+                />
+                {kycError && <p className="text-xs text-red-400">{kycError}</p>}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    id={`submit-kyc-form-btn-${p.id}`}
+                    onClick={() => handleSubmitKyc(p.id)}
+                    disabled={kycBusy || !kycName.trim() || !kycPassword.trim()}
+                    className="flex-1 py-2 rounded-lg text-xs font-bold bg-amber-500/30 text-amber-200 border border-amber-500/40 hover:bg-amber-500/40 disabled:opacity-50 cursor-pointer"
+                  >
+                    {kycBusy ? "Submitting…" : "Submit KYC"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setKycForProviderId(null);
+                      setKycError(null);
+                    }}
+                    className="px-3 py-2 rounded-lg text-xs text-foreground/50 hover:text-foreground/80 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             )}
           </div>

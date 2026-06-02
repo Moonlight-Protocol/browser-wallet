@@ -241,21 +241,23 @@ export async function applyDevSeed(): Promise<void> {
     );
     const existingUrls = new Set(channel?.providers.map((p) => p.url) ?? []);
 
+    // SEED_PROVIDERS entries are `name=url|pubkey`. The pubkey segment is
+    // required for per-PP URL paths; if missing the entry is skipped.
     const providerEntries = __SEED_PROVIDERS__.split(",").map((entry) => {
       const eqIdx = entry.indexOf("=");
-      return {
-        name: entry.slice(0, eqIdx).trim(),
-        url: entry.slice(eqIdx + 1).trim(),
-      };
+      const rhs = entry.slice(eqIdx + 1).trim();
+      const [url, pubkey] = rhs.split("|").map((s) => s.trim());
+      return { name: entry.slice(0, eqIdx).trim(), url, pubkey: pubkey ?? "" };
     });
 
-    for (const { name, url } of providerEntries) {
-      if (!url || existingUrls.has(url)) continue;
+    for (const { name, url, pubkey } of providerEntries) {
+      if (!url || !pubkey || existingUrls.has(url)) continue;
       const providerId = crypto.randomUUID();
       privateChannels.addProvider(network, channelId, {
         id: providerId,
         name,
         url,
+        pubkey,
       });
       if (!firstProviderId) firstProviderId = providerId;
       console.log("[dev-seed] Provider added:", name, url);
@@ -278,7 +280,7 @@ export async function applyDevSeed(): Promise<void> {
         console.log("[dev-seed] Auto-connecting to provider:", provider.name);
 
         // Get auth challenge
-        const client = new PrivacyProviderClient(provider.url);
+        const client = new PrivacyProviderClient(provider.url, provider.pubkey);
         const challenge = await client.getAuthChallenge(publicKey);
 
         // Sign the challenge directly using the mnemonic
@@ -304,7 +306,11 @@ export async function applyDevSeed(): Promise<void> {
           channelId,
           firstProviderId,
           accountId,
-          { token: authResponse.token, expiresAt },
+          {
+            token: authResponse.token,
+            expiresAt,
+            entityStatus: authResponse.entityStatus,
+          },
         );
         await privateChannels.setSelectedProvider(
           network,

@@ -16,6 +16,7 @@ import { ensurePrivateChannelTracking } from "@/popup/api/ensure-private-channel
 import { getPrivateStats } from "@/popup/api/get-private-stats.ts";
 import { showError, showSuccess } from "@/popup/utils/toast.tsx";
 import { addPrivacyProvider } from "@/popup/api/add-privacy-provider.ts";
+import { submitEntityKyc } from "@/popup/api/submit-entity-kyc.ts";
 import { removePrivacyProvider } from "@/popup/api/remove-privacy-provider.ts";
 import { connectPrivacyProvider } from "@/popup/api/connect-privacy-provider.ts";
 import { disconnectPrivacyProvider } from "@/popup/api/disconnect-privacy-provider.ts";
@@ -204,6 +205,7 @@ export function HomePage() {
     channelId: string,
     name: string,
     url: string,
+    pubkey: string,
   ) => {
     try {
       await addPrivacyProvider({
@@ -211,6 +213,7 @@ export function HomePage() {
         channelId,
         name,
         url,
+        pubkey,
       });
       await refreshPrivateChannels();
       showSuccess("Provider added successfully");
@@ -218,6 +221,34 @@ export function HomePage() {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(err);
       showError(msg || "Failed to add provider");
+    }
+  };
+
+  const onSubmitEntityKyc = async (
+    channelId: string,
+    providerId: string,
+    name: string,
+    password: string,
+  ) => {
+    try {
+      if (!selectedAccount?.accountId) {
+        throw new Error("No active account");
+      }
+      await submitEntityKyc({
+        network: selectedNetwork as ChainNetwork,
+        channelId,
+        providerId,
+        accountId: selectedAccount.accountId,
+        password,
+        name,
+      });
+      await refreshPrivateChannels();
+      showSuccess("KYC submitted — provider authorized");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(err);
+      showError(msg || "Failed to submit KYC");
+      throw err;
     }
   };
 
@@ -285,6 +316,7 @@ export function HomePage() {
             channelAddress: channel.contractId,
             providerId: provider.id,
             providerUrl: provider.url,
+            providerPubkey: provider.pubkey,
             accountId: selectedAccount.accountId,
             publicKey: selectedAccount.publicKey,
             network: selectedNetwork as ChainNetwork,
@@ -1097,6 +1129,7 @@ export function HomePage() {
       onAddPrivacyProvider={onAddPrivacyProvider}
       onRemovePrivacyProvider={onRemovePrivacyProvider}
       onSelectPrivacyProvider={onSelectPrivacyProvider}
+      onSubmitEntityKyc={onSubmitEntityKyc}
       activation={activation}
       onFundWithFriendbot={onFundWithFriendbot}
       accountPickerOpen={accountPickerOpen}

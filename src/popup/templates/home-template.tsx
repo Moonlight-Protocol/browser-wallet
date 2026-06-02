@@ -95,6 +95,7 @@ export type HomeTemplateProps = {
     channelId: string,
     name: string,
     url: string,
+    pubkey: string,
   ) => Promise<void>;
   onRemovePrivacyProvider?: (
     channelId: string,
@@ -103,6 +104,12 @@ export type HomeTemplateProps = {
   onSelectPrivacyProvider?: (
     channelId: string,
     providerId: string | undefined,
+  ) => Promise<void>;
+  onSubmitEntityKyc?: (
+    channelId: string,
+    providerId: string,
+    name: string,
+    password: string,
   ) => Promise<void>;
 
   activation?: {
@@ -378,14 +385,27 @@ export function HomeTemplate(props: HomeTemplateProps) {
                   props.onAddPrivateChannel?.();
                   props.setChannelPickerOpen?.(false);
                 }}
-                onAddProvider={async (channelId, name, url) => {
-                  await props.onAddPrivacyProvider?.(channelId, name, url);
+                onAddProvider={async (channelId, name, url, pubkey) => {
+                  await props.onAddPrivacyProvider?.(
+                    channelId,
+                    name,
+                    url,
+                    pubkey,
+                  );
                 }}
                 onRemoveProvider={async (channelId, providerId) => {
                   await props.onRemovePrivacyProvider?.(channelId, providerId);
                 }}
                 onSelectProvider={async (channelId, providerId) => {
                   await props.onSelectPrivacyProvider?.(channelId, providerId);
+                }}
+                onSubmitKyc={async (channelId, providerId, name, password) => {
+                  await props.onSubmitEntityKyc?.(
+                    channelId,
+                    providerId,
+                    name,
+                    password,
+                  );
                 }}
               />
             }

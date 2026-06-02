@@ -1,18 +1,19 @@
 import type { BackgroundError } from "@/background/types.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 
-export type AddPrivacyProviderRequest = {
+export type SubmitEntityKycRequest = {
   network: ChainNetwork;
   channelId: string;
+  providerId: string;
+  accountId: string;
+  password: string;
   name: string;
-  url: string;
-  pubkey: string;
+  jurisdictions?: string[];
 };
 
-export type AddPrivacyProviderResponse =
+export type SubmitEntityKycResponse =
   | {
     ok: true;
-    providerId: string;
   }
   | {
     ok: false;

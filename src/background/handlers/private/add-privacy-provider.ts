@@ -10,6 +10,7 @@ export const handleAddPrivacyProvider = async (
       id: providerId,
       name: message.name,
       url: message.url,
+      pubkey: message.pubkey,
     });
 
     await privateChannels.flush();

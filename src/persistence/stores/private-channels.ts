@@ -8,10 +8,19 @@ import type {
 } from "@/persistence/stores/private-channels.types.ts";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 
-type LegacyPrivacyProvider = Omit<PrivacyProvider, "sessions"> & {
-  session?: PrivacyProviderSession;
-  sessions?: Record<string, PrivacyProviderSession>;
-};
+type LegacyPrivacyProviderSession =
+  & Omit<PrivacyProviderSession, "entityStatus">
+  & {
+    entityStatus?: PrivacyProviderSession["entityStatus"];
+  };
+
+type LegacyPrivacyProvider =
+  & Omit<PrivacyProvider, "sessions" | "pubkey">
+  & {
+    pubkey?: string;
+    session?: LegacyPrivacyProviderSession;
+    sessions?: Record<string, LegacyPrivacyProviderSession>;
+  };
 
 type LegacyPrivateChannel =
   & Omit<
@@ -87,14 +96,31 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
             createdAt: c.createdAt,
             providers: Array.isArray(existingProviders)
               ? (existingProviders as unknown as LegacyPrivacyProvider[]).map(
-                (p) => ({
-                  id: p.id,
-                  name: p.name,
-                  url: p.url,
-                  sessions: p.session
+                (p) => {
+                  const legacySessions = p.session
                     ? { default: p.session }
-                    : p.sessions || {},
-                }),
+                    : p.sessions || {};
+                  // Pre-pubkey providers can't reach the per-PP bundle URL
+                  // until the user re-adds them with a pubkey. Default to
+                  // empty so the type-check passes; runtime will refuse to
+                  // submit bundles against an empty pubkey.
+                  return {
+                    id: p.id,
+                    name: p.name,
+                    url: p.url,
+                    pubkey: (p as { pubkey?: string }).pubkey ?? "",
+                    sessions: Object.fromEntries(
+                      Object.entries(legacySessions).map(([k, s]) => [
+                        k,
+                        {
+                          token: s.token,
+                          expiresAt: s.expiresAt,
+                          entityStatus: s.entityStatus ?? "UNVERIFIED",
+                        } satisfies PrivacyProviderSession,
+                      ]),
+                    ),
+                  };
+                },
               )
               : [],
             selectedProviderId: existingSelectedProviderId,
@@ -170,7 +196,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
   addProvider(
     network: ChainNetwork,
     channelId: string,
-    provider: { id: string; name: string; url: string },
+    provider: { id: string; name: string; url: string; pubkey: string },
   ) {
     this.store.update((prev) => {
       const channels = prev.channelsByNetwork[network] ?? [];
@@ -252,7 +278,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
     channelId: string,
     providerId: string,
     accountId: string,
-    session: { token: string; expiresAt: number },
+    session: PrivacyProviderSession,
   ) {
     this.store.update((prev) => {
       const channels = prev.channelsByNetwork[network] ?? [];

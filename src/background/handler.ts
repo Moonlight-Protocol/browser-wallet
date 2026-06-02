@@ -53,6 +53,7 @@ import {
   handlePrepareWithdraw,
   handleWithdraw,
 } from "@/background/handlers/private/withdraw.ts";
+import { handleSubmitEntityKyc } from "@/background/handlers/private/submit-entity-kyc.ts";
 import {
   ensureSessionHydrated,
   isUnlocked,
@@ -116,6 +117,7 @@ const handlers: HandlerMap = {
   [MessageType.PrepareSend]: handlePrepareSend,
   [MessageType.Withdraw]: handleWithdraw,
   [MessageType.PrepareWithdraw]: handlePrepareWithdraw,
+  [MessageType.SubmitEntityKyc]: handleSubmitEntityKyc,
 };
 
 browser.runtime.onMessage.addListener(

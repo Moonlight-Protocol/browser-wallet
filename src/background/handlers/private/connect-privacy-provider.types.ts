@@ -5,7 +5,6 @@ export type ConnectPrivacyProviderRequest = {
   channelAddress: string;
   providerId: string;
   providerUrl: string;
-  providerPubkey: string;
   accountId: string;
   publicKey: string;
   network: ChainNetwork;

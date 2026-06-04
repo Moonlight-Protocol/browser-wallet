@@ -149,10 +149,6 @@ import type {
   WithdrawRequest,
   WithdrawResponse,
 } from "@/background/handlers/private/withdraw.types.ts";
-import type {
-  SubmitEntityKycRequest,
-  SubmitEntityKycResponse,
-} from "@/background/handlers/private/submit-entity-kyc.types.ts";
 
 // Helper types and mapped types for messages and responses
 // ==============================================================================
@@ -218,7 +214,6 @@ export enum MessageType {
   PrepareSend = "PREPARE_SEND",
   Withdraw = "WITHDRAW",
   PrepareWithdraw = "PREPARE_WITHDRAW",
-  SubmitEntityKyc = "SUBMIT_ENTITY_KYC",
 }
 
 export type MessagePayloadMap = {
@@ -263,7 +258,6 @@ export type MessagePayloadMap = {
   [MessageType.PrepareSend]: PrepareSendRequest;
   [MessageType.Withdraw]: WithdrawRequest;
   [MessageType.PrepareWithdraw]: PrepareWithdrawRequest;
-  [MessageType.SubmitEntityKyc]: SubmitEntityKycRequest;
 };
 
 export type ResponsePayloadMap = {
@@ -308,5 +302,4 @@ export type ResponsePayloadMap = {
   [MessageType.PrepareSend]: PrepareSendResponse;
   [MessageType.Withdraw]: WithdrawResponse;
   [MessageType.PrepareWithdraw]: PrepareWithdrawResponse;
-  [MessageType.SubmitEntityKyc]: SubmitEntityKycResponse;
 };

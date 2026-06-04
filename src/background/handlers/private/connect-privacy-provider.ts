@@ -2,6 +2,7 @@ import { MessageType } from "@/background/messages.ts";
 import type { Handler } from "@/background/messages.ts";
 import { privateChannels, signingManager } from "@/background/session.ts";
 import { PrivacyProviderClient } from "@/background/services/privacy-provider-client.ts";
+import { extractPpPubkeyFromUrl } from "@/background/services/pp-url.ts";
 
 export const handleConnectPrivacyProvider: Handler<
   MessageType.ConnectPrivacyProvider
@@ -10,14 +11,20 @@ export const handleConnectPrivacyProvider: Handler<
     channelId,
     providerId,
     providerUrl,
-    providerPubkey,
     accountId,
     publicKey,
     network,
   } = message;
 
+  const extracted = extractPpPubkeyFromUrl(providerUrl);
+  if (!extracted) {
+    throw new Error(
+      `Provider URL has no pubkey path segment: ${providerUrl}. Re-add the provider with the full URL ending in its Stellar public key.`,
+    );
+  }
+
   // 1. Get Authentication Challenge from Provider
-  const client = new PrivacyProviderClient(providerUrl, providerPubkey);
+  const client = new PrivacyProviderClient(providerUrl);
   const challenge = await client.getAuthChallenge(publicKey);
 
   // 2. Create Signing Request
@@ -34,8 +41,8 @@ export const handleConnectPrivacyProvider: Handler<
     try {
       const signedXdr = await signingManager.waitForResult(request.id);
 
-      // 4. Submit Signed Challenge to Provider
-      const authResponse = await client.postAuth(signedXdr);
+      // 4. Submit Signed Challenge to Provider (PP-aware verify body)
+      const authResponse = await client.postAuth(signedXdr, extracted.pubkey);
 
       // Validate token was received
       if (!authResponse.token || typeof authResponse.token !== "string") {
@@ -58,6 +65,7 @@ export const handleConnectPrivacyProvider: Handler<
           token: authResponse.token,
           expiresAt,
           entityStatus: authResponse.entityStatus,
+          kycSubmissionUrl: authResponse.kycSubmissionUrl,
         },
       );
 
@@ -66,7 +74,8 @@ export const handleConnectPrivacyProvider: Handler<
         channelId,
         providerId,
         accountId,
-        hasToken: !!authResponse.token,
+        entityStatus: authResponse.entityStatus,
+        hasKycUrl: authResponse.kycSubmissionUrl !== null,
       });
 
       // 6. Auto-select the provider

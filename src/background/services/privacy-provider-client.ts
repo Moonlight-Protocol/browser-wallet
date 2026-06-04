@@ -8,6 +8,7 @@ import {
   traceparent,
 } from "@/background/services/telemetry.ts";
 import type { EntityStatus } from "@/persistence/stores/private-channels.types.ts";
+import { extractPpPubkeyFromUrl } from "@/background/services/pp-url.ts";
 
 export type AuthChallengeResponse = {
   status: number;
@@ -18,10 +19,6 @@ export type AuthChallengeResponse = {
   };
 };
 
-export type EntityChallengeResponse = {
-  data: { nonce: string };
-};
-
 export class PrivacyProviderAuthError extends Error {
   constructor(message: string) {
     super(message);
@@ -29,20 +26,25 @@ export class PrivacyProviderAuthError extends Error {
   }
 }
 
+// The wallet stores `{url, label}` per PP. The client derives the API base
+// (origin or origin + intermediate path) and the PP pubkey from the URL at
+// construction. Throws on any malformed URL — callers are expected to surface
+// the stale-URL notice to the user rather than propagate.
 export class PrivacyProviderClient {
-  private baseUrl: string;
+  private apiBase: string;
   private ppPubkey: string;
   private traceId?: string;
   private rootSpanId?: string;
 
-  constructor(url: string, ppPubkey: string) {
-    // Ensure protocol and no trailing slash
-    let normalized = url.replace(/\/$/, "");
-    if (!/^https?:\/\//i.test(normalized)) {
-      normalized = `https://${normalized}`;
+  constructor(url: string) {
+    const extracted = extractPpPubkeyFromUrl(url);
+    if (!extracted) {
+      throw new Error(
+        `Provider URL has no Stellar pubkey path segment: ${url}`,
+      );
     }
-    this.baseUrl = normalized;
-    this.ppPubkey = ppPubkey;
+    this.apiBase = extracted.apiBase;
+    this.ppPubkey = extracted.pubkey;
 
     if (isEnabled()) {
       const trace = startTrace();
@@ -114,7 +116,7 @@ export class PrivacyProviderClient {
     });
     try {
       const response = await axios.get<AuthChallengeResponse>(
-        `${this.baseUrl}/api/v1/stellar/auth`,
+        `${this.apiBase}/api/v1/stellar/auth`,
         {
           params: { account: accountPublicKey },
           headers: span ? this.traceHeaders(span.spanId) : {},
@@ -130,23 +132,30 @@ export class PrivacyProviderClient {
 
   async postAuth(
     signedChallenge: string,
-  ): Promise<{ token: string; entityStatus: EntityStatus }> {
-    // TODO: This endpoint implementation is specific to the current provider API
-    // and might not fully conform to SEP-10 standard yet. Move to standard SEP-10
-    // once stellar.toml is hosted.
+    ppPublicKey: string,
+  ): Promise<{
+    token: string;
+    entityStatus: EntityStatus;
+    kycSubmissionUrl: string | null;
+  }> {
+    // SEP-10 verify is PP-aware: `ppPublicKey` in the body, response carries
+    // per-PP entityStatus + per-PP kycSubmissionUrl.
     const span = this.startSpan("POST /api/v1/stellar/auth");
     try {
       const response = await axios.post<{
         status: number;
         message: string;
-        data: { jwt: string; entityStatus?: EntityStatus };
+        data: {
+          jwt: string;
+          entityStatus?: EntityStatus;
+          kycSubmissionUrl?: string | null;
+        };
       }>(
-        `${this.baseUrl}/api/v1/stellar/auth`,
-        { signedChallenge },
+        `${this.apiBase}/api/v1/stellar/auth`,
+        { signedChallenge, ppPublicKey },
         { headers: span ? this.traceHeaders(span.spanId) : {} },
       );
 
-      // Extract token from response.data.data.jwt
       const token = response.data.data?.jwt;
       if (!token || typeof token !== "string") {
         throw new Error(
@@ -155,66 +164,12 @@ export class PrivacyProviderClient {
           }`,
         );
       }
-      // entityStatus defaults to UNVERIFIED if the provider hasn't deployed
-      // the 0.7+ response shape yet, so the wallet can still gate KYC.
       const entityStatus: EntityStatus = response.data.data?.entityStatus ??
         "UNVERIFIED";
+      const kycSubmissionUrl = response.data.data?.kycSubmissionUrl ?? null;
 
       if (span) endSpan(span, { code: 0 });
-      return { token, entityStatus };
-    } catch (error) {
-      if (span) endSpan(span, { code: 2, message: String(error) });
-      throw error;
-    }
-  }
-
-  // KYC challenge — wallet requests a nonce per-PP, signs it with the entity's
-  // Stellar key, and posts back to /providers/:pp/entities to register.
-  async getEntityChallenge(pubkey: string): Promise<{ nonce: string }> {
-    const span = this.startSpan(
-      "POST /api/v1/providers/:pp/entities/challenge",
-      { "stellar.account": pubkey },
-    );
-    try {
-      const response = await axios.post<{
-        data: { nonce: string };
-      }>(
-        `${this.baseUrl}/api/v1/providers/${this.ppPubkey}/entities/challenge`,
-        { pubkey },
-        { headers: span ? this.traceHeaders(span.spanId) : {} },
-      );
-      const nonce = response.data.data?.nonce;
-      if (!nonce) throw new Error("entity challenge missing nonce");
-      if (span) endSpan(span, { code: 0 });
-      return { nonce };
-    } catch (error) {
-      if (span) endSpan(span, { code: 2, message: String(error) });
-      throw error;
-    }
-  }
-
-  async submitEntity(params: {
-    pubkey: string;
-    name: string;
-    jurisdictions?: string[];
-    signedChallenge: { nonce: string; signature: string };
-  }): Promise<{ entityId: string; status: EntityStatus }> {
-    const span = this.startSpan("POST /api/v1/providers/:pp/entities");
-    try {
-      const response = await axios.post<{
-        data: { entityId: string; status: EntityStatus };
-      }>(
-        `${this.baseUrl}/api/v1/providers/${this.ppPubkey}/entities`,
-        {
-          pubkey: params.pubkey,
-          name: params.name,
-          jurisdictions: params.jurisdictions ?? [],
-          signedChallenge: params.signedChallenge,
-        },
-        { headers: span ? this.traceHeaders(span.spanId) : {} },
-      );
-      if (span) endSpan(span, { code: 0 });
-      return response.data.data;
+      return { token, entityStatus, kycSubmissionUrl };
     } catch (error) {
       if (span) endSpan(span, { code: 2, message: String(error) });
       throw error;
@@ -226,8 +181,6 @@ export class PrivacyProviderClient {
     operationsMLXDR: string[];
     channelContractId: string;
   }): Promise<{ id: string }> {
-    // Validate and clean token
-    // This will throw PrivacyProviderAuthError if token is invalid
     const token = this.validateToken(params.token);
 
     const span = this.startSpan(
@@ -244,7 +197,7 @@ export class PrivacyProviderClient {
         message: string;
         data: { operationsBundleId: string; status: string };
       }>(
-        `${this.baseUrl}/api/v1/providers/${this.ppPubkey}/entity/bundles`,
+        `${this.apiBase}/api/v1/providers/${this.ppPubkey}/entity/bundles`,
         {
           operationsMLXDR: params.operationsMLXDR,
           channelContractId: params.channelContractId,
@@ -268,13 +221,11 @@ export class PrivacyProviderClient {
       if (span) endSpan(span, { code: 0 });
     } catch (error: unknown) {
       if (span) endSpan(span, { code: 2, message: String(error) });
-      // Check if it's an authentication error
       if (this.isAuthError(error)) {
         throw new PrivacyProviderAuthError(
           "Provider session expired or invalid. Please reconnect to the provider.",
         );
       }
-      // Re-throw other errors as-is
       throw error;
     }
 
@@ -305,7 +256,7 @@ export class PrivacyProviderClient {
           message: string;
           data: { status: string };
         }>(
-          `${this.baseUrl}/api/v1/providers/${this.ppPubkey}/entity/bundles/${bundleId}`,
+          `${this.apiBase}/api/v1/providers/${this.ppPubkey}/entity/bundles/${bundleId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

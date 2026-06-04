@@ -15,6 +15,7 @@ import {
   getRpcServer,
 } from "@/background/contexts/chain/network.ts";
 import { PrivacyProviderClient } from "@/background/services/privacy-provider-client.ts";
+import { extractPpPubkeyFromUrl } from "@/background/services/pp-url.ts";
 
 import { checkAccountActivationStatus } from "@/background/contexts/chain/account-activation.ts";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
@@ -241,23 +242,24 @@ export async function applyDevSeed(): Promise<void> {
     );
     const existingUrls = new Set(channel?.providers.map((p) => p.url) ?? []);
 
-    // SEED_PROVIDERS entries are `name=url|pubkey`. The pubkey segment is
-    // required for per-PP URL paths; if missing the entry is skipped.
+    // SEED_PROVIDERS entries are `name=url`. The URL must end in the PP's
+    // Stellar pubkey (extractPpPubkeyFromUrl validates at call-time); entries
+    // whose URL doesn't parse are silently skipped here.
     const providerEntries = __SEED_PROVIDERS__.split(",").map((entry) => {
       const eqIdx = entry.indexOf("=");
-      const rhs = entry.slice(eqIdx + 1).trim();
-      const [url, pubkey] = rhs.split("|").map((s) => s.trim());
-      return { name: entry.slice(0, eqIdx).trim(), url, pubkey: pubkey ?? "" };
+      return {
+        name: entry.slice(0, eqIdx).trim(),
+        url: entry.slice(eqIdx + 1).trim(),
+      };
     });
 
-    for (const { name, url, pubkey } of providerEntries) {
-      if (!url || !pubkey || existingUrls.has(url)) continue;
+    for (const { name, url } of providerEntries) {
+      if (!url || existingUrls.has(url)) continue;
       const providerId = crypto.randomUUID();
       privateChannels.addProvider(network, channelId, {
         id: providerId,
         name,
         url,
-        pubkey,
       });
       if (!firstProviderId) firstProviderId = providerId;
       console.log("[dev-seed] Provider added:", name, url);
@@ -280,7 +282,7 @@ export async function applyDevSeed(): Promise<void> {
         console.log("[dev-seed] Auto-connecting to provider:", provider.name);
 
         // Get auth challenge
-        const client = new PrivacyProviderClient(provider.url, provider.pubkey);
+        const client = new PrivacyProviderClient(provider.url);
         const challenge = await client.getAuthChallenge(publicKey);
 
         // Sign the challenge directly using the mnemonic
@@ -296,8 +298,14 @@ export async function applyDevSeed(): Promise<void> {
         transaction.sign(keypair);
         const signedXdr = transaction.toXDR();
 
-        // Submit signed challenge
-        const authResponse = await client.postAuth(signedXdr);
+        // Submit signed challenge (PP-aware verify body)
+        const extracted = extractPpPubkeyFromUrl(provider.url);
+        if (!extracted) {
+          throw new Error(
+            `dev-seed provider URL missing pubkey path segment: ${provider.url}`,
+          );
+        }
+        const authResponse = await client.postAuth(signedXdr, extracted.pubkey);
 
         // Save session
         const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
@@ -310,6 +318,7 @@ export async function applyDevSeed(): Promise<void> {
             token: authResponse.token,
             expiresAt,
             entityStatus: authResponse.entityStatus,
+            kycSubmissionUrl: authResponse.kycSubmissionUrl,
           },
         );
         await privateChannels.setSelectedProvider(

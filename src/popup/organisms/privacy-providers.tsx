@@ -3,72 +3,49 @@ import { cn } from "@/popup/utils/cn.ts";
 import { Spinner } from "@/popup/atoms/spinner.tsx";
 import { IconPlus, IconServer, IconTrash, IconX } from "@tabler/icons-react";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
+import { extractPpPubkeyFromUrl } from "@/background/services/pp-url.ts";
 
 export type PrivacyProvidersProps = {
   channel: PrivateChannel;
   accountId?: string;
-  onAddProvider: (name: string, url: string, pubkey: string) => Promise<void>;
+  onAddProvider: (name: string, url: string) => Promise<void>;
   onRemoveProvider: (providerId: string) => Promise<void>;
   onSelectProvider: (providerId: string | undefined) => Promise<void>;
-  onSubmitKyc: (
-    providerId: string,
-    name: string,
-    password: string,
-  ) => Promise<void>;
 };
 
 export function PrivacyProviders(props: PrivacyProvidersProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
-  const [port, setPort] = useState("");
-  const [pubkey, setPubkey] = useState("");
   const [busy, setBusy] = useState(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
   const [processingProviderId, setProcessingProviderId] = useState<
     string | null
   >(null);
   const [providerError, setProviderError] = useState<
     { id: string; message: string } | null
   >(null);
-  const [kycForProviderId, setKycForProviderId] = useState<string | null>(null);
-  const [kycName, setKycName] = useState("");
-  const [kycPassword, setKycPassword] = useState("");
-  const [kycBusy, setKycBusy] = useState(false);
-  const [kycError, setKycError] = useState<string | null>(null);
 
   const handleAdd = async () => {
-    if (!name.trim() || !url.trim() || !pubkey.trim()) return;
+    if (!name.trim() || !url.trim()) return;
+    const trimmed = url.trim();
+    // Soft check — background runs the authoritative validation. Catching it
+    // here just spares a round-trip.
+    if (!extractPpPubkeyFromUrl(trimmed)) {
+      setUrlError(
+        "URL must end with the PP's Stellar public key (e.g. https://provider-x.example/G…).",
+      );
+      return;
+    }
+    setUrlError(null);
     setBusy(true);
     try {
-      let finalUrl = url.trim();
-      if (port.trim()) {
-        finalUrl = finalUrl.replace(/\/$/, "");
-        finalUrl = `${finalUrl}:${port.trim()}`;
-      }
-      await props.onAddProvider(name, finalUrl, pubkey.trim());
+      await props.onAddProvider(name, trimmed);
       setIsAdding(false);
       setName("");
       setUrl("");
-      setPort("");
-      setPubkey("");
     } finally {
       setBusy(false);
-    }
-  };
-
-  const handleSubmitKyc = async (providerId: string) => {
-    if (!kycName.trim() || !kycPassword.trim()) return;
-    setKycBusy(true);
-    setKycError(null);
-    try {
-      await props.onSubmitKyc(providerId, kycName.trim(), kycPassword);
-      setKycForProviderId(null);
-      setKycName("");
-      setKycPassword("");
-    } catch (err) {
-      setKycError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setKycBusy(false);
     }
   };
 
@@ -102,7 +79,10 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
           </span>
           <button
             type="button"
-            onClick={() => setIsAdding(false)}
+            onClick={() => {
+              setIsAdding(false);
+              setUrlError(null);
+            }}
             className="h-6 w-6 rounded-md flex items-center justify-center text-foreground/40 hover:text-foreground/70 hover:bg-foreground/5 transition-colors cursor-pointer"
           >
             <IconX className="h-4 w-4" />
@@ -110,39 +90,27 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
         </div>
 
         <div className="space-y-3">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <label
-                htmlFor="provider-url"
-                className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider mb-1.5"
-              >
-                Provider URL
-              </label>
-              <input
-                id="provider-url"
-                type="text"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://..."
-                className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors"
-              />
-            </div>
-            <div className="w-20">
-              <label
-                htmlFor="provider-port"
-                className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider mb-1.5"
-              >
-                Port
-              </label>
-              <input
-                id="provider-port"
-                type="text"
-                value={port}
-                onChange={(e) => setPort(e.target.value)}
-                placeholder="8000"
-                className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors"
-              />
-            </div>
+          <div>
+            <label
+              htmlFor="provider-url"
+              className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider mb-1.5"
+            >
+              Provider URL
+            </label>
+            <input
+              id="provider-url"
+              type="text"
+              value={url}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                if (urlError) setUrlError(null);
+              }}
+              placeholder="https://provider-x.example/G…"
+              className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors font-mono"
+            />
+            {urlError && (
+              <p className="mt-1 text-xs text-red-400">{urlError}</p>
+            )}
           </div>
           <div>
             <label
@@ -160,28 +128,12 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
               className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors"
             />
           </div>
-          <div>
-            <label
-              htmlFor="provider-pubkey"
-              className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider mb-1.5"
-            >
-              Provider Public Key
-            </label>
-            <input
-              id="provider-pubkey"
-              type="text"
-              value={pubkey}
-              onChange={(e) => setPubkey(e.target.value)}
-              placeholder="G..."
-              className="w-full px-3 py-2.5 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50 transition-colors font-mono"
-            />
-          </div>
         </div>
 
         <button
           type="button"
           onClick={handleAdd}
-          disabled={busy || !name.trim() || !url.trim() || !pubkey.trim()}
+          disabled={busy || !name.trim() || !url.trim()}
           className="w-full py-2.5 rounded-lg text-sm font-bold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
           style={{
             background:
@@ -218,6 +170,48 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
           : undefined;
         const hasValidSession = session && session.expiresAt > Date.now();
         const connected = !!(isSelectedProvider && hasValidSession);
+        const isStaleUrl = extractPpPubkeyFromUrl(p.url) === null;
+
+        // Stale-URL row: the persisted URL pre-dates the URL-with-pubkey
+        // convention. The wallet refuses to operate against it. User removes
+        // and re-adds with the new URL format.
+        if (isStaleUrl) {
+          return (
+            <div key={p.id} className="flex flex-col gap-1">
+              <div
+                id={`stale-provider-${p.id}`}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+                style={{
+                  background: "oklch(0.20 0.07 65 / 0.35)",
+                  border: "1px solid oklch(0.7 0.18 90 / 0.30)",
+                }}
+              >
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: "oklch(0.20 0.07 65 / 0.50)" }}
+                >
+                  <IconServer className="h-4 w-4 text-amber-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-amber-200 truncate">
+                    {p.name}
+                  </p>
+                  <p className="text-[10px] text-amber-300/70 truncate">
+                    Needs re-adding — URL format updated.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  id={`remove-stale-provider-${p.id}`}
+                  onClick={() => props.onRemoveProvider(p.id)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-200 border border-amber-500/30 hover:bg-amber-500/25 cursor-pointer"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          );
+        }
 
         return (
           <div key={p.id} className="flex flex-col gap-1">
@@ -296,75 +290,21 @@ export function PrivacyProviders(props: PrivacyProvidersProps) {
               </div>
             )}
             {session && session.entityStatus !== "APPROVED" &&
-              kycForProviderId !== p.id && (
-              <div className="px-3 py-2 rounded-lg text-xs bg-amber-500/10 border border-amber-500/20 flex items-center justify-between gap-2">
-                <span className="text-amber-300">
-                  Connected — not authorized yet. Submit KYC to start sending.
-                </span>
-                <button
-                  type="button"
-                  id={`submit-kyc-btn-${p.id}`}
-                  onClick={() => {
-                    setKycForProviderId(p.id);
-                    setKycError(null);
-                  }}
-                  className="px-3 py-1 rounded-md text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 cursor-pointer"
-                >
-                  Submit KYC
-                </button>
-              </div>
-            )}
-            {kycForProviderId === p.id && (
-              <div
-                className="p-3 rounded-xl space-y-2"
-                id={`kyc-panel-${p.id}`}
-                style={{
-                  background: "oklch(0.18 0.03 265 / 0.6)",
-                  border: "1px solid oklch(0.7 0.18 90 / 0.25)",
-                }}
+              session.kycSubmissionUrl !== null && (
+              <a
+                id={`submit-kyc-link-${p.id}`}
+                href={session.kycSubmissionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-2 rounded-lg text-xs bg-amber-500/10 border border-amber-500/20 flex items-center justify-between gap-2 hover:bg-amber-500/20 transition-colors cursor-pointer"
               >
-                <p className="text-[11px] text-foreground/60">
-                  Provider {p.name} needs you to KYC before accepting bundles.
-                </p>
-                <input
-                  id="kyc-name"
-                  type="text"
-                  value={kycName}
-                  onChange={(e) => setKycName(e.target.value)}
-                  placeholder="Legal name"
-                  className="w-full px-3 py-2 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50"
-                />
-                <input
-                  id="kyc-password"
-                  type="password"
-                  value={kycPassword}
-                  onChange={(e) => setKycPassword(e.target.value)}
-                  placeholder="Wallet password"
-                  className="w-full px-3 py-2 rounded-lg text-sm bg-background/50 border border-foreground/10 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/50"
-                />
-                {kycError && <p className="text-xs text-red-400">{kycError}</p>}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    id={`submit-kyc-form-btn-${p.id}`}
-                    onClick={() => handleSubmitKyc(p.id)}
-                    disabled={kycBusy || !kycName.trim() || !kycPassword.trim()}
-                    className="flex-1 py-2 rounded-lg text-xs font-bold bg-amber-500/30 text-amber-200 border border-amber-500/40 hover:bg-amber-500/40 disabled:opacity-50 cursor-pointer"
-                  >
-                    {kycBusy ? "Submitting…" : "Submit KYC"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setKycForProviderId(null);
-                      setKycError(null);
-                    }}
-                    className="px-3 py-2 rounded-lg text-xs text-foreground/50 hover:text-foreground/80 cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
+                <span className="text-amber-300">
+                  Connected — not authorized yet.
+                </span>
+                <span className="px-3 py-1 rounded-md text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  Submit KYC
+                </span>
+              </a>
             )}
           </div>
         );

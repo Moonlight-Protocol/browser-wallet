@@ -7,7 +7,6 @@ export async function addPrivacyProvider(params: {
   channelId: string;
   name: string;
   url: string;
-  pubkey: string;
 }): Promise<{ providerId: string }> {
   const res = await callBackground({
     type: MessageType.AddPrivacyProvider,
@@ -15,7 +14,6 @@ export async function addPrivacyProvider(params: {
     channelId: params.channelId,
     name: params.name,
     url: params.url,
-    pubkey: params.pubkey,
   });
 
   if ("ok" in res && res.ok === false) {

@@ -6,7 +6,6 @@ export type AddPrivacyProviderRequest = {
   channelId: string;
   name: string;
   url: string;
-  pubkey: string;
 };
 
 export type AddPrivacyProviderResponse =

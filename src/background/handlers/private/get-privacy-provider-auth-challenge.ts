@@ -7,8 +7,7 @@ export const handleGetPrivacyProviderAuthChallenge: Handler<
 > = async (message) => {
   const { providerUrl, publicKey } = message;
 
-  // SEP-10 challenge is global (not per-PP), so an empty pubkey is fine here.
-  const client = new PrivacyProviderClient(providerUrl, "");
+  const client = new PrivacyProviderClient(providerUrl);
   const response = await client.getAuthChallenge(publicKey);
 
   return {

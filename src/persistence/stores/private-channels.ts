@@ -9,14 +9,17 @@ import type {
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 
 type LegacyPrivacyProviderSession =
-  & Omit<PrivacyProviderSession, "entityStatus">
+  & Omit<PrivacyProviderSession, "entityStatus" | "kycSubmissionUrl">
   & {
     entityStatus?: PrivacyProviderSession["entityStatus"];
+    kycSubmissionUrl?: PrivacyProviderSession["kycSubmissionUrl"];
   };
 
 type LegacyPrivacyProvider =
-  & Omit<PrivacyProvider, "sessions" | "pubkey">
+  & Omit<PrivacyProvider, "sessions">
   & {
+    // v3 (PR #20) stored an explicit `pubkey` field; v4 drops it (URL carries
+    // the pubkey as its last path segment). Migration strips this if present.
     pubkey?: string;
     session?: LegacyPrivacyProviderSession;
     sessions?: Record<string, LegacyPrivacyProviderSession>;
@@ -40,7 +43,7 @@ type LegacyPrivateChannelsState = {
 };
 
 const DEFAULT_PRIVATE_CHANNELS_STATE: PrivateChannelsState = {
-  version: 3,
+  version: 4,
   channelsByNetwork: {},
   selectedChannelIdByNetwork: {},
 };
@@ -100,15 +103,13 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
                   const legacySessions = p.session
                     ? { default: p.session }
                     : p.sessions || {};
-                  // Pre-pubkey providers can't reach the per-PP bundle URL
-                  // until the user re-adds them with a pubkey. Default to
-                  // empty so the type-check passes; runtime will refuse to
-                  // submit bundles against an empty pubkey.
+                  // v4 strips any `pubkey` field carried over from v3 (PR #20).
+                  // Stale URLs (no pubkey path segment) are detected at render
+                  // time and surface a "needs re-adding" notice.
                   return {
                     id: p.id,
                     name: p.name,
                     url: p.url,
-                    pubkey: (p as { pubkey?: string }).pubkey ?? "",
                     sessions: Object.fromEntries(
                       Object.entries(legacySessions).map(([k, s]) => [
                         k,
@@ -116,6 +117,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
                           token: s.token,
                           expiresAt: s.expiresAt,
                           entityStatus: s.entityStatus ?? "UNVERIFIED",
+                          kycSubmissionUrl: s.kycSubmissionUrl ?? null,
                         } satisfies PrivacyProviderSession,
                       ]),
                     ),
@@ -134,7 +136,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
         DEFAULT_PRIVATE_CHANNELS_STATE.selectedChannelIdByNetwork;
 
     return {
-      version: 3,
+      version: 4,
       channelsByNetwork: migratedChannelsByNetwork,
       selectedChannelIdByNetwork,
     };
@@ -196,7 +198,7 @@ export class PrivateChannelsStore extends PersistedStore<PrivateChannelsState> {
   addProvider(
     network: ChainNetwork,
     channelId: string,
-    provider: { id: string; name: string; url: string; pubkey: string },
+    provider: { id: string; name: string; url: string },
   ) {
     this.store.update((prev) => {
       const channels = prev.channelsByNetwork[network] ?? [];

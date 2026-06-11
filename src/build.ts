@@ -137,6 +137,24 @@ async function build() {
     __POSTHOG_HOST__: JSON.stringify(posthogHost),
   };
 
+  // Build-time Soroban RPC proxy URLs. The wallet points its network-level
+  // RPC at network-dashboard-platform's public read-only proxy
+  // (`/api/v1/public/rpc`) so the RPC-Pro token never ships in the bundle —
+  // the token is injected server-side. Per-network because the wallet switches
+  // networks at runtime. Empty = fall back to the SDK default (dev/CI only);
+  // production values are supplied by iac.
+  const dashboardRpcDefines = {
+    __SOROBAN_RPC_PROXY_MAINNET__: JSON.stringify(
+      Deno.env.get("SOROBAN_RPC_PROXY_MAINNET") ?? "",
+    ),
+    __SOROBAN_RPC_PROXY_TESTNET__: JSON.stringify(
+      Deno.env.get("SOROBAN_RPC_PROXY_TESTNET") ?? "",
+    ),
+    __SOROBAN_RPC_PROXY_LOCAL__: JSON.stringify(
+      Deno.env.get("SOROBAN_RPC_PROXY_LOCAL") ?? "",
+    ),
+  };
+
   if (Deno.env.get("DEV") == "1") {
     await preBuildChecks();
   }
@@ -269,6 +287,7 @@ async function build() {
       __DEV__: DEV ? "true" : "false",
       global: "globalThis",
       ...seedDefines,
+      ...dashboardRpcDefines,
     },
     minify: MINIFY,
     sourcemap: true,
@@ -302,7 +321,11 @@ async function build() {
     mainFields: ["module", "main"],
     // Include "default" so package.json `exports` can fall back properly.
     conditions: ["worker", "default"],
-    define: { __DEV__: DEV ? "true" : "false", global: "globalThis" },
+    define: {
+      __DEV__: DEV ? "true" : "false",
+      global: "globalThis",
+      ...dashboardRpcDefines,
+    },
     minify: MINIFY,
     sourcemap: true,
     supported: { decorators: false },
@@ -328,6 +351,7 @@ async function build() {
       global: "globalThis",
       __SEED_PASSWORD__: seedDefines.__SEED_PASSWORD__ ?? JSON.stringify(""),
       ...posthogDefines,
+      ...dashboardRpcDefines,
     },
     minify: MINIFY,
     sourcemap: true,

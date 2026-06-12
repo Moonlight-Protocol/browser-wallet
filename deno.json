@@ -16,7 +16,7 @@
   "imports": {
     "@": "./src/",
     "@/": "./src/",
-    "@colibri/core": "jsr:@colibri/core@^0.16.1",
+    "@colibri/core": "jsr:@colibri/core@^0.22.0",
     "@colibri/sep10": "jsr:@colibri/sep10@^0.2.0",
     "@moonlight/moonlight-sdk": "jsr:@moonlight/moonlight-sdk@^0.9.1",
     "bip39": "npm:bip39@^3.1.0",
@@ -33,7 +33,7 @@
     "@types/react": "npm:@types/react@^18.2.0",
     "@types/react-dom": "npm:@types/react-dom@^18.2.0",
     "@stellar/stellar-base": "npm:@stellar/stellar-base@^14.0.3",
-    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@^14.4.2",
+    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@^15.1.0",
     "axios-browser": "npm:axios@^1.13.2/dist/browser/axios.cjs",
     "esbuild": "npm:esbuild@0.25.12",
     "esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.0",

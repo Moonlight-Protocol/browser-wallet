@@ -141,17 +141,30 @@ async function build() {
   // RPC at network-dashboard-platform's public read-only proxy
   // (`/api/v1/public/rpc`) so the RPC-Pro token never ships in the bundle —
   // the token is injected server-side. Per-network because the wallet switches
-  // networks at runtime. Empty = fall back to the SDK default (dev/CI only);
-  // production values are supplied by iac.
+  // networks at runtime.
+  //
+  // These proxy URLs are PUBLIC, non-secret (the token stays server-side on
+  // n-d-p), so they are baked as per-network defaults: a bare production build
+  // (`deno task build-prod`) is correct on its own with zero raw RPC host in
+  // the bundle. The wallet ships via manual Chrome Web Store / Mozilla Add-ons
+  // upload (no auto-publish), so there is no publish-time env to rely on. An
+  // operator/iac can still override any network via the SOROBAN_RPC_PROXY_*
+  // env vars. Local has no public proxy — local-dev hits Soroban directly, the
+  // same host network.ts already falls back to.
+  const DEFAULT_RPC_PROXY_MAINNET =
+    "https://dashboard-api.moonlightprotocol.io/api/v1/public/rpc";
+  const DEFAULT_RPC_PROXY_TESTNET =
+    "https://dashboard-api-testnet.moonlightprotocol.io/api/v1/public/rpc";
+  const DEFAULT_RPC_PROXY_LOCAL = "http://localhost:8000/soroban/rpc";
   const dashboardRpcDefines = {
     __SOROBAN_RPC_PROXY_MAINNET__: JSON.stringify(
-      Deno.env.get("SOROBAN_RPC_PROXY_MAINNET") ?? "",
+      Deno.env.get("SOROBAN_RPC_PROXY_MAINNET") ?? DEFAULT_RPC_PROXY_MAINNET,
     ),
     __SOROBAN_RPC_PROXY_TESTNET__: JSON.stringify(
-      Deno.env.get("SOROBAN_RPC_PROXY_TESTNET") ?? "",
+      Deno.env.get("SOROBAN_RPC_PROXY_TESTNET") ?? DEFAULT_RPC_PROXY_TESTNET,
     ),
     __SOROBAN_RPC_PROXY_LOCAL__: JSON.stringify(
-      Deno.env.get("SOROBAN_RPC_PROXY_LOCAL") ?? "",
+      Deno.env.get("SOROBAN_RPC_PROXY_LOCAL") ?? DEFAULT_RPC_PROXY_LOCAL,
     ),
   };
 

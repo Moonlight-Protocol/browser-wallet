@@ -3,10 +3,10 @@ import { NetworkConfig } from "@colibri/core";
 import { rpc as stellarRpc } from "@stellar/stellar-sdk";
 
 // Build-time per-network Soroban RPC proxy URLs (network-dashboard-platform's
-// public read-only `/api/v1/public/rpc`). Injected via esbuild `define` from
-// the iac-supplied env (see src/build.ts). Empty string = unset → fall back to
-// the SDK's network default (dev/CI only; production builds set these so no
-// raw RPC URL is ever contacted).
+// public read-only `/api/v1/public/rpc`). Injected via esbuild `define` (see
+// src/build.ts), which bakes the public proxy URLs as per-network defaults so
+// a bare build is correct; an operator/iac can override via SOROBAN_RPC_PROXY_*
+// env vars. The token stays server-side, so no raw RPC URL is ever contacted.
 declare const __SOROBAN_RPC_PROXY_MAINNET__: string;
 declare const __SOROBAN_RPC_PROXY_TESTNET__: string;
 declare const __SOROBAN_RPC_PROXY_LOCAL__: string;

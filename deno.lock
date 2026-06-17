@@ -1,10 +1,13 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@colibri/core@0.15": "0.15.0",
     "jsr:@colibri/core@0.22": "0.22.0",
+    "jsr:@colibri/sep10@0.2": "0.2.0",
     "jsr:@fifo/convee@1.0.0": "1.0.0",
+    "jsr:@fifo/convee@~0.9.2": "0.9.2",
     "jsr:@luca/esbuild-deno-loader@0.11": "0.11.1",
-    "jsr:@moonlight/moonlight-sdk@~0.9.1": "0.9.1",
+    "jsr:@moonlight/moonlight-sdk@0.10": "0.10.0",
     "jsr:@noble/curves@^1.8.0": "1.9.0",
     "jsr:@noble/hashes@1.8.0": "1.8.0",
     "jsr:@noble/hashes@^1.6.1": "1.8.0",
@@ -30,6 +33,7 @@
     "npm:@radix-ui/react-tabs@^1.0.4": "1.1.14_@types+react@18.3.31_@types+react-dom@18.3.7__@types+react@18.3.31_react@18.3.1_react-dom@18.3.1__react@18.3.1",
     "npm:@radix-ui/react-tooltip@^1.0.7": "1.2.9_@types+react@18.3.31_@types+react-dom@18.3.7__@types+react@18.3.31_react@18.3.1_react-dom@18.3.1__react@18.3.1",
     "npm:@stellar/stellar-base@^14.0.3": "14.1.0",
+    "npm:@stellar/stellar-sdk@^14.3.3": "14.6.1",
     "npm:@stellar/stellar-sdk@^15.0.1": "15.1.0",
     "npm:@stellar/stellar-sdk@^15.1.0": "15.1.0",
     "npm:@tabler/icons-react@3": "3.44.0_react@18.3.1",
@@ -61,14 +65,34 @@
     "npm:webextension-polyfill@0.10": "0.10.0"
   },
   "jsr": {
+    "@colibri/core@0.15.0": {
+      "integrity": "f5df213b5428a945e4436e9603282db2a9b79c4dc1530aa95f56f616c05e7d21",
+      "dependencies": [
+        "jsr:@fifo/convee@~0.9.2",
+        "jsr:@std/toml",
+        "npm:@stellar/stellar-sdk@^14.3.3",
+        "npm:buffer@^6.0.3"
+      ]
+    },
     "@colibri/core@0.22.0": {
       "integrity": "043b141c75c9759f16ae3d9655301a681026edea4fa0fdca4380ba7f3b20121d",
       "dependencies": [
-        "jsr:@fifo/convee",
+        "jsr:@fifo/convee@1.0.0",
         "jsr:@std/toml",
         "npm:@stellar/stellar-sdk@^15.0.1",
         "npm:buffer@^6.0.3"
       ]
+    },
+    "@colibri/sep10@0.2.0": {
+      "integrity": "4baf95eb6a7d976cd87c4092ea1030e866ca961dc7a005078ece3d59b8ff0715",
+      "dependencies": [
+        "jsr:@colibri/core@0.15",
+        "npm:@stellar/stellar-sdk@^14.3.3",
+        "npm:buffer@^6.0.3"
+      ]
+    },
+    "@fifo/convee@0.9.2": {
+      "integrity": "178066e406335a88f90558e89f9a01d7b57f9aa3e675cd2f6548534b8ff14286"
     },
     "@fifo/convee@1.0.0": {
       "integrity": "b61bfa222b9b8a53f0f2af1f35148fd54d86afc2fc3d6b5d073d56aaa369d9a3"
@@ -81,10 +105,10 @@
         "jsr:@std/path@^1.0.6"
       ]
     },
-    "@moonlight/moonlight-sdk@0.9.1": {
-      "integrity": "fc2b58567117030be971bb66a7154c8a1d6e077af5ef7015ae2b24331352aca1",
+    "@moonlight/moonlight-sdk@0.10.0": {
+      "integrity": "2e53005b3c38085fb4d508fc18c6ffdc1f3e7eb44ca2c941b520236594034f69",
       "dependencies": [
-        "jsr:@colibri/core",
+        "jsr:@colibri/core@0.22",
         "jsr:@noble/curves",
         "jsr:@noble/hashes@^1.6.1",
         "npm:@stellar/stellar-sdk@^15.1.0",
@@ -1284,6 +1308,21 @@
         "buffer",
         "sha.js"
       ]
+    },
+    "@stellar/stellar-sdk@14.6.1": {
+      "integrity": "sha512-A1rQWDLdUasXkMXnYSuhgep+3ZZzyuXJKdt5/KAIc0gkmSp906HTvUpbT4pu+bVr41tu0+J4Ugz9J4BQAGGytg==",
+      "dependencies": [
+        "@stellar/stellar-base@14.1.0",
+        "axios",
+        "bignumber.js",
+        "commander@14.0.3",
+        "eventsource@2.0.2",
+        "feaxios",
+        "randombytes",
+        "toml",
+        "urijs"
+      ],
+      "bin": true
     },
     "@stellar/stellar-sdk@15.1.0": {
       "integrity": "sha512-GsJUcWx2yboVzYdhTe/LHS3V1wVLSHkUkglC5bBoYWGJt31vzIhbSGno60NP9CdCTNkLJdnrsLJ63oA58Zvh5A==",
@@ -3519,7 +3558,7 @@
       "jsr:@colibri/core@0.22",
       "jsr:@colibri/sep10@0.2",
       "jsr:@luca/esbuild-deno-loader@0.11",
-      "jsr:@moonlight/moonlight-sdk@~0.9.1",
+      "jsr:@moonlight/moonlight-sdk@0.10",
       "jsr:@std/fs@0.224",
       "npm:@ngneat/elf-persist-state@^1.2.1",
       "npm:@ngneat/elf@^2.5.1",

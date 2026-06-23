@@ -18,7 +18,7 @@
     "@/": "./src/",
     "@colibri/core": "jsr:@colibri/core@^0.22.0",
     "@colibri/sep10": "jsr:@colibri/sep10@^0.2.0",
-    "@moonlight/moonlight-sdk": "jsr:@moonlight/moonlight-sdk@^0.10.0",
+    "@moonlight/moonlight-sdk": "jsr:@moonlight/moonlight-sdk@^0.11.0",
     "bip39": "npm:bip39@^3.1.0",
     "react": "npm:react@^18.2.0",
     "react/jsx-runtime": "npm:react@^18.2.0/jsx-runtime",

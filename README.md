@@ -25,10 +25,10 @@ providers. You just need to unlock with the password from `.env.seed`.
 
 ### Two-wallet local-dev setup
 
-`local-dev`'s `setup-accounts-extension.sh` funds two separate dev wallets
-via Friendbot so you can run two browser extensions side by side (e.g. one
-in Chrome, one in Brave) and test sends between them against a local
-Moonlight stack. It expects two seed files to already exist here:
+`local-dev`'s `setup-accounts-extension.sh` funds two separate dev wallets via
+Friendbot so you can run two browser extensions side by side (e.g. one in
+Chrome, one in Brave) and test sends between them against a local Moonlight
+stack. It expects two seed files to already exist here:
 
 ```
 cp .env.seed.example .env.seed.user1
@@ -36,8 +36,8 @@ cp .env.seed.example .env.seed.user2
 ```
 
 Edit each with its own `SEED_MNEMONIC` (a fresh 12-word BIP39 mnemonic) and
-`SEED_PASSWORD` — the two wallets must use different mnemonics. Point both
-at your local stack:
+`SEED_PASSWORD` — the two wallets must use different mnemonics. Point both at
+your local stack:
 
 ```
 SEED_NETWORK=custom
@@ -47,12 +47,11 @@ SEED_NETWORK=custom
 `http://localhost:8000` for RPC/Horizon/Friendbot and the standalone network
 passphrase, matching `local-dev`'s Stellar quickstart.
 
-Set `SEED_CHANNEL_CONTRACT_ID` to the privacy channel deployed by
-`setup-c.sh` (`COUNCIL_<i>_CHANNEL` in `local-dev/.local-dev-state`), and
-`SEED_PROVIDERS` to a privacy provider from that same council. Provider URLs
-**must end in the PP's Stellar public key** (`extractPpPubkeyFromUrl` in
-`src/background/services/pp-url.ts` reads it from the last path segment),
-e.g.:
+Set `SEED_CHANNEL_CONTRACT_ID` to the privacy channel deployed by `setup-c.sh`
+(`COUNCIL_<i>_CHANNEL` in `local-dev/.local-dev-state`), and `SEED_PROVIDERS` to
+a privacy provider from that same council. Provider URLs **must end in the PP's
+Stellar public key** (`extractPpPubkeyFromUrl` in
+`src/background/services/pp-url.ts` reads it from the last path segment), e.g.:
 
 ```
 SEED_PROVIDERS=Mercado Libre Argentina Provider=http://localhost:3010/GCYFPWQQQI37JOQO5UF4TBPOYUMJY7BTTQ7W7PK5J52CKP735HXX2CCH

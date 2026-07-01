@@ -187,7 +187,8 @@ body {
 }
 
 @keyframes twinkle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: var(--star-opacity, 0.3);
     transform: scale(1);
   }
@@ -203,7 +204,8 @@ body {
 }
 
 @keyframes glow-ring {
-  0%, 100% {
+  0%,
+  100% {
     opacity: var(--ring-min-opacity, 0.1);
     transform: translate(-50%, -50%) scale(1);
   }
@@ -219,7 +221,8 @@ body {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {

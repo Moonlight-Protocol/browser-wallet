@@ -3,6 +3,7 @@ import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { withdraw } from "@/popup/api/withdraw.ts";
 import { showAsyncSubmitted, showError } from "@/popup/utils/toast.tsx";
+import { errorCopy } from "@/popup/utils/error-copy.ts";
 import { SubpageShell } from "@/popup/templates/subpage-shell.tsx";
 import { Button } from "@/popup/atoms/button.tsx";
 import { Card, CardContent, CardFooter } from "@/popup/atoms/card.tsx";
@@ -127,7 +128,7 @@ export function WithdrawConfirmationPage() {
       });
 
       if (!result.ok) {
-        const msg = result.error?.message ?? "Failed to execute transaction";
+        const msg = errorCopy(result.error);
         setError(msg);
         showError(msg);
         setBusy(false);

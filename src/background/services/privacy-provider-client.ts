@@ -26,6 +26,38 @@ export class PrivacyProviderAuthError extends Error {
   }
 }
 
+/**
+ * Carries the structured failure identity surfaced by the provider platform
+ * for a mid-flight bundle failure (terminal FAILED/EXPIRED poll response, or a
+ * non-2xx bundle submit body). `.code` is the machine code (e.g. `SOROBAN_1010`,
+ * `BND_005`) that the UI maps to friendly copy; `.message` is the provider's
+ * human message. Both may be undefined if the platform did not supply them.
+ */
+export class BundleFailedError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = "BundleFailedError";
+    this.code = code;
+  }
+}
+
+/**
+ * Structured failure body shapes returned by the provider platform:
+ * - poll GET terminal failure: `data.failureDetail = { code, source, message, name? }`
+ * - submit POST non-2xx: `{ code, status, message, details }`
+ */
+function extractStructuredFailure(
+  body: unknown,
+): { code?: string; message?: string } | undefined {
+  if (!body || typeof body !== "object") return undefined;
+  const b = body as { code?: unknown; message?: unknown };
+  const code = typeof b.code === "string" ? b.code : undefined;
+  const message = typeof b.message === "string" ? b.message : undefined;
+  if (!code && !message) return undefined;
+  return { code, message };
+}
+
 // The wallet stores `{url, label}` per PP. The client derives the API base
 // (origin or origin + intermediate path) and the PP pubkey from the URL at
 // construction. Throws on any malformed URL — callers are expected to surface
@@ -226,6 +258,17 @@ export class PrivacyProviderClient {
           "Provider session expired or invalid. Please reconnect to the provider.",
         );
       }
+      // Non-2xx submit responses carry a structured `{ code, status, message,
+      // details }` JSON body — surface its code + message to the UI.
+      const failure = extractStructuredFailure(
+        (error as { response?: { data?: unknown } })?.response?.data,
+      );
+      if (failure) {
+        throw new BundleFailedError(
+          failure.message ?? "Bundle submission failed",
+          failure.code,
+        );
+      }
       throw error;
     }
 
@@ -254,7 +297,15 @@ export class PrivacyProviderClient {
         const res = await axios.get<{
           status: number;
           message: string;
-          data: { status: string };
+          data: {
+            status: string;
+            failureDetail?: {
+              code?: string;
+              source?: string;
+              message?: string;
+              name?: string;
+            };
+          };
         }>(
           `${this.apiBase}/api/v1/providers/${this.ppPubkey}/entity/bundles/${bundleId}`,
           {
@@ -270,7 +321,13 @@ export class PrivacyProviderClient {
           return;
         }
         if (status === "FAILED" || status === "EXPIRED") {
-          const err = new Error(`Bundle ${bundleId} ${status}`);
+          // Terminal failures carry a structured `failureDetail` identity —
+          // surface its code + message rather than the bare status string.
+          const detail = res.data.data?.failureDetail;
+          const err = new BundleFailedError(
+            detail?.message ?? `Bundle ${bundleId} ${status}`,
+            detail?.code,
+          );
           if (span) endSpan(span, { code: 2, message: err.message });
           throw err;
         }

@@ -3,6 +3,7 @@ import { usePopup } from "@/popup/hooks/state.tsx";
 import { getPrivateChannels } from "@/popup/api/get-private-channels.ts";
 import { deposit, prepareDeposit } from "@/popup/api/deposit.ts";
 import { showAsyncSubmitted, showError } from "@/popup/utils/toast.tsx";
+import { errorCopy } from "@/popup/utils/error-copy.ts";
 import { DepositReviewTemplate } from "@/popup/templates/deposit-review-template.tsx";
 import type { ChainNetwork } from "@/persistence/stores/chain.types.ts";
 import type { PrivateChannel } from "@/persistence/stores/private-channels.types.ts";
@@ -162,7 +163,7 @@ export function DepositReviewPage() {
       });
 
       if (!result.ok) {
-        const msg = result.error?.message ?? "Deposit failed";
+        const msg = errorCopy(result.error);
         setError(msg);
         showError(msg);
         return;

@@ -2,6 +2,7 @@ import { MessageType } from "@/background/messages.ts";
 import type { Handler } from "@/background/messages.ts";
 import { privateChannels, vault } from "@/background/session.ts";
 import {
+  BundleFailedError,
   PrivacyProviderAuthError,
   PrivacyProviderClient,
 } from "@/background/services/privacy-provider-client.ts";
@@ -607,12 +608,16 @@ export const handleWithdraw: Handler<MessageType.Withdraw> = async (
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[withdraw] Error:", msg);
+    // Prefer the real surfaced code (e.g. SOROBAN_1010) when present.
+    const code = err instanceof BundleFailedError && err.code
+      ? err.code
+      : "WITHDRAW_FAILED";
+    console.error("[withdraw] Error:", code, msg);
     return {
       type: MessageType.Withdraw,
       ok: false,
       error: {
-        code: "WITHDRAW_FAILED",
+        code,
         message: msg,
       },
     };

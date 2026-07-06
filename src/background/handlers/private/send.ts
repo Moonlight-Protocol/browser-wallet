@@ -2,6 +2,7 @@ import { MessageType } from "@/background/messages.ts";
 import type { Handler } from "@/background/messages.ts";
 import { privateChannels, vault } from "@/background/session.ts";
 import {
+  BundleFailedError,
   PrivacyProviderAuthError,
   PrivacyProviderClient,
 } from "@/background/services/privacy-provider-client.ts";
@@ -629,12 +630,16 @@ export const handleSend: Handler<MessageType.Send> = async (message) => {
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[send] Error:", msg);
+    // Prefer the real surfaced code (e.g. SOROBAN_1010) when present.
+    const code = err instanceof BundleFailedError && err.code
+      ? err.code
+      : "SEND_FAILED";
+    console.error("[send] Error:", code, msg);
     return {
       type: MessageType.Send,
       ok: false,
       error: {
-        code: "SEND_FAILED",
+        code,
         message: msg,
       },
     };

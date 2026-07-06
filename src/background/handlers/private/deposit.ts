@@ -2,6 +2,7 @@ import { MessageType } from "@/background/messages.ts";
 import type { Handler } from "@/background/messages.ts";
 import { privateChannels, vault } from "@/background/session.ts";
 import {
+  BundleFailedError,
   PrivacyProviderAuthError,
   PrivacyProviderClient,
 } from "@/background/services/privacy-provider-client.ts";
@@ -530,12 +531,16 @@ export const handleDeposit: Handler<MessageType.Deposit> = async (message) => {
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[deposit] Error:", msg);
+    // Prefer the real surfaced code (e.g. SOROBAN_1010) when present.
+    const code = err instanceof BundleFailedError && err.code
+      ? err.code
+      : "DEPOSIT_FAILED";
+    console.error("[deposit] Error:", code, msg);
     return {
       type: MessageType.Deposit,
       ok: false,
       error: {
-        code: "DEPOSIT_FAILED",
+        code,
         message: msg,
       },
     };

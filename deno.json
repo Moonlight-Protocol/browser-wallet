@@ -16,9 +16,9 @@
   "imports": {
     "@": "./src/",
     "@/": "./src/",
-    "@colibri/core": "jsr:@colibri/core@^0.22.0",
+    "@colibri/core": "jsr:@colibri/core@^0.23.0",
     "@colibri/sep10": "jsr:@colibri/sep10@^0.2.0",
-    "@moonlight/moonlight-sdk": "jsr:@moonlight/moonlight-sdk@^0.12.1",
+    "@moonlight/moonlight-sdk": "jsr:@moonlight/moonlight-sdk@^0.13.0",
     "bip39": "npm:bip39@^3.1.0",
     "react": "npm:react@^18.2.0",
     "react/jsx-runtime": "npm:react@^18.2.0/jsx-runtime",
@@ -33,7 +33,7 @@
     "@types/react": "npm:@types/react@^18.2.0",
     "@types/react-dom": "npm:@types/react-dom@^18.2.0",
     "@stellar/stellar-base": "npm:@stellar/stellar-base@^14.0.3",
-    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@^15.1.0",
+    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@^16.1.0",
     "axios-browser": "npm:axios@^1.13.2/dist/browser/axios.cjs",
     "esbuild": "npm:esbuild@0.25.12",
     "esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.0",
@@ -67,11 +67,24 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "lib": ["ESNext", "DOM", "DOM.Iterable", "deno.ns"],
-    "types": ["@types/react", "@types/react-dom", "chrome-types"]
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable",
+      "deno.ns"
+    ],
+    "types": [
+      "@types/react",
+      "@types/react-dom",
+      "chrome-types"
+    ]
   },
   "allowScripts": {
     "allow": [],
-    "deny": ["npm:esbuild@0.25.12", "npm:fsevents@2.3.3", "npm:msw@2.12.4"]
+    "deny": [
+      "npm:esbuild@0.25.12",
+      "npm:fsevents@2.3.3",
+      "npm:msw@2.12.4"
+    ]
   }
 }
